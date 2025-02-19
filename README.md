@@ -1,1 +1,1 @@
-# ya-practicum-diplom
+# GophKeeper - менеджер паролей
