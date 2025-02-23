@@ -25,6 +25,9 @@ services:
       - "9000:9000"
       - "9010:9010"
     restart: unless-stopped
+    volumes:
+      - minio:/data
 
 volumes:
   pgdata:
+  minio:

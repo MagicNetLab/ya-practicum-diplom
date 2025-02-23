@@ -10,7 +10,7 @@ run-client:
 up:
 	docker compose up -d
 
-docker-down:
+down:
 	docker compose down
 
 migrate:
