@@ -1,7 +1,8 @@
 package repo
 
 type storage struct {
-	data DataStorage
+	data  DataStorage
+	files FileStorage
 }
 
 // DataStorage интерфейс хранилища данных

@@ -6,22 +6,22 @@ import (
 )
 
 const (
-	serverHostKey       = "sh"
-	serverPortKey       = "sp"
-	fileStorageTypeKey  = "ft"
-	fileStoragePathKey  = "fp"
-	s3EndpointKey       = "es"
-	s3SecretKeyKey      = "sk"
-	s3AccessKeyKey      = "ak"
-	s3BucketKey         = "bk"
-	dataStorageTypeKey  = "dt"
-	inMemoryDumpPathKey = "dp"
-	dbHostKey           = "bh"
-	dbPortKey           = "bp"
-	dbUserKey           = "uu"
-	dbPasswordKey       = "dp"
-	dbNameKey           = "dn"
-	jwtSecretKey        = "jwt"
+	serverHostKey       = "serverHost"
+	serverPortKey       = "serverPOrt"
+	fileStorageTypeKey  = "fileStorage"
+	fileStoragePathKey  = "filePath"
+	s3EndpointKey       = "s3Endpoint"
+	s3SecretKeyKey      = "s3Secret"
+	s3AccessKeyKey      = "s3Access"
+	s3BucketKey         = "s3Bucket"
+	dataStorageTypeKey  = "dataStorage"
+	inMemoryDumpPathKey = "dataDumpPath"
+	dbHostKey           = "dbHost"
+	dbPortKey           = "dbPort"
+	dbUserKey           = "dbUser"
+	dbPasswordKey       = "dbPassword"
+	dbNameKey           = "dbName"
+	jwtSecretKey        = "jwtSecret"
 )
 
 type FlagReader struct {

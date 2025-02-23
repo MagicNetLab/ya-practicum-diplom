@@ -7,7 +7,17 @@ run-server:
 run-client:
 	go run cmd/client/main.go
 
+up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
 migrate:
+	go run cmd/migration/main.go
+
+create-migration:
+	migrate create -ext sql -dir migrations/ -seq change_this_text
 
 build-client:
 
