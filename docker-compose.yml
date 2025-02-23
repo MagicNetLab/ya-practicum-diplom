@@ -26,7 +26,8 @@ services:
       - "9010:9010"
     restart: unless-stopped
     volumes:
-      - ./volumes/s3:/data
+      - minio:/data
 
 volumes:
   pgdata:
+  minio:
