@@ -18,16 +18,15 @@ services:
       - "9000"
       - "9010"
     environment:
-      MINIO_ACCESS_KEY: ${S3_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${S3_SECRET_KEY}
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9010"
     ports:
       - "9000:9000"
       - "9010:9010"
     restart: unless-stopped
     volumes:
-      - minio:/data
+      - ./volumes/s3:/data
 
 volumes:
   pgdata:
-  minio:
