@@ -29,3 +29,4 @@ gen-proto:
     		internal/grpc/auth/proto/authService.proto
 
 linter:
+	go vet -vettool=./cmd/linter/linter ./...

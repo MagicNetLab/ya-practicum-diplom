@@ -24,7 +24,7 @@ func main() {
 		logger.Fatal("failed to load configuration", logger.StrArg("error", err.Error()))
 	}
 
-	connString, err := getDbConnectString(cnf)
+	connString, err := getDBConnectString(cnf)
 	if err != nil {
 		logger.Fatal("failed migration: connect params error", logger.StrArg("error", err.Error()))
 	}
@@ -44,7 +44,7 @@ func main() {
 }
 
 // получение строки подключения из конфигурации
-func getDbConnectString(cnf conf.Configurator) (string, error) {
+func getDBConnectString(cnf conf.Configurator) (string, error) {
 	if cnf.DBHost() == "" || cnf.DBPort() == "" || cnf.DBUser() == "" || cnf.DBPassword() == "" || cnf.DBName() == "" {
 		return "", errors.New("db connection string is incorrect")
 	}

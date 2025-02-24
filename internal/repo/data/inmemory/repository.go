@@ -47,7 +47,7 @@ func (r *Repository) Import() error {
 					logger.Error("failed parse  users dump file", logger.StrArg("error", err.Error()))
 					return err
 				}
-				usersData[row.Uid] = row
+				usersData[row.UID] = row
 			}
 			r.users = usersData
 		}
@@ -75,7 +75,7 @@ func (r *Repository) Dump() error {
 
 		for _, user := range r.users {
 			rowData := User{
-				Uid:      user.Uid,
+				UID:      user.UID,
 				Login:    user.Login,
 				Password: user.Password,
 			}
