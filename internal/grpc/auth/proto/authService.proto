@@ -11,6 +11,7 @@ message RegRequest {
 
 message RegResponse {
   string Token = 1;
+  string RefreshToken = 2;
 }
 
 message AuthRequest {
@@ -20,9 +21,20 @@ message AuthRequest {
 
 message AuthResponse {
   string Token = 1;
+  string RefreshToken = 2;
+}
+
+message RefreshRequest {
+  string Token = 1;
+}
+
+message RefreshResponse {
+  string Token = 1;
+  string RefreshToken = 2;
 }
 
 service Auth {
   rpc Register (RegRequest) returns (RegResponse);
   rpc Auth (AuthRequest) returns (AuthResponse);
+  rpc Refresh (RefreshRequest) returns (RefreshResponse);
 }
