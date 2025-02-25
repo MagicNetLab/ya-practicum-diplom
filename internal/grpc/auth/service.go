@@ -60,6 +60,9 @@ func (s *Service) Register(ctx context.Context, req *pb.RegRequest) (*pb.RegResp
 	}
 
 	user, err := repo.CreateUser(ctx, req.Login, req.Secret)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
 
 	token, err := jwt.GenerateToken(user, cnf.JWTSecret())
 	if err != nil {

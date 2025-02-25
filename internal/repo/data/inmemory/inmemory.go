@@ -8,8 +8,8 @@ import (
 func NewRepository(cnf conf.Configurator) (*Repository, error) {
 	r := Repository{
 		dumpPath: cnf.InMemoryDumpPath(),
-		users:    make(map[string]User),
-		tokens:   make(map[string]Token),
+		users:    make(map[string]UserModel),
+		tokens:   make(map[string]TokenModel),
 	}
 
 	err := r.Import()

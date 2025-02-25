@@ -22,7 +22,7 @@ func (t TokenModel) GetValue() (string, error) {
 }
 
 // SetValue установка значения токена
-func (t TokenModel) SetValue(value string) error {
+func (t *TokenModel) SetValue(value string) error {
 	if value == "" {
 		return errors.New("value is not be empty")
 	}
@@ -39,7 +39,7 @@ func (t TokenModel) GetUID() (string, error) {
 }
 
 // SetUID установка UID пользователя для которого выдан токен
-func (t TokenModel) SetUID(uid string) error {
+func (t *TokenModel) SetUID(uid string) error {
 	if uid == "" {
 		return errors.New("uid is not be empty")
 	}
@@ -48,7 +48,7 @@ func (t TokenModel) SetUID(uid string) error {
 }
 
 // SetRefresh маркировка токена как refresh
-func (t TokenModel) SetRefresh() error {
+func (t *TokenModel) SetRefresh() error {
 	t.Refresh = true
 	return nil
 }
@@ -59,7 +59,7 @@ func (t TokenModel) IsRefresh() (bool, error) {
 }
 
 // SetExpired установка времени истечения действия токена
-func (t TokenModel) SetExpired(expired time.Time) error {
+func (t *TokenModel) SetExpired(expired time.Time) error {
 	if expired.IsZero() || expired.Before(time.Now()) {
 		return errors.New("expired time is not correct")
 	}
