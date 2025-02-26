@@ -31,6 +31,11 @@ func (r *DefaultConfig) Parse() error {
 	r.fileStoragePath = "/storage"
 	r.dataStorageType = "inmemory"
 	r.inMemoryDumpPath = "/values/inmemory-dump"
+	r.dbHost = "localhost"
+	r.dbPort = "5432"
+	r.dbUser = "gophkeeper"
+	r.dbPassword = "gophkeeper"
+	r.dbName = "gophkeeper"
 
 	return nil
 }

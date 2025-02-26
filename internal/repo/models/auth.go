@@ -4,22 +4,22 @@ import "time"
 
 // UserEntity интерфейс пользователя
 type UserEntity interface {
-	GetUID() (string, error)
-	GetLogin() (string, error)
-	GetPassword() (string, error)
-	SetUID(uid string) error
-	SetLogin(login string) error
-	SetPassword(password string) error
+	GetUID() string
+	GetLogin() string
+	GetPassword() string
+	//SetUID(uid string) error
+	//SetLogin(login string) error
+	//SetPassword(password string) error
 }
 
 // TokenEntity интерфейс токена
 type TokenEntity interface {
-	GetValue() (string, error)
+	GetValue() string
 	SetValue(value string) error
-	GetUID() (string, error)
+	GetUID() string
 	SetUID(uid string) error
-	SetRefresh() error
-	IsRefresh() (bool, error)
+	SetRefresh()
+	IsRefresh() bool
 	SetExpired(expired time.Time) error
-	GetExpired() (time.Time, error)
+	GetExpired() time.Time
 }

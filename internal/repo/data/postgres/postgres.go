@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/conf"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func NewRepository(cnf conf.Configurator) (*Repository, error) {

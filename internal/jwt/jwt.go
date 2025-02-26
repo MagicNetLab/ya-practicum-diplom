@@ -12,10 +12,7 @@ import (
 
 // GenerateToken генерирует JWT
 func GenerateToken(user models.UserEntity, jwtSecret string) (string, error) {
-	uid, err := user.GetUID()
-	if err != nil {
-		return "", err
-	}
+	uid := user.GetUID()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{

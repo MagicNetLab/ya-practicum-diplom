@@ -18,19 +18,21 @@ type Repository struct {
 // GetUserByUID получение пользователя по UID
 func (r Repository) GetUserByUID(ctx context.Context, uid string) (models.UserEntity, error) {
 	user := UserModel{}
-	err := r.pool.QueryRow(ctx, "SELECT * FROM users WHERE uid=$1", uid).Scan(&user)
+	rows := r.pool.QueryRow(ctx, "SELECT uid, login, password, created_at, updated_at FROM users WHERE uid=$1", uid)
+	err := rows.Scan(&user.UID, &user.Login, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		logger.Error("failed get user by uid", logger.StrArg("uid", uid), logger.StrArg("error", err.Error()))
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 // GetUserByLogin получение пользователя по логину
 func (r Repository) GetUserByLogin(ctx context.Context, login string) (models.UserEntity, error) {
 	user := UserModel{}
-	err := r.pool.QueryRow(ctx, "SELECT * FROM users WHERE login=$1", login).Scan(&user)
+	row := r.pool.QueryRow(ctx, "SELECT uid, login, password, created_at, updated_at FROM users WHERE login=$1", login)
+	err := row.Scan(&user.UID, &user.Login, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		logger.Error("failed get user by login", logger.StrArg("login", login), logger.StrArg("error", err.Error()))
 		return nil, err
@@ -41,7 +43,9 @@ func (r Repository) GetUserByLogin(ctx context.Context, login string) (models.Us
 // GetUserByLoginPassword получение пользователя по логину и паролю
 func (r Repository) GetUserByLoginPassword(ctx context.Context, login, password string) (models.UserEntity, error) {
 	user := UserModel{}
-	err := r.pool.QueryRow(ctx, "SELECT * FROM users WHERE login=$1 AND password=$2", login, password).Scan(&user)
+
+	row := r.pool.QueryRow(ctx, "SELECT * FROM users WHERE login=$1 AND password=$2", login, password)
+	err := row.Scan(&user.UID, &user.Login, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		logger.Error("failed get user by login and password", logger.StrArg("login", login), logger.StrArg("error", err.Error()))
 		return nil, err
@@ -52,16 +56,16 @@ func (r Repository) GetUserByLoginPassword(ctx context.Context, login, password 
 // CreateUser создание пользователя
 func (r Repository) CreateUser(ctx context.Context, login, password string) (models.UserEntity, error) {
 	uid := uuid.New().String()
-	sql := "INSERT INTO users (uid, login, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
-	_, err := r.pool.Exec(ctx, sql, uid, login, password, time.Now(), time.Now())
-	if err != nil {
-		return nil, err
+	user := UserModel{
+		UID:       uid,
+		Login:     login,
+		Password:  password,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
-
-	user := UserModel{}
-	err = r.pool.QueryRow(ctx, "SELECT * FROM users WHERE uid=$1", uid).Scan(&user)
+	sql := "INSERT INTO users (uid, login, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
+	_, err := r.pool.Exec(ctx, sql, user.UID, user.Login, user.Password, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
-		logger.Error("failed get user by uid after create", logger.StrArg("uid", uid), logger.StrArg("login", login), logger.StrArg("error", err.Error()))
 		return nil, err
 	}
 

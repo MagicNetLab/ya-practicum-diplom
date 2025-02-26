@@ -10,27 +10,18 @@ type UserModel struct {
 }
 
 // GetUID получение UID пользователя
-func (u *UserModel) GetUID() (string, error) {
-	if u.UID == "" {
-		return "", errors.New("uid is not set")
-	}
-	return u.UID, nil
+func (u *UserModel) GetUID() string {
+	return u.UID
 }
 
 // GetLogin получение логина пользователя
-func (u *UserModel) GetLogin() (string, error) {
-	if u.Login == "" {
-		return "", errors.New("login is not set")
-	}
-	return u.Login, nil
+func (u *UserModel) GetLogin() string {
+	return u.Login
 }
 
 // GetPassword получение пароля пользователя
-func (u *UserModel) GetPassword() (string, error) {
-	if u.Password == "" {
-		return "", errors.New("password is not set")
-	}
-	return u.Password, nil
+func (u *UserModel) GetPassword() string {
+	return u.Password
 }
 
 // SetUID установка UID пользователя

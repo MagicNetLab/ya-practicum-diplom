@@ -14,11 +14,8 @@ type TokenModel struct {
 }
 
 // GetValue получение значения токена
-func (t TokenModel) GetValue() (string, error) {
-	if t.Value == "" {
-		return "", errors.New("value is not set")
-	}
-	return t.Value, nil
+func (t *TokenModel) GetValue() string {
+	return t.Value
 }
 
 // SetValue установка значения токена
@@ -31,11 +28,8 @@ func (t *TokenModel) SetValue(value string) error {
 }
 
 // GetUID получение UID пользователя для которого выдан токен
-func (t TokenModel) GetUID() (string, error) {
-	if t.UID == "" {
-		return "", errors.New("uid is not set")
-	}
-	return t.UID, nil
+func (t *TokenModel) GetUID() string {
+	return t.UID
 }
 
 // SetUID установка UID пользователя для которого выдан токен
@@ -48,14 +42,13 @@ func (t *TokenModel) SetUID(uid string) error {
 }
 
 // SetRefresh маркировка токена как refresh
-func (t *TokenModel) SetRefresh() error {
+func (t *TokenModel) SetRefresh() {
 	t.Refresh = true
-	return nil
 }
 
 // IsRefresh возвращает является ли токен refresh
-func (t TokenModel) IsRefresh() (bool, error) {
-	return t.Refresh, nil
+func (t *TokenModel) IsRefresh() bool {
+	return t.Refresh
 }
 
 // SetExpired установка времени истечения действия токена
@@ -68,14 +61,11 @@ func (t *TokenModel) SetExpired(expired time.Time) error {
 }
 
 // GetExpired получение времени истечения действия токена
-func (t TokenModel) GetExpired() (time.Time, error) {
-	if t.Expired == "" {
-		return time.Time{}, errors.New("expired time is not set")
-	}
-
+func (t *TokenModel) GetExpired() time.Time {
 	val, err := time.Parse(time.RFC3339, t.Expired)
 	if err != nil {
-		return time.Time{}, err
+		t.Expired = time.Now().Add(time.Hour * 3).Format(time.RFC3339)
+		return time.Now().Add(time.Hour * 3)
 	}
-	return val, nil
+	return val
 }

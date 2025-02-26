@@ -71,7 +71,7 @@ func (r *Repository) HasToken(ctx context.Context, value, uid string, isRefresh 
 func (r *Repository) GetUserByUID(ctx context.Context, uid string) (models.UserEntity, error) {
 	user, ok := r.users[uid]
 	if !ok {
-		return &UserModel{}, errors.New("user not found")
+		return nil, errors.New("user not found")
 	}
 	return &user, nil
 }
@@ -126,6 +126,7 @@ func (r *Repository) RemoveUserByLogin(ctx context.Context, login string) error 
 	for k, v := range r.users {
 		if v.Login == login {
 			delete(r.users, k)
+			return nil
 		}
 	}
 
@@ -146,7 +147,7 @@ func (r *Repository) Import() error {
 		usersData := make(map[string]UserModel, 0)
 		userFile := r.dumpPath + "/users.json"
 		if _, err := os.Stat(userFile); err == nil {
-			f, err := os.OpenFile(r.dumpPath+"/users.json", os.O_RDONLY|os.O_WRONLY|os.O_CREATE, 0666)
+			f, err := os.OpenFile(userFile, os.O_RDONLY, 0666)
 			if err != nil {
 				logger.Error("failed import data from users.json", logger.StrArg("error", err.Error()))
 			}

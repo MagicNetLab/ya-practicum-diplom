@@ -7,18 +7,15 @@ import (
 
 // TokenModel интерфейс токена
 type TokenModel struct {
-	value   string `sql:"value"`
-	uid     string `sql:"uid"`
-	refresh bool   `sql:"is_refresh"`
-	expired string `sql:"expired"`
+	value   string    `db:"value"`
+	uid     string    `db:"uid"`
+	refresh bool      `db:"is_refresh"`
+	expired time.Time `db:"expired"`
 }
 
 // GetValue получение значения токена
-func (t TokenModel) GetValue() (string, error) {
-	if t.value == "" {
-		return "", errors.New("value is not set")
-	}
-	return t.value, nil
+func (t *TokenModel) GetValue() string {
+	return t.value
 }
 
 // SetValue установка значения токена
@@ -31,11 +28,8 @@ func (t *TokenModel) SetValue(value string) error {
 }
 
 // GetUID получение UID пользователя для которого выдан токен
-func (t TokenModel) GetUID() (string, error) {
-	if t.uid == "" {
-		return "", errors.New("uid is not set")
-	}
-	return t.uid, nil
+func (t *TokenModel) GetUID() string {
+	return t.uid
 }
 
 // SetUID установка UID пользователя для которого выдан токен
@@ -48,14 +42,13 @@ func (t *TokenModel) SetUID(uid string) error {
 }
 
 // SetRefresh маркировка токена как refresh
-func (t *TokenModel) SetRefresh() error {
+func (t *TokenModel) SetRefresh() {
 	t.refresh = true
-	return nil
 }
 
 // IsRefresh возвращает является ли токен refresh
-func (t TokenModel) IsRefresh() (bool, error) {
-	return t.refresh, nil
+func (t *TokenModel) IsRefresh() bool {
+	return t.refresh
 }
 
 // SetExpired установка времени истечения действия токена
@@ -63,19 +56,11 @@ func (t *TokenModel) SetExpired(expired time.Time) error {
 	if expired.IsZero() || expired.Before(time.Now()) {
 		return errors.New("expired time is not correct")
 	}
-	t.expired = expired.Format(time.RFC3339)
+	t.expired = expired
 	return nil
 }
 
 // GetExpired получение времени истечения действия токена
-func (t TokenModel) GetExpired() (time.Time, error) {
-	if t.expired == "" {
-		return time.Time{}, errors.New("expired time is not set")
-	}
-
-	val, err := time.Parse(time.RFC3339, t.expired)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return val, nil
+func (t *TokenModel) GetExpired() time.Time {
+	return t.expired
 }
