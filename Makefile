@@ -30,3 +30,10 @@ gen-proto:
 
 linter:
 	go vet -vettool=./cmd/linter/linter ./...
+
+mock-repo:
+	mockery --name=Repository --dir=internal/repo --output=internal/repo/mocks --outpkg=mocks
+
+mock-repo-models:
+	mockery --name=UserEntity --dir=internal/repo/models --output=internal/repo/models/mocks --outpkg=mocks
+	mockery --name=TokenEntity --dir=internal/repo/models --output=internal/repo/models/mocks --outpkg=mocks

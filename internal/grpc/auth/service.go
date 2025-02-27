@@ -16,28 +16,35 @@ import (
 // Service  сервис авторизации
 type Service struct {
 	pb.AuthServer
+	cnf   conf.Configurator
+	store repo.Repository
 }
 
 // Auth авторизация пользователя
 func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthResponse, error) {
-	cnf, err := conf.GetCnf()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
-	}
-
-	user, err := repo.GetUserByLoginAndPassword(ctx, req.Login, req.Secret)
+	user, err := s.store.GetUserByLoginAndPassword(ctx, req.Login, req.Secret)
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
 
-	token, err := jwt.GenerateToken(user, cnf.JWTSecret())
+	token, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user, cnf.JWTSecret())
+	refreshToken, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
+	err = s.store.CreateToken(ctx, token, user.GetUID(), false)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to create token")
+	}
+
+	err = s.store.CreateToken(ctx, refreshToken, user.GetUID(), true)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to create refresh token")
 	}
 
 	return &pb.AuthResponse{Token: token, RefreshToken: refreshToken}, nil
@@ -45,12 +52,7 @@ func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthRespon
 
 // Register регистрация пользователя
 func (s *Service) Register(ctx context.Context, req *pb.RegRequest) (*pb.RegResponse, error) {
-	cnf, err := conf.GetCnf()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
-	}
-
-	hasLogin, err := repo.HasLogin(ctx, req.Login)
+	hasLogin, err := s.store.HasLogin(ctx, req.Login)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -59,17 +61,17 @@ func (s *Service) Register(ctx context.Context, req *pb.RegRequest) (*pb.RegResp
 		return nil, status.Errorf(codes.AlreadyExists, "Login already exists")
 	}
 
-	user, err := repo.CreateUser(ctx, req.Login, req.Secret)
+	user, err := s.store.CreateUser(ctx, req.Login, req.Secret)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	token, err := jwt.GenerateToken(user, cnf.JWTSecret())
+	token, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user, cnf.JWTSecret())
+	refreshToken, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -79,36 +81,31 @@ func (s *Service) Register(ctx context.Context, req *pb.RegRequest) (*pb.RegResp
 
 // Refresh обновление токена
 func (s *Service) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
-	cnf, err := conf.GetCnf()
+	if isValidToken := jwt.VerifyToken(req.Token, s.cnf.JWTSecret()); !isValidToken {
+		return nil, status.Errorf(codes.PermissionDenied, "Invalid token1")
+	}
+
+	tokenData, err := jwt.ParseToken(req.Token, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	if isValidToken := jwt.VerifyToken(req.Token, cnf.JWTSecret()); !isValidToken {
-		return nil, status.Errorf(codes.PermissionDenied, "Invalid token")
-	}
-
-	tokenData, err := jwt.ParseToken(req.Token, cnf.JWTSecret())
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
-	}
-
-	checkToken, err := repo.HasToken(ctx, req.Token, tokenData.UID, true)
+	checkToken, err := s.store.HasToken(ctx, req.Token, tokenData.UID, true)
 	if err != nil || !checkToken {
 		return nil, status.Errorf(codes.Internal, "Invalid token")
 	}
 
-	user, err := repo.GetUserByUID(ctx, tokenData.UID)
+	user, err := s.store.GetUserByUID(ctx, tokenData.UID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "User not found")
 	}
 
-	token, err := jwt.GenerateToken(user, cnf.JWTSecret())
+	token, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user, cnf.JWTSecret())
+	refreshToken, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}

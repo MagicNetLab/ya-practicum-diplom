@@ -1,5 +1,7 @@
 package logger
 
+import "time"
+
 // LogArg параметр для дополнительного логирования
 type LogArg struct {
 	argType string
@@ -9,4 +11,8 @@ type LogArg struct {
 
 func StrArg(key string, val string) LogArg {
 	return LogArg{argType: "string", name: key, value: val}
+}
+
+func TimeDurationArg(key string, val time.Duration) LogArg {
+	return LogArg{argType: "duration", name: key, value: val}
 }

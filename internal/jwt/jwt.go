@@ -3,6 +3,8 @@ package jwt
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -28,19 +30,29 @@ func GenerateToken(user models.UserEntity, jwtSecret string) (string, error) {
 	return tokenString, nil
 }
 
-func GenerateRefreshToken(user models.UserEntity, jwtSecret string) (string, error) {
+func ParseToken(tokenString string, jwtSecret string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims,
+		func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+			return []byte(jwtSecret), nil
+		})
+	if err != nil {
+		return claims, errors.New("failed check token: invalid token")
+	}
 
-	return "", nil
-}
+	if !token.Valid {
+		return claims, errors.New("failed check token: invalid token")
+	}
 
-func ParseToken(token string, jwtSecret string) (*Claims, error) {
-
-	return nil, nil
+	return claims, nil
 }
 
 func VerifyToken(token string, jwtSecret string) bool {
-
-	return false
+	_, err := ParseToken(token, jwtSecret)
+	return err == nil
 }
 
 // GetRandomSecret возвращает случайный секрет для генерации JWT

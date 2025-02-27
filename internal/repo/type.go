@@ -2,14 +2,10 @@ package repo
 
 import (
 	"context"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/repo/models"
 	"time"
-)
 
-type storage struct {
-	data  DataStorage
-	files FileStorage
-}
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repo/models"
+)
 
 // DataStorage интерфейс хранилища данных
 type DataStorage interface {
@@ -40,4 +36,20 @@ type DataStorage interface {
 // FileStorage интерфейс хранилища файлов
 type FileStorage interface {
 	Close() error
+}
+
+// Repository интерфейс репозитория
+type Repository interface {
+	// GetUserByLoginAndPassword получение пользователя из хранилища по логину и паролю
+	GetUserByLoginAndPassword(ctx context.Context, login, password string) (models.UserEntity, error)
+	// GetUserByUID получение пользователя по UID
+	GetUserByUID(ctx context.Context, uid string) (models.UserEntity, error)
+	// HasLogin проверка существования логина
+	HasLogin(ctx context.Context, login string) (bool, error)
+	// CreateUser создание пользователя
+	CreateUser(ctx context.Context, login, password string) (models.UserEntity, error)
+	// CreateToken создание токена
+	CreateToken(ctx context.Context, token, uid string, isRefresh bool) error
+	// HasToken проверка существования действующего токена
+	HasToken(ctx context.Context, token string, uid string, isRefresh bool) (bool, error)
 }

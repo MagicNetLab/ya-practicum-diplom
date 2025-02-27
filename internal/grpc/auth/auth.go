@@ -1,9 +1,17 @@
 package auth
 
-import "github.com/MagicNetLab/ya-practicum-diplom/internal/conf"
+import (
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/conf"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repo"
+)
 
-// New возвращает настроенный сервис авторизации
-func New(cnf conf.Configurator) (Service, error) {
+// MakeService возвращает настроенный сервис авторизации
+func MakeService(cnf conf.Configurator) (Service, error) {
+	store := repo.GetStorage()
+	cnf, err := conf.GetCnf()
+	if err != nil {
+		return Service{}, err
+	}
 
-	return Service{}, nil
+	return Service{cnf: cnf, store: store}, nil
 }

@@ -11,11 +11,10 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repo/data/postgres"
 )
 
-var repository storage
+var Store Storage
 
 // InitRepo инициализация репозитория
 func InitRepo(cnf conf.Configurator) error {
-
 	// data storage
 	if cnf.DataStorageType() == "inmemory" {
 		s, err := inmemory.NewRepository(cnf)
@@ -23,14 +22,14 @@ func InitRepo(cnf conf.Configurator) error {
 			logger.Error("failed to init in-memory data storage", logger.StrArg("error", err.Error()))
 			return err
 		}
-		repository.data = s
+		Store.data = s
 	} else if cnf.DataStorageType() == "postgres" {
 		s, err := postgres.NewRepository(cnf)
 		if err != nil {
 			logger.Error("failed to init postgres data storage", logger.StrArg("error", err.Error()))
 			return err
 		}
-		repository.data = s
+		Store.data = s
 	} else {
 		logger.Error("data storage type not correct. support only 'inmemory', 'postgres", logger.StrArg("dataStorageType", cnf.DataStorageType()))
 		return errors.New("data storage type not support")
@@ -43,20 +42,25 @@ func InitRepo(cnf conf.Configurator) error {
 			logger.Error("failed init local file storage error", logger.StrArg("error", err.Error()))
 			return err
 		}
-		repository.files = f
+		Store.files = f
 	} else if cnf.FileStorageType() == "s3" {
 		f, err := s3.New(cnf)
 		if err != nil {
 			logger.Error("failed init s3 storage error", logger.StrArg("error", err.Error()))
 			return err
 		}
-		repository.files = f
+		Store.files = f
 	} else {
 		logger.Error("file storage type not correct. support only 'local', 's3", logger.StrArg("fileStorageType", cnf.FileStorageType()))
 		return errors.New("file storage type not support")
 	}
 
 	return nil
+}
+
+// GetStorage возвращает хранилище
+func GetStorage() Repository {
+	return &Store
 }
 
 // Close закрытие репозитория

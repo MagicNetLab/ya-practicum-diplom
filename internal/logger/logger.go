@@ -2,6 +2,7 @@ package logger
 
 import (
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -74,6 +75,8 @@ func prepareZapArgs(args []LogArg) []zapcore.Field {
 			zapArgs = append(zapArgs, zap.String(arg.name, arg.value.(string)))
 		case "int":
 			zapArgs = append(zapArgs, zap.Int(arg.name, arg.value.(int)))
+		case "duration":
+			zapArgs = append(zapArgs, zap.Duration(arg.name, arg.value.(time.Duration)))
 		}
 	}
 
