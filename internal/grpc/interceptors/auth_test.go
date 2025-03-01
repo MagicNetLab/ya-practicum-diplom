@@ -2,6 +2,7 @@ package interceptors
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,23 +11,23 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/conf"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
-	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repo/models/mocks"
+	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models/mocks"
 )
 
 // TestAuthInterceptor тестирование AuthInterceptor
 func TestAuthInterceptor(t *testing.T) {
-	cnf, err := conf.GetCnf()
-	assert.NoError(t, err)
+	cnf := config.GetJWTConfig()
 
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "success", nil
 	}
 
 	t.Run("Успешная аутентификация", func(t *testing.T) {
-		user := &mm.UserEntity{UID: "test_uid"}
-		token, _ := jwt.GenerateToken(user, cnf.JWTSecret())
+		mockUser := new(mm.UserModel)
+		mockUser.On("GetUID").Return(uuid.New().String())
+		token, _ := jwt.GenerateToken(mockUser, cnf.GetJWTSecret())
 
 		md := metadata.New(map[string]string{"token": token})
 		ctx := metadata.NewIncomingContext(context.Background(), md)
@@ -56,8 +57,7 @@ func TestAuthInterceptor(t *testing.T) {
 
 // TestGuestInterceptor тестирование GuestInterceptor
 func TestGuestInterceptor(t *testing.T) {
-	cnf, err := conf.GetCnf()
-	assert.NoError(t, err)
+	cnf := config.GetJWTConfig()
 
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "success", nil
@@ -72,8 +72,9 @@ func TestGuestInterceptor(t *testing.T) {
 	})
 
 	t.Run("Ошибка доступа для авторизованного пользователя", func(t *testing.T) {
-		user := &mm.UserEntity{UID: "test_uid"}
-		token, _ := jwt.GenerateToken(user, cnf.JWTSecret())
+		mockUser := new(mm.UserModel)
+		mockUser.On("GetUID").Return(uuid.New().String())
+		token, _ := jwt.GenerateToken(mockUser, cnf.GetJWTSecret())
 
 		md := metadata.New(map[string]string{"token": token})
 		ctx := metadata.NewIncomingContext(context.Background(), md)

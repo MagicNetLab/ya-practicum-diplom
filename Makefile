@@ -32,8 +32,11 @@ linter:
 	go vet -vettool=./cmd/linter/linter ./...
 
 mock-repo:
-	mockery --name=Repository --dir=internal/repo --output=internal/repo/mocks --outpkg=mocks
+	mockery --name=AuthRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
+	mockery --name=AccountRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 
 mock-repo-models:
-	mockery --name=UserEntity --dir=internal/repo/models --output=internal/repo/models/mocks --outpkg=mocks
-	mockery --name=TokenEntity --dir=internal/repo/models --output=internal/repo/models/mocks --outpkg=mocks
+	mockery --name=AccountModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=AccountSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=TokenModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=UserModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks

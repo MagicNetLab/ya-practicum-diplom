@@ -2,13 +2,13 @@ package interceptors
 
 import (
 	"context"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/conf"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
@@ -19,17 +19,13 @@ func AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServe
 	}
 
 	var token string
-	config, err := conf.GetCnf()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed authoruze")
-	}
-
 	values := md.Get("token")
 	if len(values) == 1 {
 		token = values[0]
 	}
 
-	if token != "" && jwt.VerifyToken(token, config.JWTSecret()) {
+	cnf := config.GetJWTConfig()
+	if token != "" && jwt.VerifyToken(token, cnf.GetJWTSecret()) {
 		return handler(ctx, req)
 	}
 
@@ -43,17 +39,14 @@ func GuestInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServ
 	}
 
 	var token string
-	config, err := conf.GetCnf()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed authoruze")
-	}
 
 	values := md.Get("token")
 	if len(values) == 1 {
 		token = values[0]
 	}
 
-	if token != "" && jwt.VerifyToken(token, config.JWTSecret()) {
+	cnf := config.GetJWTConfig()
+	if token != "" && jwt.VerifyToken(token, cnf.GetJWTSecret()) {
 		return nil, status.Errorf(codes.PermissionDenied, "forbidden for authorized users")
 	}
 

@@ -1,44 +1,53 @@
 package main
 
 import (
+	"errors"
 	"log"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/conf"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/repo"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
 )
 
 func main() {
-	err := appInit()
+	cnf, repo, err := appInit()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cnf, err := conf.GetCnf()
-	if err != nil {
-		logger.Fatal("failed to load configuration", logger.StrArg("error", err.Error()))
-	}
+	_ = cnf
 
-	if err = repo.InitRepo(cnf); err != nil {
-		logger.Fatal("failed to init repository", logger.StrArg("error", err.Error()))
-	}
-
-	defer appExit()
+	defer appExit(repo)
 
 	logger.Info("Application started")
 }
 
-func appInit() error {
+// appInit - Инициализация приложения
+func appInit() (config.AppConfigurator, repository.Repository, error) {
 	err := logger.Init()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return nil
+	err = config.InitConfiguration()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	appCnf := config.GetAppConfig()
+	if !appCnf.IsValid() {
+		return nil, nil, errors.New("app config is not valid")
+	}
+
+	repo, err := repository.NewRepository(appCnf.GetDBConf())
+
+	if err != nil {
+		return nil, nil, errors.New("failed to create repository")
+	}
+
+	return appCnf, repo, nil
 }
 
-func appExit() {
-	if err := repo.Close(); err != nil {
-		logger.Error("failed close repo with app exit", logger.StrArg("error", err.Error()))
-	}
+func appExit(repo repository.Repository) {
+	repo.Close()
 }

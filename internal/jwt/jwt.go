@@ -9,11 +9,11 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/repo/models"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 )
 
 // GenerateToken генерирует JWT
-func GenerateToken(user models.UserEntity, jwtSecret string) (string, error) {
+func GenerateToken(user models.UserModel, jwtSecret string) (string, error) {
 	uid := user.GetUID()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
