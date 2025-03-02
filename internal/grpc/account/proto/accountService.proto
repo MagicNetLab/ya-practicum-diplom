@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package shortener_grpc;
+
+option go_package = ".";
+
+
+message Account {
+  string Id = 1;
+  string Uid = 2;
+  string Login = 3;
+  string Password = 4;
+  string Url = 5;
+  string Description = 6;
+}
+
+message CreateAccountRequest {
+  string Uid = 1;
+  string Login = 2;
+  string Password = 3;
+  string Url = 4;
+  string Description = 5;
+}
+
+message CreateAccountResponse {
+  Account Acc = 1;
+}
+
+message GetAccountRequest {
+  string Id = 1;
+}
+
+message GetAccountResponse {
+  Account Account = 1;
+}
+
+message RemoveAccountRequest {
+  string Id = 1;
+}
+
+message RemoveAccountResponse {}
+
+message SearchAccountRequest {
+  string Uid = 1;
+  string Login = 2;
+  string Url = 3;
+  string Description = 4;
+  string Limit = 5;
+  string Offset = 6;
+}
+
+message SearchAccountResponse {
+  repeated Account Acc = 1;
+}
+
+service Accounts {
+  rpc Create(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc Get(GetAccountRequest) returns (GetAccountResponse);
+  rpc Remove(RemoveAccountRequest) returns (RemoveAccountResponse);
+  rpc Search(SearchAccountRequest) returns (SearchAccountResponse);
+}

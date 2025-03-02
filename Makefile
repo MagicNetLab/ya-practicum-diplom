@@ -24,9 +24,8 @@ build-client:
 build-server:
 
 gen-proto:
-	protoc --go_out=internal/grpc/auth/proto  \
-    		--go-grpc_out=internal/grpc/auth/proto \
-    		internal/grpc/auth/proto/authService.proto
+	protoc --go_out=internal/grpc/auth/proto --go-grpc_out=internal/grpc/auth/proto internal/grpc/auth/proto/authService.proto
+	protoc --go_out=internal/grpc/account/proto --go-grpc_out=internal/grpc/account/proto internal/grpc/account/proto/accountService.proto
 
 linter:
 	go vet -vettool=./cmd/linter/linter ./...

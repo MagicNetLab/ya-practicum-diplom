@@ -2,71 +2,59 @@ package models
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 // TestAccountSearch_GetUID проверяет правильность получения UID владельца аккаунта
-func TestAccountSearch_GetUID(t *testing.T) {
-	accountSearch := &AccountSearch{uid: "test-uid"}
-	assert.Equal(t, "test-uid", accountSearch.GetUID())
-}
+func TestAccountSearch_GetSubQuery(t *testing.T) {
+	t.Run("Проверка пустого запроса", func(t *testing.T) {
+		search := AccountSearch{}
 
-// TestAccountSearch_GetLogin проверяет правильность получения логина аккаунта
-func TestAccountSearch_GetLogin(t *testing.T) {
-	accountSearch := &AccountSearch{login: "test-login"}
-	assert.Equal(t, "test-login", accountSearch.GetLogin())
-}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
 
-// TestAccountSearch_GetURL проверяет правильность получения URL аккаунта
-func TestAccountSearch_GetURL(t *testing.T) {
-	accountSearch := &AccountSearch{url: "http://test.com"}
-	assert.Equal(t, "http://test.com", accountSearch.GetURL())
-}
+	t.Run("Проверка запроса по UID", func(t *testing.T) {
+		search := AccountSearch{UID: "test-UID"}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " WHERE UID = $1", str)
+		assert.Equal(t, []any{"test-UID"}, values)
+	})
 
-// TestAccountSearch_GetDescription проверяет правильность получения описания аккаунта
-func TestAccountSearch_GetDescription(t *testing.T) {
-	accountSearch := &AccountSearch{description: "test description"}
-	assert.Equal(t, "test description", accountSearch.GetDescription())
-}
+	t.Run("Проверка запроса с несколькими параметрами", func(t *testing.T) {
+		search := AccountSearch{UID: "test-UID", Login: "test-Login", URL: "test-URL"}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " WHERE UID = $1 AND Login ilike '%$2%' AND URL ilike '%$3%'", str)
+		assert.Equal(t, []any{"test-UID", "test-Login", "test-URL"}, values)
+	})
 
-// TestAccountSearch_GetCreatedFrom проверяет правильность получения минимальной даты создания аккаунта
-func TestAccountSearch_GetCreatedFrom(t *testing.T) {
-	createdFrom := time.Now()
-	accountSearch := &AccountSearch{createdFrom: createdFrom}
-	assert.Equal(t, createdFrom, accountSearch.GetCreatedFrom())
-}
+	t.Run("Проверка запроса с параметром Limit", func(t *testing.T) {
+		search := AccountSearch{Limit: 10}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " LIMIT $1", str)
+		assert.Equal(t, []any{10}, values)
+	})
 
-// TestAccountSearch_GetCreatedTo проверяет правильность получения максимальной даты создания аккаунта
-func TestAccountSearch_GetCreatedTo(t *testing.T) {
-	createdTo := time.Now()
-	accountSearch := &AccountSearch{createdTo: createdTo}
-	assert.Equal(t, createdTo, accountSearch.GetCreatedTo())
-}
+	t.Run("Проверка запроса с параметром Offset", func(t *testing.T) {
+		search := AccountSearch{Offset: 20}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " OFFSET $1", str)
+		assert.Equal(t, []any{20}, values)
+	})
 
-// TestAccountSearch_GetUpdatedFrom проверяет правильность получения минимальной даты обновления аккаунта
-func TestAccountSearch_GetUpdatedFrom(t *testing.T) {
-	updatedFrom := time.Now()
-	accountSearch := &AccountSearch{updatedFrom: updatedFrom}
-	assert.Equal(t, updatedFrom, accountSearch.GetUpdatedFrom())
-}
+	t.Run("Проверка запроса с Limit и Offset", func(t *testing.T) {
+		search := AccountSearch{Limit: 10, Offset: 20}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " LIMIT $1 OFFSET $2", str)
+		assert.Equal(t, []any{10, 20}, values)
+	})
 
-// TestAccountSearch_GetUpdatedTo проверяет правильность получения максимальной даты обновления аккаунта
-func TestAccountSearch_GetUpdatedTo(t *testing.T) {
-	updatedTo := time.Now()
-	accountSearch := &AccountSearch{updatedTo: updatedTo}
-	assert.Equal(t, updatedTo, accountSearch.GetUpdatedTo())
-}
-
-// TestAccountSearch_GetLimit проверяет правильность получения лимита поиска
-func TestAccountSearch_GetLimit(t *testing.T) {
-	accountSearch := &AccountSearch{limit: 10}
-	assert.Equal(t, 10, accountSearch.GetLimit())
-}
-
-// TestAccountSearch_GetOffset проверяет правильность получения смещения поиска
-func TestAccountSearch_GetOffset(t *testing.T) {
-	accountSearch := &AccountSearch{offset: 20}
-	assert.Equal(t, 20, accountSearch.GetOffset())
+	t.Run("Проверка запроса с несколькими параметрам, Limit и Offset", func(t *testing.T) {
+		search := AccountSearch{UID: "test-UID", Login: "test-Login", URL: "test-URL", Description: "test-Description", Limit: 10, Offset: 20}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " WHERE UID = $1 AND Login ilike '%$2%' AND URL ilike '%$3%' AND Description ilike '%$4%' LIMIT $5 OFFSET $6", str)
+		assert.Equal(t, []any{"test-UID", "test-Login", "test-URL", "test-Description", 10, 20}, values)
+	})
 }

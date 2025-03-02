@@ -10,8 +10,8 @@ import (
 
 // TestToken_GetID проверяет правильность получения ID токена.
 func TestToken_GetID(t *testing.T) {
-	token := &Token{id: "test-id"}
-	assert.Equal(t, "test-id", token.GetID())
+	token := &Token{id: "test-ID"}
+	assert.Equal(t, "test-ID", token.GetID())
 }
 
 // TestToken_SetID проверяет правильность установки ID токена.
@@ -26,7 +26,7 @@ func TestToken_SetID(t *testing.T) {
 
 	t.Run("Проверка попытки установки некорректного ID", func(t *testing.T) {
 		token := Token{}
-		id := "invalid-id"
+		id := "invalid-ID"
 		err := token.SetID(id)
 		assert.Error(t, err)
 	})
@@ -62,8 +62,8 @@ func TestToken_SetToken(t *testing.T) {
 
 // TestToken_GetUID проверяет правильность получения UID владельца токена.
 func TestToken_GetUID(t *testing.T) {
-	token := &Token{uid: "test-uid"}
-	assert.Equal(t, "test-uid", token.GetUID())
+	token := &Token{uid: "test-UID"}
+	assert.Equal(t, "test-UID", token.GetUID())
 }
 
 // TestToken_SetUID проверяет правильность установки UID владельца токена.
@@ -78,7 +78,7 @@ func TestToken_SetUID(t *testing.T) {
 
 	t.Run("Проверка попытки установки некорректного UID", func(t *testing.T) {
 		token := &Token{}
-		uid := "invalid-uid"
+		uid := "invalid-UID"
 		err := token.SetUID(uid)
 		assert.Error(t, err)
 	})

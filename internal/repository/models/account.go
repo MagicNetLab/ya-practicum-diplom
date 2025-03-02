@@ -29,112 +29,112 @@ type AccountModel interface {
 
 // Account модель данных аккаунта
 type Account struct {
-	id          string    `db:"id"`
-	uid         string    `db:"uid"`
-	login       string    `db:"login"`
-	password    string    `db:"password"`
-	url         string    `db:"url"`
-	description string    `db:"description"`
-	createdAt   time.Time `db:"created_at"`
-	updatedAt   time.Time `db:"updated_at"`
+	ID          string    `db:"ID"`
+	UID         string    `db:"UID"`
+	Login       string    `db:"Login"`
+	Password    string    `db:"Password"`
+	URL         string    `db:"URL"`
+	Description string    `db:"Description"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
 }
 
 // GetID получение ID аккаунта
 func (a *Account) GetID() string {
-	return a.id
+	return a.ID
 }
 
 // SetID установка ID аккаунта
 func (a *Account) SetID(id string) error {
 	if id == "" {
-		return errors.New("id is not be empty")
+		return errors.New("ID is not be empty")
 	}
 
 	if err := uuid.Validate(id); err != nil {
-		return errors.New("invalid id")
+		return errors.New("invalid ID")
 	}
 
-	a.id = id
+	a.ID = id
 	return nil
 }
 
 // GetUID получение UID владельца аккаунта
 func (a *Account) GetUID() string {
-	return a.uid
+	return a.UID
 }
 
 // SetUID установка UID владельца аккаунта
 func (a *Account) SetUID(uid string) error {
 	if uid == "" {
-		return errors.New("uid is not be empty")
+		return errors.New("UID is not be empty")
 	}
 
 	if err := uuid.Validate(uid); err != nil {
-		return errors.New("invalid uid")
+		return errors.New("invalid UID")
 	}
 
-	a.uid = uid
+	a.UID = uid
 	return nil
 }
 
 // GetLogin получение логина аккаунта
 func (a *Account) GetLogin() string {
-	return a.login
+	return a.Login
 }
 
 // SetLogin установка логина аккаунта
 func (a *Account) SetLogin(login string) error {
 	if login == "" {
-		return errors.New("login is not be empty")
+		return errors.New("Login is not be empty")
 	}
 
-	a.login = login
+	a.Login = login
 	return nil
 }
 
 // GetPassword получение пароля аккаунта
 func (a *Account) GetPassword() string {
-	return a.password
+	return a.Password
 }
 
 // SetPassword установка пароля аккаунта
 func (a *Account) SetPassword(password string) error {
 	if password == "" {
-		return errors.New("password is not be empty")
+		return errors.New("Password is not be empty")
 	}
-	a.password = password
+	a.Password = password
 	return nil
 }
 
 // GetURL получение URL аккаунта
 func (a *Account) GetURL() string {
-	return a.url
+	return a.URL
 }
 
 // SetURL установка URL аккаунта
 func (a *Account) SetURL(url string) error {
 	if url == "" {
-		return errors.New("url is not be empty")
+		return errors.New("URL is not be empty")
 	}
 
-	a.url = url
+	a.URL = url
 	return nil
 }
 
 // GetDescription получение описания аккаунта
 func (a *Account) GetDescription() string {
-	return a.description
+	return a.Description
 }
 
 // SetDescription установка описания аккаунта
 func (a *Account) SetDescription(description string) error {
-	a.description = description
+	a.Description = description
 	return nil
 }
 
 // GetCreatedAt получение даты создания аккаунта
 func (a *Account) GetCreatedAt() time.Time {
-	return a.createdAt
+	return a.CreatedAt
 }
 
 // SetCreatedAt установка даты создания аккаунта
@@ -147,13 +147,13 @@ func (a *Account) SetCreatedAt(createdAt time.Time) error {
 		return errors.New("invalid created_at")
 	}
 
-	a.createdAt = createdAt
+	a.CreatedAt = createdAt
 	return nil
 }
 
 // GetUpdatedAt получение даты обновления аккаунта
 func (a *Account) GetUpdatedAt() time.Time {
-	return a.updatedAt
+	return a.UpdatedAt
 }
 
 // SetUpdatedAt установка даты обновления аккаунта
@@ -166,6 +166,6 @@ func (a *Account) SetUpdatedAt(updatedAt time.Time) error {
 		return errors.New("invalid updated_at")
 	}
 
-	a.updatedAt = updatedAt
+	a.UpdatedAt = updatedAt
 	return nil
 }

@@ -10,8 +10,8 @@ import (
 
 // TestUser_GetUID проверяет правильность получения UID пользователя.
 func TestUser_GetUID(t *testing.T) {
-	user := &User{UID: "test-uid"}
-	assert.Equal(t, "test-uid", user.GetUID())
+	user := &User{UID: "test-UID"}
+	assert.Equal(t, "test-UID", user.GetUID())
 }
 
 // TestUser_SetUID проверяет правильность установки UID пользователя.
@@ -24,14 +24,14 @@ func TestUser_SetUID(t *testing.T) {
 		assert.Equal(t, uid, user.UID)
 	})
 
-	t.Run("Проверка попытки установки некорректного uid", func(t *testing.T) {
+	t.Run("Проверка попытки установки некорректного UID", func(t *testing.T) {
 		user := &User{}
-		uid := "invalid-uid"
+		uid := "invalid-UID"
 		err := user.SetUID(uid)
 		assert.Error(t, err)
 	})
 
-	t.Run("Проверка попытки установки пустого uid", func(t *testing.T) {
+	t.Run("Проверка попытки установки пустого UID", func(t *testing.T) {
 		user := &User{}
 		err := user.SetUID("")
 		assert.Error(t, err)

@@ -22,9 +22,9 @@ type UserModel interface {
 }
 
 type User struct {
-	UID       string    `json:"id"`
-	Login     string    `json:"login"`
-	Password  string    `json:"password"`
+	UID       string    `json:"ID"`
+	Login     string    `json:"Login"`
+	Password  string    `json:"Password"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -37,11 +37,11 @@ func (u *User) GetUID() string {
 // SetUID установка UID пользователя
 func (u *User) SetUID(uid string) error {
 	if uid == "" {
-		return errors.New("uid is empty")
+		return errors.New("UID is empty")
 	}
 
 	if err := uuid.Validate(uid); err != nil {
-		return errors.New("invalid uid")
+		return errors.New("invalid UID")
 	}
 
 	u.UID = uid
@@ -56,7 +56,7 @@ func (u *User) GetLogin() string {
 // SetLogin установка логина пользователя
 func (u *User) SetLogin(login string) error {
 	if login == "" {
-		return errors.New("login is empty")
+		return errors.New("Login is empty")
 	}
 	u.Login = login
 	return nil
@@ -70,7 +70,7 @@ func (u *User) GetPassword() string {
 // SetPassword установка пароля пользователя
 func (u *User) SetPassword(password string) error {
 	if password == "" {
-		return errors.New("password is empty")
+		return errors.New("Password is empty")
 	}
 	u.Password = password
 	return nil

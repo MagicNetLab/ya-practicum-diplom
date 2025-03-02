@@ -23,9 +23,9 @@ type TokenModel interface {
 
 // Token модель данных токена
 type Token struct {
-	id        string    `db:"id"`
+	id        string    `db:"ID"`
 	token     string    `db:"token"`
-	uid       string    `db:"uid"`
+	uid       string    `db:"UID"`
 	isRefresh bool      `db:"is_refresh"`
 	expired   time.Time `db:"expired"`
 }
@@ -38,11 +38,11 @@ func (t *Token) GetID() string {
 // SetID устанавливает идентификатор токена
 func (t *Token) SetID(id string) error {
 	if id == "" {
-		return errors.New("id is not be empty")
+		return errors.New("ID is not be empty")
 	}
 
 	if err := uuid.Validate(id); err != nil {
-		return errors.New("invalid id")
+		return errors.New("invalid ID")
 	}
 
 	t.id = id
@@ -72,11 +72,11 @@ func (t *Token) GetUID() string {
 // SetUID устанавливает идентификатор владельца токена
 func (t *Token) SetUID(uid string) error {
 	if uid == "" {
-		return errors.New("uid is not be empty")
+		return errors.New("UID is not be empty")
 	}
 
 	if err := uuid.Validate(uid); err != nil {
-		return errors.New("invalid uid")
+		return errors.New("invalid UID")
 	}
 
 	t.uid = uid
