@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Accounts_Create_FullMethodName = "/shortener_grpc.Accounts/Create"
-	Accounts_Get_FullMethodName    = "/shortener_grpc.Accounts/Get"
-	Accounts_Remove_FullMethodName = "/shortener_grpc.Accounts/Remove"
-	Accounts_Search_FullMethodName = "/shortener_grpc.Accounts/Search"
+	Accounts_Create_FullMethodName = "/gophkeeper_grpc.Accounts/Create"
+	Accounts_Get_FullMethodName    = "/gophkeeper_grpc.Accounts/Get"
+	Accounts_Remove_FullMethodName = "/gophkeeper_grpc.Accounts/Remove"
+	Accounts_Search_FullMethodName = "/gophkeeper_grpc.Accounts/Search"
 )
 
 // AccountsClient is the client API for Accounts service.
@@ -210,7 +210,7 @@ func _Accounts_Search_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Accounts_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "shortener_grpc.Accounts",
+	ServiceName: "gophkeeper_grpc.Accounts",
 	HandlerType: (*AccountsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package gophkeeper_grpc;
+
+option go_package = ".";
+
+message CardModel {
+  string ID = 1;
+  string Name = 2;
+  string Number = 3;
+  int32 Month = 4;
+  int32 Year = 5;
+}
+
+message GetCardRequest {
+  string ID = 1;
+}
+
+message GetCardResponse {
+  CardModel Card = 1;
+}
+
+message CreateCardRequest {
+  string UID = 1;
+  string Name = 2;
+  string Number = 3;
+  int32 Month = 4;
+  int32 Year = 5;
+  string CVC = 6;
+  string PIN = 7;
+}
+
+message CreateCardResponse {
+  CardModel Card = 1;
+}
+
+message DeleteCardRequest {
+  string ID = 1;
+}
+
+message DeleteCardResponse {}
+
+message SearchCardRequest {
+  string UID = 1;
+  string Number = 2;
+  string Name = 3;
+  int32 Year = 4;
+  int32 Limit = 5;
+  int32 Offset = 6;
+}
+
+message SearchCardResponse {
+  repeated CardModel Cards = 1;
+}
+
+message ListCardRequest {
+  string UID = 1;
+}
+
+message ListCardResponse {
+  repeated CardModel Cards = 1;
+}
+
+service Card {
+  rpc Get(GetCardRequest) returns (GetCardResponse);
+  rpc Create(CreateCardRequest) returns (CreateCardResponse);
+  rpc Delete(DeleteCardRequest) returns (DeleteCardResponse);
+  rpc Search(SearchCardRequest) returns (SearchCardResponse);
+  rpc List(ListCardRequest) returns (ListCardResponse);
+}

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package shortener_grpc;
+package gophkeeper_grpc;
 
 option go_package = ".";
 

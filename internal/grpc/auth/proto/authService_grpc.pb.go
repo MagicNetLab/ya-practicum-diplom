@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Auth_Register_FullMethodName = "/shortener_grpc.Auth/Register"
-	Auth_Auth_FullMethodName     = "/shortener_grpc.Auth/Auth"
-	Auth_Refresh_FullMethodName  = "/shortener_grpc.Auth/Refresh"
+	Auth_Register_FullMethodName = "/gophkeeper_grpc.Auth/Register"
+	Auth_Auth_FullMethodName     = "/gophkeeper_grpc.Auth/Auth"
+	Auth_Refresh_FullMethodName  = "/gophkeeper_grpc.Auth/Refresh"
 )
 
 // AuthClient is the client API for Auth service.
@@ -176,7 +176,7 @@ func _Auth_Refresh_Handler(srv interface{}, ctx context.Context, dec func(interf
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Auth_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "shortener_grpc.Auth",
+	ServiceName: "gophkeeper_grpc.Auth",
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

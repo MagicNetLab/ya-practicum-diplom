@@ -26,6 +26,7 @@ build-server:
 gen-proto:
 	protoc --go_out=internal/grpc/auth/proto --go-grpc_out=internal/grpc/auth/proto internal/grpc/auth/proto/authService.proto
 	protoc --go_out=internal/grpc/account/proto --go-grpc_out=internal/grpc/account/proto internal/grpc/account/proto/accountService.proto
+	protoc --go_out=internal/grpc/card/proto --go-grpc_out=internal/grpc/card/proto internal/grpc/card/proto/cardService.proto
 
 linter:
 	go vet -vettool=./cmd/linter/linter ./...
@@ -33,9 +34,11 @@ linter:
 mock-repo:
 	mockery --name=AuthRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 	mockery --name=AccountRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
+	mockery --name=CardRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 
 mock-repo-models:
 	mockery --name=AccountModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=AccountSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=TokenModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=UserModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=CardModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks

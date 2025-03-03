@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"github.com/google/uuid"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 

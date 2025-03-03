@@ -122,24 +122,6 @@ func (_m *AccountRepository) SearchAccounts(ctx context.Context, search models.A
 	return r0, r1
 }
 
-// UpdateAccount provides a mock function with given fields: ctx, account
-func (_m *AccountRepository) UpdateAccount(ctx context.Context, account models.AccountModel) error {
-	ret := _m.Called(ctx, account)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateAccount")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.AccountModel) error); ok {
-		r0 = rf(ctx, account)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // NewAccountRepository creates a new instance of AccountRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAccountRepository(t interface {
