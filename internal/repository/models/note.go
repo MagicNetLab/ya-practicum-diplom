@@ -12,8 +12,11 @@ type NoteModel interface {
 	GetID() string
 	GetUID() string
 	GetTitle() string
+	SetTitle(string) error
 	GetContent() string
+	SetContent(string) error
 	GetMeta() string
+	SetMeta(string) error
 	GetCreatedAt() time.Time
 	GetUpdatedAt() time.Time
 }
@@ -61,14 +64,43 @@ func (n *Note) GetTitle() string {
 	return n.Title
 }
 
+// SetTitle устанавливает заголовок заметки
+func (n *Note) SetTitle(title string) error {
+	if title == "" {
+		return errors.New("invalid data")
+	}
+
+	n.Title = title
+	return nil
+}
+
 // GetContent возвращает содержимое заметки
 func (n *Note) GetContent() string {
 	return n.Content
 }
 
+// SetContent устанавливает содержимое заметки
+func (n *Note) SetContent(content string) error {
+	if content == "" {
+		return errors.New("invalid data")
+	}
+
+	n.Content = content
+	return nil
+}
+
 // GetMeta возвращает метаданные заметки
 func (n *Note) GetMeta() string {
 	return n.Meta
+}
+
+// SetMeta устанавливает метаданные заметки
+func (n *Note) SetMeta(meta string) error {
+	if meta == "" {
+		return errors.New("invalid data")
+	}
+	n.Meta = meta
+	return nil
 }
 
 // GetCreatedAt возвращает дату создания заметки

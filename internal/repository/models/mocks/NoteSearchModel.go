@@ -9,76 +9,34 @@ type NoteSearchModel struct {
 	mock.Mock
 }
 
-// GetContent provides a mock function with no fields
-func (_m *NoteSearchModel) GetContent() string {
+// GetSubQuery provides a mock function with no fields
+func (_m *NoteSearchModel) GetSubQuery() (string, []interface{}) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetContent")
+		panic("no return value specified for GetSubQuery")
 	}
 
 	var r0 string
+	var r1 []interface{}
+	if rf, ok := ret.Get(0).(func() (string, []interface{})); ok {
+		return rf()
+	}
 	if rf, ok := ret.Get(0).(func() string); ok {
 		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	return r0
-}
-
-// GetMeta provides a mock function with no fields
-func (_m *NoteSearchModel) GetMeta() string {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetMeta")
-	}
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(1).(func() []interface{}); ok {
+		r1 = rf()
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).([]interface{})
+		}
 	}
 
-	return r0
-}
-
-// GetTitle provides a mock function with no fields
-func (_m *NoteSearchModel) GetTitle() string {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetTitle")
-	}
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	return r0
-}
-
-// GetUID provides a mock function with no fields
-func (_m *NoteSearchModel) GetUID() string {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetUID")
-	}
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	return r0
+	return r0, r1
 }
 
 // NewNoteSearchModel creates a new instance of NoteSearchModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

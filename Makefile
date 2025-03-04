@@ -27,6 +27,7 @@ gen-proto:
 	protoc --go_out=internal/grpc/auth/proto --go-grpc_out=internal/grpc/auth/proto internal/grpc/auth/proto/authService.proto
 	protoc --go_out=internal/grpc/account/proto --go-grpc_out=internal/grpc/account/proto internal/grpc/account/proto/accountService.proto
 	protoc --go_out=internal/grpc/card/proto --go-grpc_out=internal/grpc/card/proto internal/grpc/card/proto/cardService.proto
+	protoc --go_out=internal/grpc/note/proto --go-grpc_out=internal/grpc/note/proto internal/grpc/note/proto/noteService.proto
 
 linter:
 	go vet -vettool=./cmd/linter/linter ./...

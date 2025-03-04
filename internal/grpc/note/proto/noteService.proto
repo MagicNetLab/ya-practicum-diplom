@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package gophkeeper_grpc;
+
+option go_package = ".";
+
+message NoteModel {
+  string ID = 1;
+  string UID = 2;
+  string Title = 3;
+  string Content = 4;
+  string Meta = 5;
+  string CreatedAt = 6;
+  string UpdatedAt = 7;
+}
+
+
+message CreateNoteRequest {
+  string UID = 1;
+  string Title = 2;
+  string Content = 3;
+  string Meta = 4;
+}
+
+message CreateNoteResponse {
+  NoteModel Note = 1;
+}
+
+message RemoveNoteRequest {
+  string ID = 1;
+}
+
+message RemoveNoteResponse {}
+
+message GetNoteRequest {
+  string ID = 1;
+}
+
+message GetNoteResponse {
+  NoteModel Note = 1;
+}
+
+message UpdateNoteRequest {
+  string ID = 1;
+  string UID = 2;
+  string Title = 3;
+  string Content = 4;
+  string Meta = 5;
+}
+
+message UpdateNoteResponse {
+  NoteModel Note = 1;
+}
+
+message SearchNoteRequest {
+  string UID = 1;
+  string Title = 2;
+  string Content = 3;
+  string Meta = 4;
+  int32 Limit = 5;
+  int32 Offset = 6;
+}
+
+message SearchNoteResponse {
+  repeated NoteModel Notes = 1;
+}
+
+message ListNoteRequest {
+  string UID = 1;
+}
+
+message ListNoteResponse {
+  repeated NoteModel Notes = 1;
+}
+
+service Note {
+  rpc Create(CreateNoteRequest) returns (CreateNoteResponse);
+  rpc Remove(RemoveNoteRequest) returns (RemoveNoteResponse);
+  rpc Get(GetNoteRequest) returns (GetNoteResponse);
+  rpc Update(UpdateNoteRequest) returns (UpdateNoteResponse);
+  rpc Search(SearchNoteRequest) returns (SearchNoteResponse);
+  rpc List(SearchNoteRequest) returns (ListNoteResponse);
+}

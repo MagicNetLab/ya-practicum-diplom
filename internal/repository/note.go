@@ -97,13 +97,13 @@ func (n NoteRepo) SearchNote(ctx context.Context, search models.NoteSearchModel)
 
 	var result []models.NoteModel
 	for rows.Next() {
-		note := models.Note{}
+		note := &models.Note{}
 		err = rows.Scan(&note.ID, &note.UID, &note.Title, &note.Content, &note.Meta, &note.CreatedAt, &note.UpdatedAt)
 		if err != nil {
 			logger.Error("error scanning note row", logger.StrArg("error", err.Error()))
 			continue
 		}
-		result = append(result, &note)
+		result = append(result, note)
 	}
 
 	return result, nil
