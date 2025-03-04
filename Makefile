@@ -35,6 +35,7 @@ mock-repo:
 	mockery --name=AuthRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 	mockery --name=AccountRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 	mockery --name=CardRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
+	mockery --name=NoteRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 
 mock-repo-models:
 	mockery --name=AccountModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
@@ -42,3 +43,5 @@ mock-repo-models:
 	mockery --name=TokenModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=UserModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=CardModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=NoteModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=NoteSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
