@@ -171,11 +171,11 @@ func TestAccountRepo_SearchAccounts(t *testing.T) {
 	uid1 := uuid.New().String()
 	uid2 := uuid.New().String()
 	testData := []models.Account{
-		{uuid.New().String(), uid1, "test-login-1", "test-password-1", "test-url-1", "test-description-1", time.Now(), time.Now()},
-		{uuid.New().String(), uid1, "test-login-2", "test-password-2", "test-url-2", "test-description-2", time.Now(), time.Now()},
-		{uuid.New().String(), uid1, "test-login-3", "test-password-3", "test-url-3", "test-description-3", time.Now(), time.Now()},
-		{uuid.New().String(), uid2, "test-login-4", "test-password-4", "test-url-4", "test-description-4", time.Now(), time.Now()},
-		{uuid.New().String(), uid2, "test-login-5", "test-password-5", "test-url-5", "test-description-5", time.Now(), time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Login: "test-login-1", Password: "test-password-1", URL: "test-url-1", Description: "test-description-1", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Login: "test-login-2", Password: "test-password-2", URL: "test-url-2", Description: "test-description-2", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Login: "test-login-3", Password: "test-password-3", URL: "test-url-3", Description: "test-description-3", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid2, Login: "test-login-4", Password: "test-password-4", URL: "test-url-4", Description: "test-description-4", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid2, Login: "test-login-5", Password: "test-password-5", URL: "test-url-5", Description: "test-description-5", CreatedAt: time.Now(), UpdatedAt: time.Now()},
 	}
 	sql := "INSERT INTO accounts (id, uid, login, password, url, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 	for _, account := range testData {

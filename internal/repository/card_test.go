@@ -180,11 +180,11 @@ func TestCardRepo_SearchCard(t *testing.T) {
 	ctx := context.Background()
 
 	testData := []models.Card{
-		{uuid.New().String(), uid1, "VASYA PUPKIN", "4532015112830366", "453201******0366", 1, 2026, "123", "1", time.Now()},
-		{uuid.New().String(), uid1, "VASYA PUPKIN", "45329999x2830377", "453299******0377", 2, 2025, "123", "1", time.Now()},
-		{uuid.New().String(), uid1, "VASYA PUPKIN", "4532888112830388", "453288******0388", 3, 2027, "123", "1", time.Now()},
-		{uuid.New().String(), uid2, "PETYA PUPKIN", "4532777112830399", "453277******0399", 4, 2030, "123", "1", time.Now()},
-		{uuid.New().String(), uid2, "PETYA PUPKIN", "45320005112830300", "453200******0300", 5, 2029, "123", "1", time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "4532015112830366", Mask: "453201******0366", Month: 1, Year: 2026, CVC: "123", PIN: "1", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "45329999x2830377", Mask: "453299******0377", Month: 2, Year: 2025, CVC: "123", PIN: "1", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "4532888112830388", Mask: "453288******0388", Month: 3, Year: 2027, CVC: "123", PIN: "1", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "4532777112830399", Mask: "453277******0399", Month: 4, Year: 2030, CVC: "123", PIN: "1", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "45320005112830300", Mask: "453200******0300", Month: 5, Year: 2029, CVC: "123", PIN: "1", CreatedAt: time.Now()},
 	}
 
 	t.Cleanup(func() {
