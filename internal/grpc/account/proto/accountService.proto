@@ -15,11 +15,10 @@ message Account {
 }
 
 message CreateAccountRequest {
-  string Uid = 1;
-  string Login = 2;
-  string Password = 3;
-  string Url = 4;
-  string Description = 5;
+  string Login = 1;
+  string Password = 2;
+  string Url = 3;
+  string Description = 4;
 }
 
 message CreateAccountResponse {
@@ -41,12 +40,11 @@ message RemoveAccountRequest {
 message RemoveAccountResponse {}
 
 message SearchAccountRequest {
-  string Uid = 1;
-  string Login = 2;
-  string Url = 3;
-  string Description = 4;
-  string Limit = 5;
-  string Offset = 6;
+  string Login = 1;
+  string Url = 2;
+  string Description = 3;
+  string Limit = 4;
+  string Offset = 5;
 }
 
 message SearchAccountResponse {

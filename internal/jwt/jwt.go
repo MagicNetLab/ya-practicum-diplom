@@ -1,10 +1,13 @@
 package jwt
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
+	"google.golang.org/grpc/metadata"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -64,4 +67,41 @@ func GetRandomSecret() string {
 	}
 
 	return hex.EncodeToString(b)
+}
+
+func ExtractToken(ctx context.Context) (string, error) {
+	meta, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", errors.New("failed to parse metadata")
+	}
+
+	val := meta.Get("token")
+	if len(val) == 0 {
+		return "", errors.New("no token provided")
+	}
+
+	token := val[0]
+	return token, nil
+}
+
+func GetUIDFromContext(ctx context.Context, jwtSecret string) (string, error) {
+	tokenString, err := ExtractToken(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	tokenData, err := ParseToken(tokenString, jwtSecret)
+	if err != nil {
+		return "", err
+	}
+
+	if tokenData.UID == "" {
+		return "", errors.New("invalid token")
+	}
+
+	if err := uuid.Validate(tokenData.UID); err != nil {
+		return "", err
+	}
+
+	return tokenData.UID, nil
 }

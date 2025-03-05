@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"os"
 	"strconv"
 
@@ -78,8 +79,12 @@ func GetJWTConfig() JWTConfigurator {
 		rtlf = defaultRefreshTokenLifeTime
 	}
 
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+	if secretKey == "" {
+		secretKey = jwt.GetRandomSecret()
+	}
 	return &JWTConfig{
-		secret:               os.Getenv("JWT_SECRET"),
+		secret:               secretKey,
 		tokenLifeTime:        tlf,
 		refreshTokenLifeTime: rtlf,
 	}

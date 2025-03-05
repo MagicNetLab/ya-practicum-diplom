@@ -44,9 +44,9 @@ func (_m *AccountRepository) CreateAccount(ctx context.Context, uid string, logi
 	return r0, r1
 }
 
-// GetAccount provides a mock function with given fields: ctx, id
-func (_m *AccountRepository) GetAccount(ctx context.Context, id string) (models.AccountModel, error) {
-	ret := _m.Called(ctx, id)
+// GetAccount provides a mock function with given fields: ctx, id, uid
+func (_m *AccountRepository) GetAccount(ctx context.Context, id string, uid string) (models.AccountModel, error) {
+	ret := _m.Called(ctx, id, uid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAccount")
@@ -54,19 +54,19 @@ func (_m *AccountRepository) GetAccount(ctx context.Context, id string) (models.
 
 	var r0 models.AccountModel
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (models.AccountModel, error)); ok {
-		return rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (models.AccountModel, error)); ok {
+		return rf(ctx, id, uid)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) models.AccountModel); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) models.AccountModel); ok {
+		r0 = rf(ctx, id, uid)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(models.AccountModel)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, id, uid)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -74,17 +74,17 @@ func (_m *AccountRepository) GetAccount(ctx context.Context, id string) (models.
 	return r0, r1
 }
 
-// RemoveAccount provides a mock function with given fields: ctx, id
-func (_m *AccountRepository) RemoveAccount(ctx context.Context, id string) error {
-	ret := _m.Called(ctx, id)
+// RemoveAccount provides a mock function with given fields: ctx, id, uid
+func (_m *AccountRepository) RemoveAccount(ctx context.Context, id string, uid string) error {
+	ret := _m.Called(ctx, id, uid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RemoveAccount")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, id, uid)
 	} else {
 		r0 = ret.Error(0)
 	}

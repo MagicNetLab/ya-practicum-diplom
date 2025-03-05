@@ -2,29 +2,42 @@ package account
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"strconv"
 )
 
 // MakeService возвращает настроенный сервис аккаунтов
-func MakeService(repo repository.AccountRepository) (Service, error) {
-	return Service{store: repo}, nil
+func MakeService(repo repository.AccountRepository, jwtCnf config.JWTConfigurator) (Service, error) {
+	return Service{store: repo, jwtCnf: jwtCnf}, nil
 }
 
 // Service  сервис аккаунтов
 type Service struct {
 	pb.AccountsServer
-	store repository.AccountRepository
+	store  repository.AccountRepository
+	jwtCnf config.JWTConfigurator
 }
 
 // GetAccount получение аккаунта по идентификатору
 func (s *Service) GetAccount(ctx context.Context, req *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	id := req.GetId()
-	result, err := s.store.GetAccount(ctx, id)
+	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	err = uuid.Validate(req.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid id")
+	}
+
+	result, err := s.store.GetAccount(ctx, req.GetId(), userUID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "account not found")
 	}
@@ -44,7 +57,12 @@ func (s *Service) GetAccount(ctx context.Context, req *pb.GetAccountRequest) (*p
 
 // CreateAccount создание аккаунта
 func (s *Service) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
-	acc, err := s.store.CreateAccount(ctx, req.GetUid(), req.GetLogin(), req.GetPassword(), req.GetUrl(), req.GetDescription())
+	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	acc, err := s.store.CreateAccount(ctx, userUID, req.GetLogin(), req.GetPassword(), req.GetUrl(), req.GetDescription())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "account not created")
 	}
@@ -63,8 +81,13 @@ func (s *Service) CreateAccount(ctx context.Context, req *pb.CreateAccountReques
 
 // RemoveAccount удаление аккаунта по идентификатору
 func (s *Service) RemoveAccount(ctx context.Context, req *pb.RemoveAccountRequest) (*pb.RemoveAccountResponse, error) {
+	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
 	id := req.GetId()
-	err := s.store.RemoveAccount(ctx, id)
+	err = s.store.RemoveAccount(ctx, id, userUID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "account not removed")
 	}
@@ -74,10 +97,13 @@ func (s *Service) RemoveAccount(ctx context.Context, req *pb.RemoveAccountReques
 
 // SearchAccounts поиск аккаунтов по критериям
 func (s *Service) SearchAccounts(ctx context.Context, req *pb.SearchAccountRequest) (*pb.SearchAccountResponse, error) {
-	search := models.AccountSearch{}
-	if req.GetUid() != "" {
-		search.UID = req.GetUid()
+	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
+
+	search := models.AccountSearch{}
+	search.UID = userUID
 
 	if req.GetLogin() != "" {
 		search.Login = req.GetLogin()

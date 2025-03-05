@@ -38,7 +38,7 @@ func TestAccountRepo_GetAccount(t *testing.T) {
 	createdAt := time.Now()
 	updatedAt := time.Now()
 
-	// Создание тестового пользователя
+	// Тестовые данные в базе данных
 	sql := "INSERT INTO accounts (id, uid, login, password, url, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 	_, err := pgx.Exec(
 		context.Background(),
@@ -50,7 +50,7 @@ func TestAccountRepo_GetAccount(t *testing.T) {
 	})
 
 	t.Run("Проверка успешного получения аккаунта по идентификатору", func(t *testing.T) {
-		account, err := repo.GetAccount(context.Background(), id)
+		account, err := repo.GetAccount(context.Background(), id, uid)
 		assert.NoError(t, err)
 		assert.Equal(t, id, account.GetID())
 		assert.Equal(t, uid, account.GetUID())
@@ -62,7 +62,11 @@ func TestAccountRepo_GetAccount(t *testing.T) {
 	})
 
 	t.Run("Проверка попытки получения несуществующего аккаунта", func(t *testing.T) {
-		account, err := repo.GetAccount(context.Background(), "nonexistent-id")
+		account, err := repo.GetAccount(context.Background(), "nonexistent-id", uid)
+		assert.Error(t, err)
+		assert.Nil(t, account)
+
+		account, err = repo.GetAccount(context.Background(), id, uuid.New().String())
 		assert.Error(t, err)
 		assert.Nil(t, account)
 	})
@@ -138,7 +142,7 @@ func TestAccountRepo_RemoveAccount(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count)
 
-		err = repo.RemoveAccount(context.Background(), "nonexistent-id")
+		err = repo.RemoveAccount(context.Background(), "nonexistent-id", uid)
 		assert.Error(t, err)
 
 		err = pgx.QueryRow(context.Background(), "SELECT COUNT(*) FROM accounts").Scan(&count)
@@ -152,7 +156,7 @@ func TestAccountRepo_RemoveAccount(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count)
 
-		err = repo.RemoveAccount(context.Background(), id)
+		err = repo.RemoveAccount(context.Background(), id, uid)
 		assert.NoError(t, err)
 
 		err = pgx.QueryRow(context.Background(), "SELECT COUNT(*) FROM accounts WHERE id=$1", id).Scan(&count)

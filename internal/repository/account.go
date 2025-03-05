@@ -19,9 +19,9 @@ func NewAccountRepo(pool *pgxpool.Pool) AccountRepository {
 
 // AccountRepository интерфейс репозитория аккаунтов
 type AccountRepository interface {
-	GetAccount(ctx context.Context, id string) (models.AccountModel, error)
+	GetAccount(ctx context.Context, id string, uid string) (models.AccountModel, error)
 	CreateAccount(ctx context.Context, uid, login, password, url, description string) (models.AccountModel, error)
-	RemoveAccount(ctx context.Context, id string) error
+	RemoveAccount(ctx context.Context, id string, uid string) error
 	SearchAccounts(ctx context.Context, search models.AccountSearchModel) ([]models.AccountModel, error)
 }
 
@@ -31,10 +31,10 @@ type AccountRepo struct {
 }
 
 // GetAccount возвращает аккаунт по идентификатору
-func (a *AccountRepo) GetAccount(ctx context.Context, id string) (models.AccountModel, error) {
+func (a *AccountRepo) GetAccount(ctx context.Context, id string, uid string) (models.AccountModel, error) {
 	account := &models.Account{}
-	sql := "SELECT id, uid, login, password, url, description, created_at, updated_at FROM accounts WHERE id=$1"
-	err := a.pool.QueryRow(ctx, sql, id).Scan(&account.ID, &account.UID, &account.Login, &account.Password, &account.URL, &account.Description, &account.CreatedAt, &account.UpdatedAt)
+	sql := "SELECT id, uid, login, password, url, description, created_at, updated_at FROM accounts WHERE id=$1 AND uid=$2"
+	err := a.pool.QueryRow(ctx, sql, id, uid).Scan(&account.ID, &account.UID, &account.Login, &account.Password, &account.URL, &account.Description, &account.CreatedAt, &account.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -95,12 +95,12 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 }
 
 // RemoveAccount удаляет аккаунт по идентификатору
-func (a *AccountRepo) RemoveAccount(ctx context.Context, id string) error {
+func (a *AccountRepo) RemoveAccount(ctx context.Context, id string, uid string) error {
 	if id == "" {
 		return errors.New("account id is empty")
 	}
 
-	res, err := a.pool.Exec(ctx, "DELETE FROM accounts WHERE id=$1", id)
+	res, err := a.pool.Exec(ctx, "DELETE FROM accounts WHERE id=$1 and uid=$2", id, uid)
 	if err != nil {
 		return err
 	}
