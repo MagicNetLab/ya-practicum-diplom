@@ -34,6 +34,7 @@ func TestNoteRepo_GetNoteByID(t *testing.T) {
 
 	// Тестовые данные
 	id := uuid.New().String()
+	uid := uuid.New().String()
 	t.Cleanup(func() {
 		_, _ = pgx.Exec(ctx, "DELETE FROM notes WHERE id=$1", id)
 	})
@@ -41,7 +42,7 @@ func TestNoteRepo_GetNoteByID(t *testing.T) {
 	sql := "INSERT INTO notes (id, uid, title, content, meta, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	_, err := pgx.Exec(ctx, sql,
 		id,
-		uuid.New().String(),
+		uid,
 		"Test Note",
 		"Test Content",
 		"Test Meta",
@@ -51,14 +52,14 @@ func TestNoteRepo_GetNoteByID(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Run("Проверка поиска существующей заметки", func(t *testing.T) {
-		res, err := repo.GetNote(ctx, id)
+		res, err := repo.GetNote(ctx, id, uid)
 		assert.NoError(t, err)
 		assert.NotNil(t, res)
 		assert.Equal(t, res.GetID(), id)
 	})
 
 	t.Run("Проверка поиска несуществующей заметки", func(t *testing.T) {
-		res, err := repo.GetNote(ctx, uuid.New().String())
+		res, err := repo.GetNote(ctx, uuid.New().String(), uid)
 		assert.Error(t, err)
 		assert.Nil(t, res)
 	})
@@ -116,6 +117,7 @@ func TestNoteRepo_DeleteNote(t *testing.T) {
 	ctx := context.Background()
 
 	id := uuid.New().String()
+	uid := uuid.New().String()
 	t.Cleanup(func() {
 		_, _ = pgx.Exec(ctx, "DELETE FROM notes WHERE id=$1", id)
 	})
@@ -123,7 +125,7 @@ func TestNoteRepo_DeleteNote(t *testing.T) {
 	sql := "INSERT INTO notes (id, uid, title, content, meta, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	_, err := pgx.Exec(ctx, sql,
 		id,
-		uuid.New().String(),
+		uid,
 		"Test Note",
 		"Test Content",
 		"Test Meta",
@@ -139,7 +141,7 @@ func TestNoteRepo_DeleteNote(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count)
 
-		err = repo.RemoveNote(ctx, id)
+		err = repo.RemoveNote(ctx, id, uid)
 		assert.NoError(t, err)
 
 		row = pgx.QueryRow(ctx, "SELECT COUNT(*) FROM notes WHERE id=$1", id)
@@ -149,7 +151,7 @@ func TestNoteRepo_DeleteNote(t *testing.T) {
 	})
 
 	t.Run("Проверка удаления несуществующей заметки", func(t *testing.T) {
-		err := repo.RemoveNote(ctx, uuid.New().String())
+		err := repo.RemoveNote(ctx, uuid.New().String(), uid)
 		assert.Error(t, err)
 		assert.Equal(t, "note not found", err.Error())
 	})

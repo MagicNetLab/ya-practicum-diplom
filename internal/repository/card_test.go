@@ -35,6 +35,7 @@ func TestCardRepo_GetCardByID(t *testing.T) {
 
 	// Тестовые данные
 	id := uuid.New().String()
+	uid := uuid.New().String()
 	t.Cleanup(func() {
 		_, _ = pgx.Exec(ctx, "DELETE FROM cards WHERE id=$1", id)
 	})
@@ -42,7 +43,7 @@ func TestCardRepo_GetCardByID(t *testing.T) {
 	sql := "INSERT INTO cards (id, uid, name, number, mask, month, year, cvc, pin, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 	_, err := pgx.Exec(ctx, sql,
 		id,
-		uuid.New().String(),
+		uid,
 		"VASYA PUPKIN",
 		"4532015112830366",
 		"453201******0366",
@@ -55,14 +56,14 @@ func TestCardRepo_GetCardByID(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Run("Проверка поиска существующей карты", func(t *testing.T) {
-		res, err := repo.GetCardByID(ctx, id)
+		res, err := repo.GetCardByID(ctx, id, uid)
 		assert.NoError(t, err)
 		assert.NotNil(t, res)
 		assert.Equal(t, res.GetID(), id)
 	})
 
 	t.Run("Проверка поиска несуществующей карты", func(t *testing.T) {
-		res, err := repo.GetCardByID(ctx, uuid.New().String())
+		res, err := repo.GetCardByID(ctx, id, uuid.New().String())
 		assert.Error(t, err)
 		assert.Nil(t, res)
 	})
@@ -130,6 +131,7 @@ func TestCardRepo_DeleteCard(t *testing.T) {
 	ctx := context.Background()
 
 	id := uuid.New().String()
+	uid := uuid.New().String()
 	t.Cleanup(func() {
 		_, _ = pgx.Exec(ctx, "DELETE FROM cards WHERE id=$1", id)
 	})
@@ -137,7 +139,7 @@ func TestCardRepo_DeleteCard(t *testing.T) {
 	sql := "INSERT INTO cards (id, uid, name, number, mask, month, year, cvc, pin, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 	_, err := pgx.Exec(ctx, sql,
 		id,
-		uuid.New().String(),
+		uid,
 		"VASYA PUPKIN",
 		"4532015112830366",
 		"453201******0366",
@@ -156,7 +158,7 @@ func TestCardRepo_DeleteCard(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, count, 1)
 
-		err = repo.DeleteCard(ctx, id)
+		err = repo.DeleteCard(ctx, id, uid)
 		assert.NoError(t, err)
 
 		row = pgx.QueryRow(ctx, "SELECT COUNT(*) FROM cards WHERE id=$1", id)
@@ -166,7 +168,7 @@ func TestCardRepo_DeleteCard(t *testing.T) {
 	})
 
 	t.Run("Проверка удаления несуществующей карты", func(t *testing.T) {
-		err := repo.DeleteCard(ctx, uuid.New().String())
+		err := repo.DeleteCard(ctx, uuid.New().String(), uid)
 		assert.Error(t, err)
 		assert.Equal(t, "card not found", err.Error())
 	})

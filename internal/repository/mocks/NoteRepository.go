@@ -32,9 +32,9 @@ func (_m *NoteRepository) CreateNote(ctx context.Context, note models.NoteModel)
 	return r0
 }
 
-// GetNote provides a mock function with given fields: ctx, id
-func (_m *NoteRepository) GetNote(ctx context.Context, id string) (models.NoteModel, error) {
-	ret := _m.Called(ctx, id)
+// GetNote provides a mock function with given fields: ctx, id, uid
+func (_m *NoteRepository) GetNote(ctx context.Context, id string, uid string) (models.NoteModel, error) {
+	ret := _m.Called(ctx, id, uid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetNote")
@@ -42,19 +42,19 @@ func (_m *NoteRepository) GetNote(ctx context.Context, id string) (models.NoteMo
 
 	var r0 models.NoteModel
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (models.NoteModel, error)); ok {
-		return rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (models.NoteModel, error)); ok {
+		return rf(ctx, id, uid)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) models.NoteModel); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) models.NoteModel); ok {
+		r0 = rf(ctx, id, uid)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(models.NoteModel)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, id, uid)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -62,17 +62,17 @@ func (_m *NoteRepository) GetNote(ctx context.Context, id string) (models.NoteMo
 	return r0, r1
 }
 
-// RemoveNote provides a mock function with given fields: ctx, id
-func (_m *NoteRepository) RemoveNote(ctx context.Context, id string) error {
-	ret := _m.Called(ctx, id)
+// RemoveNote provides a mock function with given fields: ctx, id, uid
+func (_m *NoteRepository) RemoveNote(ctx context.Context, id string, uid string) error {
+	ret := _m.Called(ctx, id, uid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RemoveNote")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, id, uid)
 	} else {
 		r0 = ret.Error(0)
 	}

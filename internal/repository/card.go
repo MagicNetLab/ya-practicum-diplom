@@ -17,11 +17,11 @@ func NewCardRepo(pool *pgxpool.Pool) CardRepository {
 // CardRepository интерфейс репозитория карт
 type CardRepository interface {
 	// GetCardByID возвращает карту по ID
-	GetCardByID(ctx context.Context, id string) (models.CardModel, error)
+	GetCardByID(ctx context.Context, id string, uid string) (models.CardModel, error)
 	// GetCardByNumber возвращает карту по номеру
 	CreateCard(ctx context.Context, card models.CardModel) error
 	// DeleteCard удаляет карту по ID
-	DeleteCard(ctx context.Context, id string) error
+	DeleteCard(ctx context.Context, id string, uid string) error
 	// SearchCards возвращает карты по запросу
 	SearchCards(ctx context.Context, search models.CardSearch) ([]models.CardModel, error)
 }
@@ -32,10 +32,11 @@ type CardRepo struct {
 }
 
 // GetCardByID возвращает карту по ID
-func (r *CardRepo) GetCardByID(ctx context.Context, id string) (models.CardModel, error) {
+func (r *CardRepo) GetCardByID(ctx context.Context, id string, uid string) (models.CardModel, error) {
 	model := models.Card{}
 
-	row := r.pool.QueryRow(ctx, `SELECT id, uid, name, number, month, year, cvc, pin, created_at FROM cards WHERE id = $1`, id)
+	sql := `SELECT id, uid, name, number, month, year, cvc, pin, created_at FROM cards WHERE id = $1 AND uid = $2`
+	row := r.pool.QueryRow(ctx, sql, id, uid)
 	err := row.Scan(&model.ID, &model.UID, &model.Name, &model.Number, &model.Month, &model.Year, &model.CVC, &model.PIN, &model.CreatedAt)
 	if err != nil {
 		return nil, errors.New("card not found")
@@ -52,8 +53,8 @@ func (r *CardRepo) CreateCard(ctx context.Context, card models.CardModel) error 
 }
 
 // DeleteCard удаляет карту по ID
-func (r *CardRepo) DeleteCard(ctx context.Context, id string) error {
-	res, err := r.pool.Exec(ctx, "DELETE FROM cards WHERE id = $1", id)
+func (r *CardRepo) DeleteCard(ctx context.Context, id string, uid string) error {
+	res, err := r.pool.Exec(ctx, "DELETE FROM cards WHERE id = $1 AND uid = $2", id, uid)
 	if err != nil {
 		return err
 	}

@@ -13,10 +13,10 @@ import (
 
 // NoteRepository - интерфейс репозитория для работы с заметками
 type NoteRepository interface {
-	GetNote(ctx context.Context, id string) (models.NoteModel, error)
+	GetNote(ctx context.Context, id string, uid string) (models.NoteModel, error)
 	CreateNote(ctx context.Context, note models.NoteModel) error
 	UpdateNote(ctx context.Context, note models.NoteModel) error
-	RemoveNote(ctx context.Context, id string) error
+	RemoveNote(ctx context.Context, id string, uid string) error
 	SearchNote(ctx context.Context, search models.NoteSearchModel) ([]models.NoteModel, error)
 }
 
@@ -31,14 +31,14 @@ type NoteRepo struct {
 }
 
 // GetNote - получение заметки по id
-func (n NoteRepo) GetNote(ctx context.Context, id string) (models.NoteModel, error) {
+func (n NoteRepo) GetNote(ctx context.Context, id string, uid string) (models.NoteModel, error) {
 	if err := uuid.Validate(id); err != nil {
 		return nil, errors.New("invalid note id")
 	}
 
 	note := models.Note{}
-	sql := "SELECT id, uid, title, content, meta, created_at, updated_at FROM notes WHERE id=$1"
-	row := n.pool.QueryRow(ctx, sql, id)
+	sql := "SELECT id, uid, title, content, meta, created_at, updated_at FROM notes WHERE id=$1 and uid=$2"
+	row := n.pool.QueryRow(ctx, sql, id, uid)
 	err := row.Scan(&note.ID, &note.UID, &note.Title, &note.Content, &note.Meta, &note.CreatedAt, &note.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -68,12 +68,12 @@ func (n NoteRepo) UpdateNote(ctx context.Context, note models.NoteModel) error {
 }
 
 // RemoveNote - удаление заметки
-func (n NoteRepo) RemoveNote(ctx context.Context, id string) error {
+func (n NoteRepo) RemoveNote(ctx context.Context, id string, uid string) error {
 	if err := uuid.Validate(id); err != nil {
 		return errors.New("invalid note id")
 	}
 
-	res, err := n.pool.Exec(ctx, "DELETE FROM notes WHERE id=$1", id)
+	res, err := n.pool.Exec(ctx, "DELETE FROM notes WHERE id=$1 and uid=$2", id, uid)
 	if err != nil {
 		return err
 	}

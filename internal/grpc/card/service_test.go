@@ -2,7 +2,10 @@ package card
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
+	"google.golang.org/grpc/metadata"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -15,15 +18,48 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 )
 
-func setupService() (*Service, *rm.CardRepository) {
+type mockJWTConfigurator struct {
+	mock.Mock
+}
+
+func (m *mockJWTConfigurator) GetJWTSecret() string {
+	return "test-secret"
+}
+
+func (m *mockJWTConfigurator) IsValid() bool { return true }
+
+func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
+	return time.Hour
+}
+
+func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
+	return time.Hour
+}
+
+func setupService() (*Service, *rm.CardRepository, *mockJWTConfigurator) {
 	mockRepo := new(rm.CardRepository)
-	return &Service{store: mockRepo}, mockRepo
+	mockJWTCnf := new(mockJWTConfigurator)
+	return &Service{store: mockRepo, jwt: mockJWTCnf}, mockRepo, mockJWTCnf
+}
+
+func setupAuthContext(uid string) context.Context {
+	user := &models.User{
+		UID:       uid,
+		Login:     "test-login",
+		Password:  "test-password",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	token, _ := jwt.GenerateToken(user, "test-secret")
+	md := metadata.New(map[string]string{"token": token})
+	return metadata.NewIncomingContext(context.Background(), md)
 }
 
 // TestService_Get тесты получения карты по идентификатору
 func TestService_Get(t *testing.T) {
-	service, mockRepo := setupService()
-	ctx := context.Background()
+	service, mockRepo, _ := setupService()
+	uid := uuid.New().String()
+	ctx := setupAuthContext(uid)
 
 	t.Run("Проверка успешного получения карты по идентификатору", func(t *testing.T) {
 		id := uuid.New().String()
@@ -35,7 +71,7 @@ func TestService_Get(t *testing.T) {
 			Year:   2025,
 		}
 
-		mockRepo.On("GetCardByID", ctx, id).Return(expectedCard, nil)
+		mockRepo.On("GetCardByID", ctx, id, uid).Return(expectedCard, nil)
 
 		resp, err := service.Get(ctx, &pb.GetCardRequest{ID: id})
 
@@ -58,7 +94,7 @@ func TestService_Get(t *testing.T) {
 
 	t.Run("Проверка ошибки при получении карты из репозитория", func(t *testing.T) {
 		id := uuid.New().String()
-		mockRepo.On("GetCardByID", ctx, id).Return(nil, assert.AnError)
+		mockRepo.On("GetCardByID", ctx, id, uid).Return(nil, assert.AnError)
 
 		resp, err := service.Get(ctx, &pb.GetCardRequest{ID: id})
 
@@ -69,16 +105,24 @@ func TestService_Get(t *testing.T) {
 		assert.Equal(t, codes.NotFound, statusErr.Code())
 		mockRepo.AssertExpectations(t)
 	})
+
+	t.Run("Проверка ошибки валидации токена", func(t *testing.T) {
+		ctx = context.Background()
+		req := &pb.GetCardRequest{ID: uuid.New().String()}
+		resp, err := service.Get(ctx, req)
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+	})
 }
 
 // TestService_Create тест создания карты
 func TestService_Create(t *testing.T) {
-	ctx := context.Background()
+	uid := uuid.New().String()
+	ctx := setupAuthContext(uid)
 
 	t.Run("Проверка успешного создания карты", func(t *testing.T) {
-		service, mockRepo := setupService()
+		service, mockRepo, _ := setupService()
 		req := &pb.CreateCardRequest{
-			UID:    uuid.New().String(),
 			Name:   "Test Card",
 			Number: "4111111111111111",
 			Month:  12,
@@ -99,9 +143,8 @@ func TestService_Create(t *testing.T) {
 	})
 
 	t.Run("Проверка ошибки валидации данных карты", func(t *testing.T) {
-		service, _ := setupService()
+		service, _, _ := setupService()
 		req := &pb.CreateCardRequest{
-			UID:    "", // Invalid UID
 			Name:   "Test Card",
 			Number: "invalid",
 			Month:  13,   // Invalid month
@@ -118,9 +161,8 @@ func TestService_Create(t *testing.T) {
 	})
 
 	t.Run("Проверка ошибки при создании карты в репозитории", func(t *testing.T) {
-		service, mockRepo := setupService()
+		service, mockRepo, _ := setupService()
 		req := &pb.CreateCardRequest{
-			UID:    uuid.New().String(),
 			Name:   "Test Card",
 			Number: "4532015112830366",
 			Month:  12,
@@ -140,19 +182,35 @@ func TestService_Create(t *testing.T) {
 		assert.Equal(t, codes.Internal, statusErr.Code())
 		mockRepo.AssertExpectations(t)
 	})
+
+	t.Run("Проверка ошибки валидации токена", func(t *testing.T) {
+		service, _, _ := setupService()
+		req := &pb.CreateCardRequest{
+			Name:   "Test Card",
+			Number: "4532015112830366",
+			Month:  12,
+			Year:   2025,
+			CVC:    "123",
+			PIN:    "1234",
+		}
+		ctx := context.Background()
+		resp, err := service.Create(ctx, req)
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+	})
 }
 
 // TestService_Delete тест удаления карты
 func TestService_Delete(t *testing.T) {
-	service, mockRepo := setupService()
-	ctx := context.Background()
+	service, mockRepo, _ := setupService()
+	uid := uuid.New().String()
+	ctx := setupAuthContext(uid)
 
 	t.Run("Проверка успешного удаления карты", func(t *testing.T) {
 		id := uuid.New().String()
-		mockRepo.On("DeleteCard", ctx, id).Return(nil)
+		mockRepo.On("DeleteCard", ctx, id, uid).Return(nil)
 
 		resp, err := service.Delete(ctx, &pb.DeleteCardRequest{ID: id})
-
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		mockRepo.AssertExpectations(t)
@@ -170,7 +228,7 @@ func TestService_Delete(t *testing.T) {
 
 	t.Run("Проверка ошибки отсутствия карты в репозитории", func(t *testing.T) {
 		id := uuid.New().String()
-		mockRepo.On("DeleteCard", ctx, id).Return(assert.AnError)
+		mockRepo.On("DeleteCard", ctx, id, uid).Return(assert.AnError)
 
 		resp, err := service.Delete(ctx, &pb.DeleteCardRequest{ID: id})
 
@@ -181,16 +239,23 @@ func TestService_Delete(t *testing.T) {
 		assert.Equal(t, codes.NotFound, statusErr.Code())
 		mockRepo.AssertExpectations(t)
 	})
+
+	t.Run("Проверка ошибки валидации токена", func(t *testing.T) {
+		ctx := context.Background()
+		resp, err := service.Delete(ctx, &pb.DeleteCardRequest{ID: uuid.New().String()})
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+	})
 }
 
 // TestService_Search tests the Search method
 func TestService_Search(t *testing.T) {
-	ctx := context.Background()
+	uid := uuid.New().String()
+	ctx := setupAuthContext(uid)
 
 	t.Run("Success with all search parameters", func(t *testing.T) {
-		service, mockRepo := setupService()
+		service, mockRepo, _ := setupService()
 		searchReq := &pb.SearchCardRequest{
-			UID:    uuid.New().String(),
 			Number: "4111",
 			Name:   "Test",
 			Year:   2025,
@@ -225,11 +290,11 @@ func TestService_Search(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Success with only UID", func(t *testing.T) {
-		service, mockRepo := setupService()
-		searchReq := &pb.SearchCardRequest{
-			UID: uuid.New().String(),
-		}
+	t.Run("Проверка успешного поиска карты с пустыми параметрами поиска", func(t *testing.T) {
+		service, mockRepo, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid)
+		searchReq := &pb.SearchCardRequest{}
 
 		expectedCards := []models.CardModel{
 			&models.Card{
@@ -244,15 +309,16 @@ func TestService_Search(t *testing.T) {
 		mockRepo.On("SearchCards", ctx, mock.AnythingOfType("models.CardSearch")).Return(expectedCards, nil)
 
 		resp, err := service.Search(ctx, searchReq)
-
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.Len(t, resp.Cards, 1)
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Success with only Number", func(t *testing.T) {
-		service, mockRepo := setupService()
+	t.Run("Проверка успешного поиска карты по номеру", func(t *testing.T) {
+		service, mockRepo, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid)
 		searchReq := &pb.SearchCardRequest{
 			Number: "4111",
 		}
@@ -277,8 +343,10 @@ func TestService_Search(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Success with pagination", func(t *testing.T) {
-		service, mockRepo := setupService()
+	t.Run("Проверка успешного поиска карт с пагинацией", func(t *testing.T) {
+		service, mockRepo, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid)
 		searchReq := &pb.SearchCardRequest{
 			Limit:  2,
 			Offset: 1,
@@ -304,8 +372,10 @@ func TestService_Search(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Success with empty result", func(t *testing.T) {
-		service, mockRepo := setupService()
+	t.Run("Проверка успешного поиска карты по имени с пустым результатом", func(t *testing.T) {
+		service, mockRepo, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid)
 		searchReq := &pb.SearchCardRequest{
 			Name: "NonExistentCard",
 		}
@@ -320,11 +390,11 @@ func TestService_Search(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Repository Error", func(t *testing.T) {
-		service, mockRepo := setupService()
-		searchReq := &pb.SearchCardRequest{
-			UID: uuid.New().String(),
-		}
+	t.Run("Проверка поиска с  ошибкой от репозитория", func(t *testing.T) {
+		service, mockRepo, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid)
+		searchReq := &pb.SearchCardRequest{}
 
 		mockRepo.On("SearchCards", ctx, mock.AnythingOfType("models.CardSearch")).Return(nil, assert.AnError)
 
@@ -337,15 +407,25 @@ func TestService_Search(t *testing.T) {
 		assert.Equal(t, codes.Internal, statusErr.Code())
 		mockRepo.AssertExpectations(t)
 	})
+
+	t.Run("Проверка ошибки валидации токена", func(t *testing.T) {
+		service, _, _ := setupService()
+		ctx := context.Background()
+		searchReq := &pb.SearchCardRequest{}
+
+		resp, err := service.Search(ctx, searchReq)
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+	})
 }
 
 // TestService_List тестирование метода List сервиса CardService
 func TestService_List(t *testing.T) {
-	ctx := context.Background()
+	uid := uuid.New().String()
+	ctx := setupAuthContext(uid)
 
 	t.Run("Проверка успешного получения списка карт", func(t *testing.T) {
-		service, mockRepo := setupService()
-		uid := uuid.New().String()
+		service, mockRepo, _ := setupService()
 		expectedCards := []models.CardModel{
 			&models.Card{
 				ID:     uuid.New().String(),
@@ -365,7 +445,7 @@ func TestService_List(t *testing.T) {
 
 		mockRepo.On("SearchCards", ctx, mock.AnythingOfType("models.CardSearch")).Return(expectedCards, nil)
 
-		resp, err := service.List(ctx, &pb.ListCardRequest{UID: uid})
+		resp, err := service.List(ctx, &pb.ListCardRequest{})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -373,23 +453,11 @@ func TestService_List(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Проверка ошибки валидации UID", func(t *testing.T) {
-		service, _ := setupService()
-		resp, err := service.List(ctx, &pb.ListCardRequest{UID: "invalid-uid"})
-
-		assert.Error(t, err)
-		assert.Nil(t, resp)
-		statusErr, ok := status.FromError(err)
-		assert.True(t, ok)
-		assert.Equal(t, codes.InvalidArgument, statusErr.Code())
-	})
-
 	t.Run("Проверка ошибки при получении списка карт из репозитория", func(t *testing.T) {
-		service, mockRepo := setupService()
-		uid := uuid.New().String()
+		service, mockRepo, _ := setupService()
 		mockRepo.On("SearchCards", ctx, mock.AnythingOfType("models.CardSearch")).Return(nil, assert.AnError)
 
-		resp, err := service.List(ctx, &pb.ListCardRequest{UID: uid})
+		resp, err := service.List(ctx, &pb.ListCardRequest{})
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -397,5 +465,17 @@ func TestService_List(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, codes.Internal, statusErr.Code())
 		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("Проверка ошибки валидации UID", func(t *testing.T) {
+		service, _, _ := setupService()
+		ctx = context.Background()
+		resp, err := service.List(ctx, &pb.ListCardRequest{})
+
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+		statusErr, ok := status.FromError(err)
+		assert.True(t, ok)
+		assert.Equal(t, codes.Unauthenticated, statusErr.Code())
 	})
 }

@@ -32,17 +32,17 @@ func (_m *CardRepository) CreateCard(ctx context.Context, card models.CardModel)
 	return r0
 }
 
-// DeleteCard provides a mock function with given fields: ctx, id
-func (_m *CardRepository) DeleteCard(ctx context.Context, id string) error {
-	ret := _m.Called(ctx, id)
+// DeleteCard provides a mock function with given fields: ctx, id, uid
+func (_m *CardRepository) DeleteCard(ctx context.Context, id string, uid string) error {
+	ret := _m.Called(ctx, id, uid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteCard")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, id, uid)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -50,9 +50,9 @@ func (_m *CardRepository) DeleteCard(ctx context.Context, id string) error {
 	return r0
 }
 
-// GetCardByID provides a mock function with given fields: ctx, id
-func (_m *CardRepository) GetCardByID(ctx context.Context, id string) (models.CardModel, error) {
-	ret := _m.Called(ctx, id)
+// GetCardByID provides a mock function with given fields: ctx, id, uid
+func (_m *CardRepository) GetCardByID(ctx context.Context, id string, uid string) (models.CardModel, error) {
+	ret := _m.Called(ctx, id, uid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetCardByID")
@@ -60,19 +60,19 @@ func (_m *CardRepository) GetCardByID(ctx context.Context, id string) (models.Ca
 
 	var r0 models.CardModel
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (models.CardModel, error)); ok {
-		return rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (models.CardModel, error)); ok {
+		return rf(ctx, id, uid)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) models.CardModel); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) models.CardModel); ok {
+		r0 = rf(ctx, id, uid)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(models.CardModel)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, id, uid)
 	} else {
 		r1 = ret.Error(1)
 	}

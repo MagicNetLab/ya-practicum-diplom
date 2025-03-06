@@ -2,6 +2,8 @@ package note
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,19 +15,26 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 )
 
-func MakeService(store repository.NoteRepository) *Service {
-	return &Service{store: store}
+// MakeService создание сервиса работы с заметками
+func MakeService(store repository.NoteRepository, jwt config.JWTConfigurator) *Service {
+	return &Service{store: store, jwt: jwt}
 }
 
 // Service сервис работы с заметками
 type Service struct {
 	pb    pb.NoteServer
 	store repository.NoteRepository
+	jwt   config.JWTConfigurator
 }
 
 // CreateNote создание заметки
 func (s *Service) CreateNote(ctx context.Context, req *pb.CreateNoteRequest) (*pb.CreateNoteResponse, error) {
-	note, err := models.NewNote(req.GetUID(), req.GetTitle(), req.GetContent(), req.GetMeta())
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	note, err := models.NewNote(uid, req.GetTitle(), req.GetContent(), req.GetMeta())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -50,12 +59,17 @@ func (s *Service) CreateNote(ctx context.Context, req *pb.CreateNoteRequest) (*p
 
 // GetNote получение заметки
 func (s *Service) GetNote(ctx context.Context, req *pb.GetNoteRequest) (*pb.GetNoteResponse, error) {
-	err := uuid.Validate(req.GetID())
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	err = uuid.Validate(req.GetID())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	model, err := s.store.GetNote(ctx, req.GetID())
+	model, err := s.store.GetNote(ctx, req.GetID(), uid)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -75,15 +89,16 @@ func (s *Service) GetNote(ctx context.Context, req *pb.GetNoteRequest) (*pb.GetN
 
 // UpdateNote обновление заметки
 func (s *Service) UpdateNote(ctx context.Context, req *pb.UpdateNoteRequest) (*pb.UpdateNoteResponse, error) {
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
 	if uuid.Validate(req.GetID()) != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
 	}
 
-	if uuid.Validate(req.GetUID()) != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid uid")
-	}
-
-	model, err := s.store.GetNote(ctx, req.GetUID())
+	model, err := s.store.GetNote(ctx, req.GetID(), uid)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
@@ -123,11 +138,16 @@ func (s *Service) UpdateNote(ctx context.Context, req *pb.UpdateNoteRequest) (*p
 
 // RemoveNote удаление заметки
 func (s *Service) RemoveNote(ctx context.Context, req *pb.RemoveNoteRequest) (*pb.RemoveNoteResponse, error) {
-	if err := uuid.Validate(req.GetID()); err != nil {
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	if err = uuid.Validate(req.GetID()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	err := s.store.RemoveNote(ctx, req.GetID())
+	err = s.store.RemoveNote(ctx, req.GetID(), uid)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -137,12 +157,17 @@ func (s *Service) RemoveNote(ctx context.Context, req *pb.RemoveNoteRequest) (*p
 
 // ListNotes получение списка заметок пользователя
 func (s *Service) ListNotes(ctx context.Context, req *pb.ListNoteRequest) (*pb.ListNoteResponse, error) {
-	err := uuid.Validate(req.GetUID())
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	err = uuid.Validate(uid)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	search := models.NoteSearch{UID: req.GetUID()}
+	search := models.NoteSearch{UID: uid}
 	result, err := s.store.SearchNote(ctx, &search)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -167,12 +192,13 @@ func (s *Service) ListNotes(ctx context.Context, req *pb.ListNoteRequest) (*pb.L
 
 // SearchNotes поиск заметок пользователя
 func (s *Service) SearchNotes(ctx context.Context, req *pb.SearchNoteRequest) (*pb.SearchNoteResponse, error) {
-	if err := uuid.Validate(req.GetUID()); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
 
 	search := models.NoteSearch{
-		UID:     req.GetUID(),
+		UID:     uid,
 		Title:   req.GetTitle(),
 		Content: req.GetContent(),
 		Meta:    req.GetMeta(),

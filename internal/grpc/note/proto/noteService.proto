@@ -16,10 +16,9 @@ message NoteModel {
 
 
 message CreateNoteRequest {
-  string UID = 1;
-  string Title = 2;
-  string Content = 3;
-  string Meta = 4;
+  string Title = 1;
+  string Content = 2;
+  string Meta = 3;
 }
 
 message CreateNoteResponse {
@@ -42,10 +41,9 @@ message GetNoteResponse {
 
 message UpdateNoteRequest {
   string ID = 1;
-  string UID = 2;
-  string Title = 3;
-  string Content = 4;
-  string Meta = 5;
+  string Title = 2;
+  string Content = 3;
+  string Meta = 4;
 }
 
 message UpdateNoteResponse {
@@ -53,21 +51,18 @@ message UpdateNoteResponse {
 }
 
 message SearchNoteRequest {
-  string UID = 1;
-  string Title = 2;
-  string Content = 3;
-  string Meta = 4;
-  int32 Limit = 5;
-  int32 Offset = 6;
+  string Title = 1;
+  string Content = 2;
+  string Meta = 3;
+  int32 Limit = 4;
+  int32 Offset = 5;
 }
 
 message SearchNoteResponse {
   repeated NoteModel Notes = 1;
 }
 
-message ListNoteRequest {
-  string UID = 1;
-}
+message ListNoteRequest {}
 
 message ListNoteResponse {
   repeated NoteModel Notes = 1;

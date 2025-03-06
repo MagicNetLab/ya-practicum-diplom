@@ -2,6 +2,8 @@ package card
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,23 +15,29 @@ import (
 )
 
 // MakeService возвращает настроенный сервис карт
-func MakeService(repo repository.CardRepository) (Service, error) {
-	return Service{store: repo}, nil
+func MakeService(repo repository.CardRepository, jwtConfig config.JWTConfigurator) (Service, error) {
+	return Service{store: repo, jwt: jwtConfig}, nil
 }
 
 // Service  сервис карт
 type Service struct {
 	pb.CardServer
 	store repository.CardRepository
+	jwt   config.JWTConfigurator
 }
 
 // Get получение карты по идентификатору
 func (s *Service) Get(ctx context.Context, req *pb.GetCardRequest) (*pb.GetCardResponse, error) {
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err = uuid.Validate(uid); err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
 	if err := uuid.Validate(req.ID); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid id")
 	}
 
-	card, err := s.store.GetCardByID(ctx, req.ID)
+	card, err := s.store.GetCardByID(ctx, req.ID, uid)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "card not found")
 	}
@@ -47,9 +55,14 @@ func (s *Service) Get(ctx context.Context, req *pb.GetCardRequest) (*pb.GetCardR
 
 // Create создание карты
 func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.CreateCardResponse, error) {
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err = uuid.Validate(uid); err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
 	card := models.Card{
 		ID:        uuid.New().String(),
-		UID:       req.UID,
+		UID:       uid,
 		Name:      req.Name,
 		Number:    req.Number,
 		Month:     int(req.Month),
@@ -60,7 +73,7 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.Cr
 	}
 	card.MaskNumber()
 
-	err := card.Validate()
+	err = card.Validate()
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid card data")
 	}
@@ -81,11 +94,16 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.Cr
 
 // Delete удаление карты по идентификатору
 func (s *Service) Delete(ctx context.Context, req *pb.DeleteCardRequest) (*pb.DeleteCardResponse, error) {
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err = uuid.Validate(uid); err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
 	if err := uuid.Validate(req.ID); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid id")
 	}
 
-	res := s.store.DeleteCard(ctx, req.ID)
+	res := s.store.DeleteCard(ctx, req.ID, uid)
 	if res != nil {
 		return nil, status.Errorf(codes.NotFound, "card not found")
 	}
@@ -95,7 +113,12 @@ func (s *Service) Delete(ctx context.Context, req *pb.DeleteCardRequest) (*pb.De
 
 // Search поиск карт по запросу
 func (s *Service) Search(ctx context.Context, req *pb.SearchCardRequest) (*pb.SearchCardResponse, error) {
-	search := models.CardSearch{UID: req.UID, Number: req.Number, Name: req.Name, Year: int(req.Year), Limit: int(req.Limit), Offset: int(req.Offset)}
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err = uuid.Validate(uid); err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	search := models.CardSearch{UID: uid, Number: req.Number, Name: req.Name, Year: int(req.Year), Limit: int(req.Limit), Offset: int(req.Offset)}
 	res, err := s.store.SearchCards(ctx, search)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to search cards")
@@ -119,11 +142,12 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchCardRequest) (*pb.Se
 
 // List получение списка карт по идентификатору владельца
 func (s *Service) List(ctx context.Context, req *pb.ListCardRequest) (*pb.ListCardResponse, error) {
-	if err := uuid.Validate(req.UID); err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid uid")
+	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	if err = uuid.Validate(uid); err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
 
-	search := models.CardSearch{UID: req.UID}
+	search := models.CardSearch{UID: uid}
 	res, err := s.store.SearchCards(ctx, search)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "faled to get cards list")
