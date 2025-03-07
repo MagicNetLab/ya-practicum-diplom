@@ -26,6 +26,8 @@ func NewRepository(cnf config.DataBaseConfigurator) (Repository, error) {
 	r := &AppRepository{
 		auth:    NewAuthRepository(pool),
 		account: NewAccountRepo(pool),
+		cards:   NewCardRepo(pool),
+		notes:   NewNoteRepository(pool),
 	}
 
 	return r, nil
@@ -35,6 +37,8 @@ func NewRepository(cnf config.DataBaseConfigurator) (Repository, error) {
 type AppRepository struct {
 	auth    AuthRepository
 	account AccountRepository
+	cards   CardRepository
+	notes   NoteRepository
 	pool    *pgxpool.Pool
 }
 
@@ -46,6 +50,16 @@ func (r *AppRepository) GetAuthRepo() AuthRepository {
 // GetAccountRepo возвращает репозиторий аккаунта
 func (r *AppRepository) GetAccountRepo() AccountRepository {
 	return r.account
+}
+
+// GetCardRepo возвращает репозиторий карты
+func (r *AppRepository) GetCardRepo() CardRepository {
+	return r.cards
+}
+
+// GetNoteRepo возвращает репозиторий заметки
+func (r *AppRepository) GetNoteRepo() NoteRepository {
+	return r.notes
 }
 
 // Close закрывает соединение с базой данных

@@ -46,3 +46,5 @@ mock-repo-models:
 	mockery --name=CardModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=NoteModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=NoteSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=FilesModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+	mockery --name=FilesSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
