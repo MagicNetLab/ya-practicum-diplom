@@ -49,3 +49,6 @@ mock-repo-models:
 	mockery --name=NoteSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=FilesModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=FilesSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
+
+mock-clients:
+	mockery --name=S3Client --dir=internal/services/s3 --output=internal/services/s3/mocks --outpkg=mocks

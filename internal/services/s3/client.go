@@ -14,15 +14,15 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 )
 
-// Client интерфейс клиента S3
-type Client interface {
+// S3Client интерфейс клиента S3
+type S3Client interface {
 	GetObject(ctx context.Context, name string) ([]byte, error)
 	PutObject(ctx context.Context, name string, obj io.Reader, size int64) error
 	RemoveObject(ctx context.Context, name string) error
 }
 
 // New конструктор клиента S3
-func New(cnf config.S3Configurator) (Client, error) {
+func New(cnf config.S3Configurator) (S3Client, error) {
 	client, err := minio.New(cnf.GetEndpoint(), &minio.Options{
 		Creds:  credentials.NewStaticV4(cnf.GetAccessKey(), cnf.GetSecretKey(), ""),
 		Secure: false,
@@ -48,17 +48,17 @@ func New(cnf config.S3Configurator) (Client, error) {
 		}
 	}
 
-	return &S3Client{client: client, bucket: cnf.GetBucket()}, nil
+	return &Client{client: client, bucket: cnf.GetBucket()}, nil
 }
 
 // S3Client клиент хранилища S3
-type S3Client struct {
+type Client struct {
 	client *minio.Client
 	bucket string
 }
 
 // GetObject получение объекта из хранилища
-func (c *S3Client) GetObject(ctx context.Context, name string) ([]byte, error) {
+func (c *Client) GetObject(ctx context.Context, name string) ([]byte, error) {
 	obj, err := c.client.GetObject(ctx, c.bucket, name, minio.GetObjectOptions{})
 	if err != nil {
 		logger.Error("Failed to get object", logger.StrArg("err", err.Error()))
@@ -79,7 +79,7 @@ func (c *S3Client) GetObject(ctx context.Context, name string) ([]byte, error) {
 }
 
 // PutObject сохранение объекта в хранилище
-func (c *S3Client) PutObject(ctx context.Context, name string, obj io.Reader, size int64) error {
+func (c *Client) PutObject(ctx context.Context, name string, obj io.Reader, size int64) error {
 	if _, err := c.client.PutObject(
 		ctx,
 		c.bucket,
@@ -96,7 +96,7 @@ func (c *S3Client) PutObject(ctx context.Context, name string, obj io.Reader, si
 }
 
 // RemoveObject удаление объекта из хранилища
-func (c *S3Client) RemoveObject(ctx context.Context, name string) error {
+func (c *Client) RemoveObject(ctx context.Context, name string) error {
 	err := c.client.RemoveObject(ctx, c.bucket, name, minio.RemoveObjectOptions{})
 	if err != nil {
 		logger.Error("Failed to remove object", logger.StrArg("err", err.Error()))
