@@ -37,6 +37,7 @@ mock-repo:
 	mockery --name=AccountRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 	mockery --name=CardRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 	mockery --name=NoteRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
+	mockery --name=FileRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
 
 mock-repo-models:
 	mockery --name=AccountModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
