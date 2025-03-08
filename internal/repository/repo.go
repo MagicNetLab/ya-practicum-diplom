@@ -18,7 +18,7 @@ type Repository interface {
 
 // NewRepository конструктор репозитория
 func NewRepository(cnf config.DataBaseConfigurator) (Repository, error) {
-	pool, err := pgxpool.New(context.TODO(), cnf.GetDSN())
+	pool, err := pgxpool.New(context.Background(), cnf.GetDSN())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed connect to database")
 	}
@@ -28,6 +28,7 @@ func NewRepository(cnf config.DataBaseConfigurator) (Repository, error) {
 		account: NewAccountRepo(pool),
 		cards:   NewCardRepo(pool),
 		notes:   NewNoteRepository(pool),
+		files:   NewFileRepository(pool),
 	}
 
 	return r, nil
@@ -39,6 +40,7 @@ type AppRepository struct {
 	account AccountRepository
 	cards   CardRepository
 	notes   NoteRepository
+	files   FileRepository
 	pool    *pgxpool.Pool
 }
 
@@ -60,6 +62,10 @@ func (r *AppRepository) GetCardRepo() CardRepository {
 // GetNoteRepo возвращает репозиторий заметки
 func (r *AppRepository) GetNoteRepo() NoteRepository {
 	return r.notes
+}
+
+func (r *AppRepository) GetFileRepo() FileRepository {
+	return r.files
 }
 
 // Close закрывает соединение с базой данных

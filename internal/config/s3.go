@@ -10,33 +10,33 @@ type S3Configurator interface {
 }
 
 type S3Config struct {
-	endpoint  string `env:"S3_ENDPOINT" envDefault:""`
-	secretKey string `env:"S3_SECRET_KEY" envDefault:""`
-	accessKey string `env:"S3_ACCESS_KEY" envDefault:""`
-	bucket    string `env:"S3_BUCKET" envDefault:""`
+	Endpoint  string `env:"S3_ENDPOINT" envDefault:""`
+	SecretKey string `env:"S3_SECRET_KEY" envDefault:""`
+	AccessKey string `env:"S3_ACCESS_KEY" envDefault:""`
+	Bucket    string `env:"S3_BUCKET" envDefault:""`
 }
 
-// GetEndpoint возвращает endpoint S3 хранилища
+// GetEndpoint возвращает Endpoint S3 хранилища
 func (s S3Config) GetEndpoint() string {
-	return s.endpoint
+	return s.Endpoint
 }
 
 // GetSecretKey возвращает secret key S3 хранилища
 func (s S3Config) GetSecretKey() string {
-	return s.secretKey
+	return s.SecretKey
 }
 
 // GetAccessKey возвращает access key S3 хранилища
 func (s S3Config) GetAccessKey() string {
-	return s.accessKey
+	return s.AccessKey
 }
 
-// GetBucket возвращает bucket S3 хранилища
+// GetBucket возвращает Bucket S3 хранилища
 func (s S3Config) GetBucket() string {
-	return s.bucket
+	return s.Bucket
 }
 
 // IsValid проверяет корректность конфигурации S3 хранилища
 func (s S3Config) IsValid() bool {
-	return s.endpoint != "" && s.secretKey != "" && s.accessKey != "" && s.bucket != ""
+	return s.Endpoint != "" && s.SecretKey != "" && s.AccessKey != "" && s.Bucket != ""
 }

@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 
 	"github.com/google/uuid"
@@ -24,7 +23,7 @@ func getFileTestDB(t *testing.T) *pgxpool.Pool {
 
 func getFileTestRepo(t *testing.T) (FileRepository, *pgxpool.Pool) {
 	pool := getFileTestDB(t)
-	return NewFileRepository(pool, &config.JWTConfig{}), pool
+	return NewFileRepository(pool), pool
 }
 
 // TestFileRepo_GetFile проверка получения файла по ID

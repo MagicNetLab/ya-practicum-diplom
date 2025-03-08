@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 	"github.com/google/uuid"
@@ -18,14 +17,13 @@ type FileRepository interface {
 	SearchFile(ctx context.Context, search models.FilesSearchModel) ([]models.FilesModel, error)
 }
 
-func NewFileRepository(pool *pgxpool.Pool, cnf config.JWTConfigurator) FileRepository {
-	return &FileRepo{pool: pool, cnf: cnf}
+func NewFileRepository(pool *pgxpool.Pool) FileRepository {
+	return &FileRepo{pool: pool}
 }
 
 // FileRepo - репозиторий для работы с файлами.
 type FileRepo struct {
 	pool *pgxpool.Pool
-	cnf  config.JWTConfigurator
 }
 
 // GetFile - получить данные файла из БД

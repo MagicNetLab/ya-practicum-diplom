@@ -56,10 +56,10 @@ func GetDBConfig() DataBaseConfigurator {
 // GetS3Config возвращает параметры для работы с S3
 func GetS3Config() S3Configurator {
 	return S3Config{
-		endpoint:  os.Getenv("S3_ENDPOINT"),
-		secretKey: os.Getenv("S3_SECRET_KEY"),
-		accessKey: os.Getenv("S3_ACCESS_KEY"),
-		bucket:    os.Getenv("S3_BUCKET"),
+		Endpoint:  os.Getenv("S3_ENDPOINT"),
+		SecretKey: os.Getenv("S3_SECRET_KEY"),
+		AccessKey: os.Getenv("S3_ACCESS_KEY"),
+		Bucket:    os.Getenv("S3_BUCKET"),
 	}
 }
 

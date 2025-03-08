@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -28,38 +29,39 @@ func New(cnf config.S3Configurator) (S3Client, error) {
 		Secure: false,
 	})
 	if err != nil {
-		logger.Error("Failed to create minio client", logger.StrArg("err", err.Error()))
-		return nil, errors.New("failed to create minio client")
+		logger.Error("Failed to create minio Client", logger.StrArg("err", err.Error()))
+		return nil, fmt.Errorf("Failed to create minio Client: %w", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	exists, err := client.BucketExists(ctx, cnf.GetBucket())
 	if err != nil {
-		logger.Error("Failed to check bucket existence", logger.StrArg("err", err.Error()))
-		return nil, errors.New("failed to check bucket existence")
+		logger.Error("Failed to check Bucket existence", logger.StrArg("err", err.Error()))
+		return nil, fmt.Errorf("failed to check Bucket existence: %w", err)
 	}
+
 	if !exists {
-		logger.Debug("bucket hasn't been found")
+		logger.Debug("Bucket hasn't been found")
 		err = client.MakeBucket(ctx, cnf.GetBucket(), minio.MakeBucketOptions{})
 		if err != nil {
-			logger.Error("Failed to create bucket", logger.StrArg("err", err.Error()))
-			return nil, errors.New("failed to create bucket")
+			logger.Error("Failed to create Bucket", logger.StrArg("err", err.Error()))
+			return nil, errors.New("failed to create Bucket")
 		}
 	}
 
-	return &Client{client: client, bucket: cnf.GetBucket()}, nil
+	return &Client{Client: client, Bucket: cnf.GetBucket()}, nil
 }
 
 // S3Client клиент хранилища S3
 type Client struct {
-	client *minio.Client
-	bucket string
+	Client *minio.Client
+	Bucket string
 }
 
 // GetObject получение объекта из хранилища
 func (c *Client) GetObject(ctx context.Context, name string) ([]byte, error) {
-	obj, err := c.client.GetObject(ctx, c.bucket, name, minio.GetObjectOptions{})
+	obj, err := c.Client.GetObject(ctx, c.Bucket, name, minio.GetObjectOptions{})
 	if err != nil {
 		logger.Error("Failed to get object", logger.StrArg("err", err.Error()))
 		return nil, errors.New("failed to get object")
@@ -80,9 +82,9 @@ func (c *Client) GetObject(ctx context.Context, name string) ([]byte, error) {
 
 // PutObject сохранение объекта в хранилище
 func (c *Client) PutObject(ctx context.Context, name string, obj io.Reader, size int64) error {
-	if _, err := c.client.PutObject(
+	if _, err := c.Client.PutObject(
 		ctx,
-		c.bucket,
+		c.Bucket,
 		name,
 		obj,
 		size,
@@ -97,7 +99,7 @@ func (c *Client) PutObject(ctx context.Context, name string, obj io.Reader, size
 
 // RemoveObject удаление объекта из хранилища
 func (c *Client) RemoveObject(ctx context.Context, name string) error {
-	err := c.client.RemoveObject(ctx, c.bucket, name, minio.RemoveObjectOptions{})
+	err := c.Client.RemoveObject(ctx, c.Bucket, name, minio.RemoveObjectOptions{})
 	if err != nil {
 		logger.Error("Failed to remove object", logger.StrArg("err", err.Error()))
 		return errors.New("failed to remove object")

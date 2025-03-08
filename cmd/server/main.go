@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3"
 	"log"
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
@@ -10,12 +11,13 @@ import (
 )
 
 func main() {
-	cnf, repo, err := appInit()
+	cnf, repo, s3Client, err := appInit()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_ = cnf
+	_ = s3Client
 
 	defer appExit(repo)
 
@@ -23,31 +25,37 @@ func main() {
 }
 
 // appInit - Инициализация приложения
-func appInit() (config.AppConfigurator, repository.Repository, error) {
+func appInit() (config.AppConfigurator, repository.Repository, s3.S3Client, error) {
 	err := logger.Init()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	err = config.InitConfiguration()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	appCnf := config.GetAppConfig()
 	if !appCnf.IsValid() {
-		return nil, nil, errors.New("app config is not valid")
+		return nil, nil, nil, errors.New("app config is not valid")
+	}
+
+	s3Client, err := s3.New(appCnf.GetS3Conf())
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
 	repo, err := repository.NewRepository(appCnf.GetDBConf())
 
 	if err != nil {
-		return nil, nil, errors.New("failed to create repository")
+		return nil, nil, nil, errors.New("failed to create repository")
 	}
 
-	return appCnf, repo, nil
+	return appCnf, repo, s3Client, nil
 }
 
 func appExit(repo repository.Repository) {
-	repo.Close()
+	// TODO close repository
+	//repo.Close()
 }
