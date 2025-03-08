@@ -13,6 +13,9 @@ import (
 type Repository interface {
 	GetAuthRepo() AuthRepository
 	GetAccountRepo() AccountRepository
+	GetCardRepo() CardRepository
+	GetNoteRepo() NoteRepository
+	GetFileRepo() FileRepository
 	Close()
 }
 

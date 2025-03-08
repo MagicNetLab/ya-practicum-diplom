@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
+	"google.golang.org/grpc"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,13 +17,13 @@ import (
 )
 
 // MakeService создание сервиса работы с заметками
-func MakeService(store repository.NoteRepository, jwt config.JWTConfigurator) *Service {
-	return &Service{store: store, jwt: jwt}
+func MakeService(store repository.NoteRepository, jwt config.JWTConfigurator) Service {
+	return Service{store: store, jwt: jwt}
 }
 
 // Service сервис работы с заметками
 type Service struct {
-	pb    pb.NoteServer
+	pb.NoteServer
 	store repository.NoteRepository
 	jwt   config.JWTConfigurator
 }
@@ -226,4 +227,8 @@ func (s *Service) SearchNotes(ctx context.Context, req *pb.SearchNoteRequest) (*
 	}
 
 	return &pb.SearchNoteResponse{Notes: notes}, nil
+}
+
+func RegisterService(gRPCServer *grpc.Server, s Service) {
+	pb.RegisterNoteServer(gRPCServer, &s)
 }

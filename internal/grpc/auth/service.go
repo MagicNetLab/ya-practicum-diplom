@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"google.golang.org/grpc"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -117,4 +118,8 @@ func (s *Service) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Refr
 	}
 
 	return &pb.RefreshResponse{Token: token, RefreshToken: refreshToken}, nil
+}
+
+func RegisterService(gRPCServer *grpc.Server, s Service) {
+	pb.RegisterAuthServer(gRPCServer, &s)
 }

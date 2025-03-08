@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,12 +19,12 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3"
 )
 
-func MakeService(repo repository.FileRepository, storage s3.S3Client, jwt config.JWTConfigurator) *Service {
-	return &Service{db: repo, storage: storage, jwt: jwt}
+func MakeService(repo repository.FileRepository, storage s3.S3Client, jwt config.JWTConfigurator) Service {
+	return Service{db: repo, storage: storage, jwt: jwt}
 }
 
 type Service struct {
-	pb      *pb.FilesServer
+	pb.FilesServer
 	db      repository.FileRepository
 	storage s3.S3Client
 	jwt     config.JWTConfigurator
@@ -179,4 +180,8 @@ func (s *Service) Remove(ctx context.Context, req *pb.RemoveFileRequest) (*pb.Re
 	}
 
 	return &pb.RemoveFileResponse{}, nil
+}
+
+func RegisterService(gRPCServer *grpc.Server, s Service) {
+	pb.RegisterFilesServer(gRPCServer, &s)
 }

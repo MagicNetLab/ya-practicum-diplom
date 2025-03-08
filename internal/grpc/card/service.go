@@ -5,6 +5,7 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
@@ -167,4 +168,8 @@ func (s *Service) List(ctx context.Context, req *pb.ListCardRequest) (*pb.ListCa
 	}
 
 	return &pb.ListCardResponse{Cards: cards}, nil
+}
+
+func RegisterService(gRPCServer *grpc.Server, s Service) {
+	pb.RegisterCardServer(gRPCServer, &s)
 }

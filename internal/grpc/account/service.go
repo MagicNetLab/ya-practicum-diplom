@@ -8,6 +8,7 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"strconv"
@@ -148,4 +149,8 @@ func (s *Service) SearchAccounts(ctx context.Context, req *pb.SearchAccountReque
 	}
 
 	return &pb.SearchAccountResponse{Acc: accounts}, nil
+}
+
+func RegisterService(gRPCServer *grpc.Server, s Service) {
+	pb.RegisterAccountsServer(gRPCServer, &s)
 }

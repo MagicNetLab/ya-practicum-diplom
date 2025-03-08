@@ -1,61 +1,42 @@
 package main
 
 import (
-	"errors"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3"
 	"log"
 
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/app"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
 )
 
 func main() {
-	cnf, repo, s3Client, err := appInit()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_ = cnf
-	_ = s3Client
-
-	defer appExit(repo)
-
-	logger.Info("Application started")
-}
-
-// appInit - Инициализация приложения
-func appInit() (config.AppConfigurator, repository.Repository, s3.S3Client, error) {
 	err := logger.Init()
 	if err != nil {
-		return nil, nil, nil, err
+		log.Fatalf("Error initializing logger: %v", err)
 	}
 
 	err = config.InitConfiguration()
 	if err != nil {
-		return nil, nil, nil, err
+		logger.Fatal("failed to init configuration", logger.StrArg("error", err.Error()))
+
 	}
 
-	appCnf := config.GetAppConfig()
-	if !appCnf.IsValid() {
-		return nil, nil, nil, errors.New("app config is not valid")
-	}
-
-	s3Client, err := s3.New(appCnf.GetS3Conf())
+	application, err := app.New(config.GetAppConfig())
 	if err != nil {
-		return nil, nil, nil, err
+		log.Fatalf("appInit err: %v", err)
 	}
 
-	repo, err := repository.NewRepository(appCnf.GetDBConf())
-
+	err = application.InitServer()
 	if err != nil {
-		return nil, nil, nil, errors.New("failed to create repository")
+		application.Stop()
+		log.Fatalf("appInit err: %v", err)
+	}
+	defer application.Stop()
+
+	err = application.Start()
+	if err != nil {
+		application.Stop()
+		log.Fatalf("appStart error: %v", err)
 	}
 
-	return appCnf, repo, s3Client, nil
-}
-
-func appExit(repo repository.Repository) {
-	// TODO close repository
-	//repo.Close()
+	logger.Info("Application started")
 }
