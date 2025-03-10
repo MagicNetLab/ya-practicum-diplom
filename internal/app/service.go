@@ -89,7 +89,7 @@ func (app *Application) InitServer() error {
 
 func (app *Application) Start() error {
 
-	serverAddress := fmt.Sprintf("%s:%d", app.cnf.GetServerConf().GetHost(), app.cnf.GetServerConf().GetPort())
+	serverAddress := app.cnf.GetServerConf().GetHost() + ":" + app.cnf.GetServerConf().GetPort()
 	listener, err := net.Listen("tcp", serverAddress)
 	if err != nil {
 		logger.Error("failed to start serv listen", logger.StrArg("error", err.Error()))

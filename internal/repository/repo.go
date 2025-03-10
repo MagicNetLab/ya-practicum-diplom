@@ -32,6 +32,7 @@ func NewRepository(cnf config.DataBaseConfigurator) (Repository, error) {
 		cards:   NewCardRepo(pool),
 		notes:   NewNoteRepository(pool),
 		files:   NewFileRepository(pool),
+		pool:    pool,
 	}
 
 	return r, nil
