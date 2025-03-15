@@ -4,10 +4,11 @@ CREATE TABLE cards (
    name varchar NULL,
    number varchar NOT NULL UNIQUE,
    mask varchar NOT NULL,
-   month integer NULL,
-   year integer NULL,
-   cvc varchar NULL,
-   pin varchar NULL,
+   month integer NOT NULL,
+   year integer NOT NULL,
+   cvc varchar NOT NULL,
+   pin varchar NOT NULL,
+   meta varchar,
    created_at timestamp NOT NULL
 );
 

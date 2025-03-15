@@ -17,6 +17,7 @@ type CardModel interface {
 	GetYear() int
 	GetCVC() string
 	GetPIN() string
+	GetMeta() string
 	GetCreatedAt() time.Time
 	MaskNumber()
 	Validate() error
@@ -33,6 +34,7 @@ type Card struct {
 	Year      int       `db:"year"`
 	CVC       string    `db:"cvc"`
 	PIN       string    `db:"pin"`
+	Meta      string    `db:"meta"`
 	CreatedAt time.Time `db:"created_at"`
 }
 
@@ -99,6 +101,10 @@ func (c *Card) MaskNumber() {
 	}
 
 	c.Mask = mask + c.Number[len(c.Number)-4:]
+}
+
+func (c *Card) GetMeta() string {
+	return c.Meta
 }
 
 // Validate проверка данных карты

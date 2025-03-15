@@ -31,12 +31,30 @@ func (_m *FilesModel) GetCreatedAt() time.Time {
 	return r0
 }
 
-// GetId provides a mock function with no fields
-func (_m *FilesModel) GetId() string {
+// GetID provides a mock function with no fields
+func (_m *FilesModel) GetID() string {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetId")
+		panic("no return value specified for GetID")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// GetMeta provides a mock function with no fields
+func (_m *FilesModel) GetMeta() string {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMeta")
 	}
 
 	var r0 string
@@ -86,18 +104,18 @@ func (_m *FilesModel) GetPath() string {
 }
 
 // GetSize provides a mock function with no fields
-func (_m *FilesModel) GetSize() int64 {
+func (_m *FilesModel) GetSize() int {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetSize")
 	}
 
-	var r0 int64
-	if rf, ok := ret.Get(0).(func() int64); ok {
+	var r0 int
+	if rf, ok := ret.Get(0).(func() int); ok {
 		r0 = rf()
 	} else {
-		r0 = ret.Get(0).(int64)
+		r0 = ret.Get(0).(int)
 	}
 
 	return r0
@@ -116,6 +134,24 @@ func (_m *FilesModel) GetUID() string {
 		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// IsValid provides a mock function with no fields
+func (_m *FilesModel) IsValid() bool {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsValid")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func() bool); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(bool)
 	}
 
 	return r0

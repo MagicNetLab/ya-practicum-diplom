@@ -65,10 +65,15 @@ func TestService_Get(t *testing.T) {
 		id := uuid.New().String()
 		expectedCard := &models.Card{
 			ID:     id,
+			UID:    uid,
 			Name:   "Test Card",
 			Number: "4111111111111111",
+			Mask:   "test-mask",
 			Month:  12,
 			Year:   2025,
+			CVC:    "test-cvc",
+			PIN:    "test-pin",
+			Meta:   "test-meta",
 		}
 
 		mockRepo.On("GetCardByID", ctx, id, uid).Return(expectedCard, nil)
@@ -79,6 +84,12 @@ func TestService_Get(t *testing.T) {
 		assert.NotNil(t, resp)
 		assert.Equal(t, id, resp.Card.ID)
 		assert.Equal(t, expectedCard.Name, resp.Card.Name)
+		assert.Equal(t, expectedCard.Number, resp.Card.Number)
+		assert.Equal(t, expectedCard.Meta, resp.Card.Meta)
+		assert.Equal(t, int32(expectedCard.Month), resp.Card.Month)
+		assert.Equal(t, int32(expectedCard.Year), resp.Card.Year)
+		assert.Equal(t, expectedCard.CVC, resp.Card.CVC)
+		assert.Equal(t, expectedCard.PIN, resp.Card.PIN)
 		mockRepo.AssertExpectations(t)
 	})
 
@@ -126,6 +137,7 @@ func TestService_Create(t *testing.T) {
 			Name:   "Test Card",
 			Number: "4111111111111111",
 			Month:  12,
+			Meta:   "test-meta",
 			Year:   2025,
 			CVC:    "123",
 			PIN:    "1234",
@@ -139,6 +151,8 @@ func TestService_Create(t *testing.T) {
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Card.ID)
 		assert.Equal(t, req.Name, resp.Card.Name)
+		assert.Equal(t, req.Number, resp.Card.Number)
+		assert.Equal(t, req.Meta, resp.Card.Meta)
 		mockRepo.AssertExpectations(t)
 	})
 
@@ -241,10 +255,12 @@ func TestService_Delete(t *testing.T) {
 	})
 
 	t.Run("Проверка ошибки валидации токена", func(t *testing.T) {
-		ctx := context.Background()
-		resp, err := service.Delete(ctx, &pb.DeleteCardRequest{ID: uuid.New().String()})
+		ctx = metadata.NewIncomingContext(context.Background(), metadata.Pairs("token", "invalid"))
+		resp, err := service.Get(ctx, &pb.GetCardRequest{ID: uuid.New().String()})
 		assert.Error(t, err)
 		assert.Nil(t, resp)
+		statusErr, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, statusErr.Code())
 	})
 }
 
@@ -258,6 +274,7 @@ func TestService_Search(t *testing.T) {
 		searchReq := &pb.SearchCardRequest{
 			Number: "4111",
 			Name:   "Test",
+			Meta:   "test-meta",
 			Year:   2025,
 			Limit:  10,
 			Offset: 0,
@@ -268,6 +285,7 @@ func TestService_Search(t *testing.T) {
 				ID:     uuid.New().String(),
 				Name:   "Test Card 1",
 				Number: "4111111111111111",
+				Meta:   "test-meta",
 				Month:  12,
 				Year:   2025,
 			},
@@ -275,6 +293,7 @@ func TestService_Search(t *testing.T) {
 				ID:     uuid.New().String(),
 				Name:   "Test Card 2",
 				Number: "4111222233334444",
+				Meta:   "test-meta",
 				Month:  11,
 				Year:   2025,
 			},

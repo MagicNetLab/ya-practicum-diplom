@@ -79,7 +79,7 @@ func GetJWTConfig() JWTConfigurator {
 		rtlf = defaultRefreshTokenLifeTime
 	}
 
-	secretKey := os.Getenv("JWT_SECRET_KEY")
+	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
 		secretKey = jwt.GetRandomSecret()
 	}

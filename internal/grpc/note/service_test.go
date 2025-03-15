@@ -37,7 +37,7 @@ func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
-func setupService() (*Service, *rm.NoteRepository) {
+func setupService() (Service, *rm.NoteRepository) {
 	mockRepo := new(rm.NoteRepository)
 	jwtCnf := new(mockJWTConfigurator)
 	return MakeService(mockRepo, jwtCnf), mockRepo

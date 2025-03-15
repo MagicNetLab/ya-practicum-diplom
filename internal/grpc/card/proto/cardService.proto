@@ -4,12 +4,22 @@ package gophkeeper_grpc;
 
 option go_package = ".";
 
+message ShortCardModel {
+  string ID = 1;
+  string Name = 2;
+  string Number = 3;
+  string Meta = 4;
+}
+
 message CardModel {
   string ID = 1;
   string Name = 2;
   string Number = 3;
-  int32 Month = 4;
-  int32 Year = 5;
+  string Meta = 4;
+  int32 Month = 5;
+  int32 Year = 6;
+  string CVC = 7;
+  string PIN = 8;
 }
 
 message GetCardRequest {
@@ -23,14 +33,15 @@ message GetCardResponse {
 message CreateCardRequest {
   string Name = 1;
   string Number = 2;
-  int32 Month = 3;
-  int32 Year = 4;
-  string CVC = 5;
-  string PIN = 6;
+  string Meta = 3;
+  int32 Month = 4;
+  int32 Year = 5;
+  string CVC = 6;
+  string PIN = 7;
 }
 
 message CreateCardResponse {
-  CardModel Card = 1;
+  ShortCardModel Card = 1;
 }
 
 message DeleteCardRequest {
@@ -42,19 +53,20 @@ message DeleteCardResponse {}
 message SearchCardRequest {
   string Number = 1;
   string Name = 2;
-  int32 Year = 3;
-  int32 Limit = 4;
-  int32 Offset = 5;
+  string Meta = 3;
+  int32 Year = 4;
+  int32 Limit = 5;
+  int32 Offset = 6;
 }
 
 message SearchCardResponse {
-  repeated CardModel Cards = 1;
+  repeated ShortCardModel Cards = 1;
 }
 
 message ListCardRequest {}
 
 message ListCardResponse {
-  repeated CardModel Cards = 1;
+  repeated ShortCardModel Cards = 1;
 }
 
 service Card {

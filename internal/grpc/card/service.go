@@ -49,6 +49,9 @@ func (s *Service) Get(ctx context.Context, req *pb.GetCardRequest) (*pb.GetCardR
 		Number: card.GetNumber(),
 		Month:  int32(card.GetMonth()),
 		Year:   int32(card.GetYear()),
+		Meta:   card.GetMeta(),
+		CVC:    card.GetCVC(),
+		PIN:    card.GetPIN(),
 	}
 
 	return &pb.GetCardResponse{Card: &model}, nil
@@ -65,6 +68,7 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.Cr
 		ID:        uuid.New().String(),
 		UID:       uid,
 		Name:      req.Name,
+		Meta:      req.Meta,
 		Number:    req.Number,
 		Month:     int(req.Month),
 		Year:      int(req.Year),
@@ -84,12 +88,11 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.Cr
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	return &pb.CreateCardResponse{Card: &pb.CardModel{
+	return &pb.CreateCardResponse{Card: &pb.ShortCardModel{
 		ID:     card.GetID(),
 		Name:   card.GetName(),
-		Number: card.GetNumber(),
-		Month:  int32(card.GetMonth()),
-		Year:   int32(card.GetYear()),
+		Number: card.GetMask(),
+		Meta:   card.GetMeta(),
 	}}, nil
 }
 
@@ -125,14 +128,13 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchCardRequest) (*pb.Se
 		return nil, status.Errorf(codes.Internal, "failed to search cards")
 	}
 
-	cards := make([]*pb.CardModel, 0)
+	cards := make([]*pb.ShortCardModel, 0)
 	for _, card := range res {
-		model := pb.CardModel{
+		model := pb.ShortCardModel{
 			ID:     card.GetID(),
 			Name:   card.GetName(),
-			Number: card.GetNumber(),
-			Month:  int32(card.GetMonth()),
-			Year:   int32(card.GetYear()),
+			Number: card.GetMask(),
+			Meta:   card.GetMeta(),
 		}
 
 		cards = append(cards, &model)
@@ -154,14 +156,13 @@ func (s *Service) List(ctx context.Context, req *pb.ListCardRequest) (*pb.ListCa
 		return nil, status.Errorf(codes.Internal, "faled to get cards list")
 	}
 
-	cards := make([]*pb.CardModel, 0, len(res))
+	cards := make([]*pb.ShortCardModel, 0, len(res))
 	for _, card := range res {
-		model := pb.CardModel{
+		model := pb.ShortCardModel{
 			ID:     card.GetID(),
 			Name:   card.GetName(),
-			Number: card.GetNumber(),
-			Month:  int32(card.GetMonth()),
-			Year:   int32(card.GetYear()),
+			Number: card.GetMask(),
+			Meta:   card.GetMeta(),
 		}
 
 		cards = append(cards, &model)

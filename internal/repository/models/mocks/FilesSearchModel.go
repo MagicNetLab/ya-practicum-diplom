@@ -39,6 +39,24 @@ func (_m *FilesSearchModel) GetSubQuery() (string, []interface{}) {
 	return r0, r1
 }
 
+// GetUID provides a mock function with no fields
+func (_m *FilesSearchModel) GetUID() string {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUID")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // NewFilesSearchModel creates a new instance of FilesSearchModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewFilesSearchModel(t interface {

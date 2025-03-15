@@ -26,8 +26,8 @@ type Service struct {
 	jwtCnf config.JWTConfigurator
 }
 
-// GetAccount получение аккаунта по идентификатору
-func (s *Service) GetAccount(ctx context.Context, req *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
+// Get получение аккаунта по идентификатору
+func (s *Service) Get(ctx context.Context, req *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
 	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
@@ -56,8 +56,8 @@ func (s *Service) GetAccount(ctx context.Context, req *pb.GetAccountRequest) (*p
 
 }
 
-// CreateAccount создание аккаунта
-func (s *Service) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
+// Create создание аккаунта
+func (s *Service) Create(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
 	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
@@ -80,8 +80,8 @@ func (s *Service) CreateAccount(ctx context.Context, req *pb.CreateAccountReques
 	return &pb.CreateAccountResponse{Acc: account}, nil
 }
 
-// RemoveAccount удаление аккаунта по идентификатору
-func (s *Service) RemoveAccount(ctx context.Context, req *pb.RemoveAccountRequest) (*pb.RemoveAccountResponse, error) {
+// Remove удаление аккаунта по идентификатору
+func (s *Service) Remove(ctx context.Context, req *pb.RemoveAccountRequest) (*pb.RemoveAccountResponse, error) {
 	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
@@ -96,8 +96,8 @@ func (s *Service) RemoveAccount(ctx context.Context, req *pb.RemoveAccountReques
 	return &pb.RemoveAccountResponse{}, nil
 }
 
-// SearchAccounts поиск аккаунтов по критериям
-func (s *Service) SearchAccounts(ctx context.Context, req *pb.SearchAccountRequest) (*pb.SearchAccountResponse, error) {
+// Search поиск аккаунтов по критериям
+func (s *Service) Search(ctx context.Context, req *pb.SearchAccountRequest) (*pb.SearchAccountResponse, error) {
 	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")

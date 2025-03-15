@@ -31,15 +31,10 @@ type Service struct {
 func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthResponse, error) {
 	user, err := s.store.GetUserByLoginAndPassword(ctx, req.Login, req.Secret)
 	if err != nil {
-		return nil, status.Errorf(codes.PermissionDenied, err.Error())
+		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 
 	token, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
-	}
-
-	refreshToken, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -49,12 +44,7 @@ func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthRespon
 		return nil, status.Errorf(codes.Internal, "Failed to create token")
 	}
 
-	err = s.store.CreateToken(ctx, user.GetUID(), refreshToken, true, time.Now().Add(s.jwt.GetRefreshTokenLifeTime()))
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to create refresh token")
-	}
-
-	return &pb.AuthResponse{Token: token, RefreshToken: refreshToken}, nil
+	return &pb.AuthResponse{Token: token, RefreshToken: ""}, nil
 }
 
 // Register регистрация пользователя
