@@ -217,12 +217,13 @@ func register(ctx context.Context) error {
 		printErr("Ошибка регистрации")
 		return err
 	}
+	nav.Token = jwtToken
 
 	clearScreen()
 
 	printSuccess("Пользователь успешно зарегистрирован")
 	nav.PrintAvailableCommands()
-	nav.Token = jwtToken
+
 	return nil
 }
 
