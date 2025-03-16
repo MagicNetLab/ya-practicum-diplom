@@ -74,5 +74,5 @@ service Note {
   rpc Get(GetNoteRequest) returns (GetNoteResponse);
   rpc Update(UpdateNoteRequest) returns (UpdateNoteResponse);
   rpc Search(SearchNoteRequest) returns (SearchNoteResponse);
-  rpc List(SearchNoteRequest) returns (ListNoteResponse);
+  rpc List(ListNoteRequest) returns (ListNoteResponse);
 }

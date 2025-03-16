@@ -127,6 +127,38 @@ func initApp(ctx context.Context, client appClianet.AppClient) *cli.Command {
 							} else {
 								printErr("Вы не авторизованы")
 							}
+
+						case "noteList":
+							if nav.IsLoggedIn() {
+								notesList(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "noteAdd":
+							if nav.IsLoggedIn() {
+								notesAdd(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "noteDelete":
+							if nav.IsLoggedIn() {
+								notesRemove(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "noteSearch":
+							if nav.IsLoggedIn() {
+								notesSearch(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "noteDetails":
+							if nav.IsLoggedIn() {
+								notesDetail(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+
 						case "commandList":
 							if nav.IsLoggedIn() {
 								cardsSearch(ctx)

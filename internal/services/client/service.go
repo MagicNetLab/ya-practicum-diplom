@@ -6,6 +6,7 @@ import (
 	accpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
 	authpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/auth/proto"
 	cardpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card/proto"
+	notepb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/note/proto"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -46,6 +47,19 @@ type CardSearchData struct {
 	Year   string
 }
 
+type NoteData struct {
+	ID      string
+	Title   string
+	Content string
+	Meta    string
+}
+
+type NoteSearchData struct {
+	Title   string
+	Meta    string
+	Content string
+}
+
 type AppClient interface {
 	Auth(ctx context.Context, username string, password string) (string, error)
 	Register(ctx context.Context, username string, password string) (string, error)
@@ -59,6 +73,11 @@ type AppClient interface {
 	RemoveCard(ctx context.Context, id string) error
 	CardDetail(ctx context.Context, id string) (CardData, error)
 	CardSearch(ctx context.Context, data CardSearchData) ([]ShortCardData, error)
+	NotesList(ctx context.Context) ([]NoteData, error)
+	NoteCreate(ctx context.Context, data NoteData) error
+	NoteDelete(ctx context.Context, id string) error
+	NoteSearch(ctx context.Context, data NoteSearchData) ([]NoteData, error)
+	NoteDetail(ctx context.Context, id string) (NoteData, error)
 }
 
 func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
@@ -75,6 +94,7 @@ func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
 		authClient: authpb.NewAuthClient(connect),
 		accounts:   accpb.NewAccountsClient(connect),
 		cards:      cardpb.NewCardClient(connect),
+		notes:      notepb.NewNoteClient(connect),
 	}, nil
 }
 
@@ -83,6 +103,7 @@ type AppClientImpl struct {
 	authClient authpb.AuthClient
 	accounts   accpb.AccountsClient
 	cards      cardpb.CardClient
+	notes      notepb.NoteClient
 }
 
 // Auth - метод аутентификации пользователя
@@ -313,4 +334,85 @@ func (c *AppClientImpl) CardSearch(ctx context.Context, data CardSearchData) ([]
 	}
 
 	return resList, nil
+}
+
+// NotesList - метод получения списка всех заметок пользователя
+func (c *AppClientImpl) NotesList(ctx context.Context) ([]NoteData, error) {
+	resp, err := c.notes.Search(ctx, &notepb.SearchNoteRequest{})
+	if err != nil {
+		return nil, err
+	}
+	res := make([]NoteData, 0)
+	for _, row := range resp.GetNotes() {
+		r := NoteData{
+			ID:    row.GetID(),
+			Title: row.GetTitle(),
+			Meta:  row.GetMeta(),
+		}
+		res = append(res, r)
+	}
+
+	return res, nil
+}
+
+// NoteCreate - метод создания новой заметки
+func (c *AppClientImpl) NoteCreate(ctx context.Context, data NoteData) error {
+	_, err := c.notes.Create(ctx, &notepb.CreateNoteRequest{
+		Title:   data.Title,
+		Meta:    data.Meta,
+		Content: data.Content,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// NoteDelete - метод удаления заметки
+func (c *AppClientImpl) NoteDelete(ctx context.Context, id string) error {
+	_, err := c.notes.Remove(ctx, &notepb.RemoveNoteRequest{ID: id})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// NoteSearch - метод поиска заметок по фильтрам
+func (c *AppClientImpl) NoteSearch(ctx context.Context, data NoteSearchData) ([]NoteData, error) {
+	resp, err := c.notes.Search(ctx, &notepb.SearchNoteRequest{
+		Title:   data.Title,
+		Meta:    data.Meta,
+		Content: data.Content,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	resList := make([]NoteData, 0)
+	for _, row := range resp.GetNotes() {
+		r := NoteData{
+			ID:    row.GetID(),
+			Title: row.GetTitle(),
+			Meta:  row.GetMeta(),
+		}
+		resList = append(resList, r)
+	}
+	return resList, nil
+}
+
+// NoteDetail - метод получения детальной информации по заметки
+func (c *AppClientImpl) NoteDetail(ctx context.Context, id string) (NoteData, error) {
+	res, err := c.notes.Get(ctx, &notepb.GetNoteRequest{ID: id})
+	if err != nil {
+		return NoteData{}, err
+	}
+
+	note := res.GetNote()
+	return NoteData{
+		ID:      note.GetID(),
+		Title:   note.GetTitle(),
+		Meta:    note.GetMeta(),
+		Content: note.GetContent(),
+	}, nil
 }

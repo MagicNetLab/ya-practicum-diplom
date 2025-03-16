@@ -36,7 +36,7 @@ type NoteClient interface {
 	Get(ctx context.Context, in *GetNoteRequest, opts ...grpc.CallOption) (*GetNoteResponse, error)
 	Update(ctx context.Context, in *UpdateNoteRequest, opts ...grpc.CallOption) (*UpdateNoteResponse, error)
 	Search(ctx context.Context, in *SearchNoteRequest, opts ...grpc.CallOption) (*SearchNoteResponse, error)
-	List(ctx context.Context, in *SearchNoteRequest, opts ...grpc.CallOption) (*ListNoteResponse, error)
+	List(ctx context.Context, in *ListNoteRequest, opts ...grpc.CallOption) (*ListNoteResponse, error)
 }
 
 type noteClient struct {
@@ -97,7 +97,7 @@ func (c *noteClient) Search(ctx context.Context, in *SearchNoteRequest, opts ...
 	return out, nil
 }
 
-func (c *noteClient) List(ctx context.Context, in *SearchNoteRequest, opts ...grpc.CallOption) (*ListNoteResponse, error) {
+func (c *noteClient) List(ctx context.Context, in *ListNoteRequest, opts ...grpc.CallOption) (*ListNoteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListNoteResponse)
 	err := c.cc.Invoke(ctx, Note_List_FullMethodName, in, out, cOpts...)
@@ -116,7 +116,7 @@ type NoteServer interface {
 	Get(context.Context, *GetNoteRequest) (*GetNoteResponse, error)
 	Update(context.Context, *UpdateNoteRequest) (*UpdateNoteResponse, error)
 	Search(context.Context, *SearchNoteRequest) (*SearchNoteResponse, error)
-	List(context.Context, *SearchNoteRequest) (*ListNoteResponse, error)
+	List(context.Context, *ListNoteRequest) (*ListNoteResponse, error)
 	mustEmbedUnimplementedNoteServer()
 }
 
@@ -142,7 +142,7 @@ func (UnimplementedNoteServer) Update(context.Context, *UpdateNoteRequest) (*Upd
 func (UnimplementedNoteServer) Search(context.Context, *SearchNoteRequest) (*SearchNoteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
-func (UnimplementedNoteServer) List(context.Context, *SearchNoteRequest) (*ListNoteResponse, error) {
+func (UnimplementedNoteServer) List(context.Context, *ListNoteRequest) (*ListNoteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedNoteServer) mustEmbedUnimplementedNoteServer() {}
@@ -257,7 +257,7 @@ func _Note_Search_Handler(srv interface{}, ctx context.Context, dec func(interfa
 }
 
 func _Note_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchNoteRequest)
+	in := new(ListNoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func _Note_List_Handler(srv interface{}, ctx context.Context, dec func(interface
 		FullMethod: Note_List_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NoteServer).List(ctx, req.(*SearchNoteRequest))
+		return srv.(NoteServer).List(ctx, req.(*ListNoteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

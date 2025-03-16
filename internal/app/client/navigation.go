@@ -37,6 +37,12 @@ func (n *navigation) PrintAvailableCommands() {
 		printInfo("cardDelete - удалить карту")
 		printInfo("cardSearch - поиск карты")
 
+		printInfo("noteList - список сохраненных карт")
+		printInfo("noteAdd - добавить новую карту")
+		printInfo("noteDetails - информация о карте")
+		printInfo("noteDelete - удалить карту")
+		printInfo("noteSearch - поиск карты")
+
 		printInfo("commands - список доступных команд")
 		printInfo("clear - очистка экрана")
 		printInfo("exit - выход")
