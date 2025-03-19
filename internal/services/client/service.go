@@ -6,10 +6,12 @@ import (
 	accpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
 	authpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/auth/proto"
 	cardpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card/proto"
+	filepb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/files/proto"
 	notepb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/note/proto"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"os"
 	"strconv"
 )
 
@@ -54,6 +56,15 @@ type NoteData struct {
 	Meta    string
 }
 
+type FileData struct {
+	ID      string
+	Name    string
+	Path    string
+	Content []byte
+	Size    int64
+	Meta    string
+}
+
 type NoteSearchData struct {
 	Title   string
 	Meta    string
@@ -78,8 +89,14 @@ type AppClient interface {
 	NoteDelete(ctx context.Context, id string) error
 	NoteSearch(ctx context.Context, data NoteSearchData) ([]NoteData, error)
 	NoteDetail(ctx context.Context, id string) (NoteData, error)
+	FileList(ctx context.Context) ([]FileData, error)
+	FileAdd(ctx context.Context, data FileData) error
+	FileRemove(ctx context.Context, id string) error
+	FileDownload(ctx context.Context, id string) (FileData, error)
+	FileSearch(ctx context.Context, title, meta string) ([]FileData, error)
 }
 
+// NewAppClient - конструктор объекта реализующего интерфейс AppClient
 func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
 	connAddress := cnf.GetServerConf().GetHost() + ":" + cnf.GetServerConf().GetPort()
 	connect, err := grpc.NewClient(connAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -95,15 +112,18 @@ func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
 		accounts:   accpb.NewAccountsClient(connect),
 		cards:      cardpb.NewCardClient(connect),
 		notes:      notepb.NewNoteClient(connect),
+		files:      filepb.NewFilesClient(connect),
 	}, nil
 }
 
+// AppClientImpl - реализация интерфейса AppClient
 type AppClientImpl struct {
 	cnf        config.AppConfigurator
 	authClient authpb.AuthClient
 	accounts   accpb.AccountsClient
 	cards      cardpb.CardClient
 	notes      notepb.NoteClient
+	files      filepb.FilesClient
 }
 
 // Auth - метод аутентификации пользователя
@@ -415,4 +435,84 @@ func (c *AppClientImpl) NoteDetail(ctx context.Context, id string) (NoteData, er
 		Meta:    note.GetMeta(),
 		Content: note.GetContent(),
 	}, nil
+}
+
+// FileList - метод получения списка всех файлов пользователя
+func (c *AppClientImpl) FileList(ctx context.Context) ([]FileData, error) {
+	resp, err := c.files.List(ctx, &filepb.ListFilesRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	resList := make([]FileData, 0)
+	for _, row := range resp.GetFiles() {
+		f := FileData{
+			ID:   row.GetId(),
+			Name: row.GetName(),
+			Size: row.GetSize(),
+			Meta: row.GetMeta(),
+		}
+		resList = append(resList, f)
+	}
+	return resList, nil
+}
+
+// FileAdd - метод добавления нового файла
+func (c *AppClientImpl) FileAdd(ctx context.Context, data FileData) error {
+	fileContent, err := os.ReadFile(data.Path)
+	if err != nil {
+		return err
+	}
+
+	req := &filepb.PutFileRequest{
+		Name:    data.Name,
+		Meta:    data.Meta,
+		Content: fileContent,
+	}
+
+	_, err = c.files.Put(ctx, req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// FileRemove - метод удаления файла
+func (c *AppClientImpl) FileRemove(ctx context.Context, id string) error {
+	_, err := c.files.Remove(ctx, &filepb.RemoveFileRequest{Id: id})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// FileDownload - метод скачивания файла
+func (c *AppClientImpl) FileDownload(ctx context.Context, id string) (FileData, error) {
+	resp, err := c.files.Download(ctx, &filepb.DownloadFileRequest{Id: id})
+	if err != nil {
+		return FileData{}, err
+	}
+
+	return FileData{Name: resp.GetName(), Content: resp.GetContent(), Size: resp.GetSize()}, nil
+}
+
+// FileSearch - метод поиска файлов по фильтрам
+func (c *AppClientImpl) FileSearch(ctx context.Context, title, meta string) ([]FileData, error) {
+	resp, err := c.files.Search(ctx, &filepb.SearchFilesRequest{Name: title, Meta: meta})
+	if err != nil {
+		return nil, err
+	}
+
+	resList := make([]FileData, 0)
+	for _, row := range resp.GetFiles() {
+		r := FileData{
+			ID:   row.GetId(),
+			Name: row.GetName(),
+			Size: row.GetSize(),
+			Meta: row.GetMeta(),
+		}
+		resList = append(resList, r)
+	}
+
+	return resList, nil
 }

@@ -159,6 +159,37 @@ func initApp(ctx context.Context, client appClianet.AppClient) *cli.Command {
 								printErr("Вы не авторизованы")
 							}
 
+						case "fileList":
+							if nav.IsLoggedIn() {
+								fileList(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "fileAdd":
+							if nav.IsLoggedIn() {
+								fileAdd(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "fileRemove":
+							if nav.IsLoggedIn() {
+								fileRemove(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "fileDownload":
+							if nav.IsLoggedIn() {
+								fileDownload(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+						case "fileSearch":
+							if nav.IsLoggedIn() {
+								fileSearch(ctx)
+							} else {
+								printErr("Вы не авторизованы")
+							}
+
 						case "commandList":
 							if nav.IsLoggedIn() {
 								cardsSearch(ctx)
