@@ -39,52 +39,52 @@ type Card struct {
 }
 
 // GetID возвращает идентификатор карты
-func (c Card) GetID() string {
+func (c *Card) GetID() string {
 	return c.ID
 }
 
 // GetUID возвращает идентификатор владельца карты
-func (c Card) GetUID() string {
+func (c *Card) GetUID() string {
 	return c.UID
 }
 
 // GetName возвращает имя владельца карты
-func (c Card) GetName() string {
+func (c *Card) GetName() string {
 	return c.Name
 }
 
 // GetNumber возвращает номер карты
-func (c Card) GetNumber() string {
+func (c *Card) GetNumber() string {
 	return c.Number
 }
 
 // GetMask возвращает маску номера карты
-func (c Card) GetMask() string {
+func (c *Card) GetMask() string {
 	return c.Mask
 }
 
 // GetMonth возвращает месяц действия карты
-func (c Card) GetMonth() int {
+func (c *Card) GetMonth() int {
 	return c.Month
 }
 
 // GetYear возвращает год действия карты
-func (c Card) GetYear() int {
+func (c *Card) GetYear() int {
 	return c.Year
 }
 
 // GetCVC возвращает код карты
-func (c Card) GetCVC() string {
+func (c *Card) GetCVC() string {
 	return c.CVC
 }
 
-// GetPin возвращает пин карты
-func (c Card) GetPIN() string {
+// GetPIN возвращает пин карты
+func (c *Card) GetPIN() string {
 	return c.PIN
 }
 
 // GetCreatedAt возвращает дату создания карты
-func (c Card) GetCreatedAt() time.Time {
+func (c *Card) GetCreatedAt() time.Time {
 	return c.CreatedAt
 }
 
@@ -108,7 +108,7 @@ func (c *Card) GetMeta() string {
 }
 
 // Validate проверка данных карты
-func (c Card) Validate() error {
+func (c *Card) Validate() error {
 	if c.Month < 1 || 12 < c.Month {
 		return errors.New("invalid month value")
 	}

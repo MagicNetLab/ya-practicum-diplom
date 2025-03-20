@@ -56,7 +56,7 @@ func (u *User) GetLogin() string {
 // SetLogin установка логина пользователя
 func (u *User) SetLogin(login string) error {
 	if login == "" {
-		return errors.New("Login is empty")
+		return errors.New("login is empty")
 	}
 	u.Login = login
 	return nil
@@ -70,7 +70,7 @@ func (u *User) GetPassword() string {
 // SetPassword установка пароля пользователя
 func (u *User) SetPassword(password string) error {
 	if password == "" {
-		return errors.New("Password is empty")
+		return errors.New("password is empty")
 	}
 	u.Password = password
 	return nil

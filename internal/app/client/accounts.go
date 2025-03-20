@@ -57,7 +57,7 @@ func accountAdd(ctx context.Context) {
 
 	fmt.Print("Введите дополнительную информацию (не обязательно): ")
 	in := bufio.NewReader(os.Stdin)
-	meta, err = in.ReadString('\n')
+	meta, _ = in.ReadString('\n')
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)

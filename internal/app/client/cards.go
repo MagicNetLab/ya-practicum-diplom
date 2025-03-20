@@ -80,7 +80,7 @@ func cardsCreate(ctx context.Context) {
 
 	fmt.Print("Введите дополнительную информацию (не обязательно): ")
 	in := bufio.NewReader(os.Stdin)
-	data.Meta, err = in.ReadString('\n')
+	data.Meta, _ = in.ReadString('\n')
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)

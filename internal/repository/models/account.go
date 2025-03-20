@@ -85,7 +85,7 @@ func (a *Account) GetLogin() string {
 // SetLogin установка логина аккаунта
 func (a *Account) SetLogin(login string) error {
 	if login == "" {
-		return errors.New("Login is not be empty")
+		return errors.New("login is not be empty")
 	}
 
 	a.Login = login
@@ -100,7 +100,7 @@ func (a *Account) GetPassword() string {
 // SetPassword установка пароля аккаунта
 func (a *Account) SetPassword(password string) error {
 	if password == "" {
-		return errors.New("Password is not be empty")
+		return errors.New("password is not be empty")
 	}
 	a.Password = password
 	return nil

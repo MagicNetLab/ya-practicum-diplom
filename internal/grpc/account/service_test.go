@@ -72,7 +72,7 @@ func TestService_GetAccount(t *testing.T) {
 		mockRepo.On("GetAccount", ctx, id, uid).Return(mockAccount, nil)
 
 		req := &pb.GetAccountRequest{Id: id}
-		resp, err := service.GetAccount(ctx, req)
+		resp, err := service.Get(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -88,7 +88,7 @@ func TestService_GetAccount(t *testing.T) {
 		mockRepo.On("GetAccount", ctx, "non-existent-id", "test-uid").Return(nil, errors.New("account not found"))
 
 		req := &pb.GetAccountRequest{Id: "non-existent-id"}
-		resp, err := service.GetAccount(ctx, req)
+		resp, err := service.Get(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -96,7 +96,7 @@ func TestService_GetAccount(t *testing.T) {
 
 	t.Run("Ошибка: неверный формат ID", func(t *testing.T) {
 		req := &pb.GetAccountRequest{Id: "invalid-id"}
-		resp, err := service.GetAccount(ctx, req)
+		resp, err := service.Get(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -105,7 +105,7 @@ func TestService_GetAccount(t *testing.T) {
 	t.Run("Ошибка: не аутентифицирован", func(t *testing.T) {
 		ctx := context.Background()
 		req := &pb.GetAccountRequest{Id: "test-id"}
-		resp, err := service.GetAccount(ctx, req)
+		resp, err := service.Get(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -134,7 +134,7 @@ func TestService_CreateAccount(t *testing.T) {
 			Url:         "test-url",
 			Description: "test-description",
 		}
-		resp, err := service.CreateAccount(ctx, req)
+		resp, err := service.Create(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -155,7 +155,7 @@ func TestService_CreateAccount(t *testing.T) {
 			Url:         "invalid-url",
 			Description: "invalid-description",
 		}
-		resp, err := service.CreateAccount(ctx, req)
+		resp, err := service.Create(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -169,7 +169,7 @@ func TestService_CreateAccount(t *testing.T) {
 			Url:         "test-url",
 			Description: "test-description",
 		}
-		resp, err := service.CreateAccount(ctx, req)
+		resp, err := service.Create(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -186,7 +186,7 @@ func TestService_RemoveAccount(t *testing.T) {
 		mockRepo.On("RemoveAccount", ctx, id, uid).Return(nil)
 
 		req := &pb.RemoveAccountRequest{Id: id}
-		resp, err := service.RemoveAccount(ctx, req)
+		resp, err := service.Remove(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -197,7 +197,7 @@ func TestService_RemoveAccount(t *testing.T) {
 		mockRepo.On("RemoveAccount", ctx, nonexistentID, uid).Return(errors.New("account not found"))
 
 		req := &pb.RemoveAccountRequest{Id: nonexistentID}
-		resp, err := service.RemoveAccount(ctx, req)
+		resp, err := service.Remove(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -206,7 +206,7 @@ func TestService_RemoveAccount(t *testing.T) {
 	t.Run("Ошибка: не аутентифицирован", func(t *testing.T) {
 		ctx := context.Background()
 		req := &pb.RemoveAccountRequest{Id: uuid.New().String()}
-		resp, err := service.RemoveAccount(ctx, req)
+		resp, err := service.Remove(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -256,7 +256,7 @@ func TestService_SearchAccounts(t *testing.T) {
 			Limit:       "10",
 			Offset:      "0",
 		}
-		resp, err := service.SearchAccounts(ctx, req)
+		resp, err := service.Search(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -272,7 +272,7 @@ func TestService_SearchAccounts(t *testing.T) {
 		mockRepo.On("SearchAccounts", ctx, mock.AnythingOfType("models.AccountSearch")).Return(nil, errors.New("search failed"))
 
 		req := &pb.SearchAccountRequest{}
-		resp, err := service.SearchAccounts(ctx, req)
+		resp, err := service.Search(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -281,7 +281,7 @@ func TestService_SearchAccounts(t *testing.T) {
 	t.Run("Ошибка: не аутентифицирован", func(t *testing.T) {
 		ctx := context.Background()
 		req := &pb.SearchAccountRequest{}
-		resp, err := service.SearchAccounts(ctx, req)
+		resp, err := service.Search(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)

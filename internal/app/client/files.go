@@ -121,7 +121,7 @@ func fileDownload(ctx context.Context) {
 	}
 
 	fmt.Print("Введите путь для сохранения файла (без пробелов. Пример: /path/to/file/): ")
-	_, err = fmt.Scanln(&path)
+	_, _ = fmt.Scanln(&path)
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)

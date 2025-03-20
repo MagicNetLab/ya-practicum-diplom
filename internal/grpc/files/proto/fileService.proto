@@ -43,7 +43,7 @@ message DownloadFileResponse {
 }
 
 message SearchFilesRequest {
-  string Search = 1;
+  string Name = 1;
   string Meta = 2;
   int32 Limit = 3;
   int32 Offset = 4;

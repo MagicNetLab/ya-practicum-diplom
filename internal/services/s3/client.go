@@ -30,7 +30,7 @@ func New(cnf config.S3Configurator) (S3Client, error) {
 	})
 	if err != nil {
 		logger.Error("Failed to create minio Client", logger.StrArg("err", err.Error()))
-		return nil, fmt.Errorf("Failed to create minio Client: %w", err)
+		return nil, fmt.Errorf("failed to create minio Client: %w", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -53,7 +53,7 @@ func New(cnf config.S3Configurator) (S3Client, error) {
 	return &Client{Client: client, Bucket: cnf.GetBucket()}, nil
 }
 
-// S3Client клиент хранилища S3
+// Client клиент хранилища S3
 type Client struct {
 	Client *minio.Client
 	Bucket string

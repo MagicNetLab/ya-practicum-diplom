@@ -71,7 +71,7 @@ func TestService_CreateNote(t *testing.T) {
 
 		mockRepo.On("CreateNote", ctx, mock.AnythingOfType("*models.Note")).Return(nil)
 
-		resp, err := service.CreateNote(ctx, req)
+		resp, err := service.Create(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -88,7 +88,7 @@ func TestService_CreateNote(t *testing.T) {
 			Title: "", // Empty title
 		}
 
-		resp, err := service.CreateNote(ctx, req)
+		resp, err := service.Create(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -107,7 +107,7 @@ func TestService_CreateNote(t *testing.T) {
 
 		mockRepo.On("CreateNote", ctx, mock.AnythingOfType("*models.Note")).Return(assert.AnError)
 
-		resp, err := service.CreateNote(ctx, req)
+		resp, err := service.Create(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -126,7 +126,7 @@ func TestService_CreateNote(t *testing.T) {
 			Meta:    "Test Meta",
 		}
 
-		resp, err := service.CreateNote(ctx, req)
+		resp, err := service.Create(ctx, req)
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 	})
@@ -152,7 +152,7 @@ func TestService_GetNote(t *testing.T) {
 
 		mockRepo.On("GetNote", ctx, id, uid).Return(expectedNote, nil)
 
-		resp, err := service.GetNote(ctx, &pb.GetNoteRequest{ID: id})
+		resp, err := service.Get(ctx, &pb.GetNoteRequest{ID: id})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -162,7 +162,7 @@ func TestService_GetNote(t *testing.T) {
 	})
 
 	t.Run("Ошибка валидации идентификатора", func(t *testing.T) {
-		resp, err := service.GetNote(ctx, &pb.GetNoteRequest{ID: "invalid-id"})
+		resp, err := service.Get(ctx, &pb.GetNoteRequest{ID: "invalid-id"})
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -175,7 +175,7 @@ func TestService_GetNote(t *testing.T) {
 		id := uuid.New().String()
 		mockRepo.On("GetNote", ctx, id, uid).Return(nil, assert.AnError)
 
-		resp, err := service.GetNote(ctx, &pb.GetNoteRequest{ID: id})
+		resp, err := service.Get(ctx, &pb.GetNoteRequest{ID: id})
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -188,7 +188,7 @@ func TestService_GetNote(t *testing.T) {
 	t.Run("Ошибка валидации токена", func(t *testing.T) {
 		ctx := context.Background()
 		req := &pb.GetNoteRequest{}
-		resp, err := service.GetNote(ctx, req)
+		resp, err := service.Get(ctx, req)
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 		statusErr, ok := status.FromError(err)
@@ -225,7 +225,7 @@ func TestService_UpdateNote(t *testing.T) {
 			Meta:    "New Meta",
 		}
 
-		resp, err := service.UpdateNote(ctx, req)
+		resp, err := service.Update(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -241,7 +241,7 @@ func TestService_UpdateNote(t *testing.T) {
 			ID: "invalid-id",
 		}
 
-		resp, err := service.UpdateNote(ctx, req)
+		resp, err := service.Update(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -273,7 +273,7 @@ func TestService_UpdateNote(t *testing.T) {
 			Meta:    "New Meta",
 		}
 
-		resp, err := service.UpdateNote(ctx, req)
+		resp, err := service.Update(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -287,7 +287,7 @@ func TestService_UpdateNote(t *testing.T) {
 		service, _ := setupService()
 		ctx := context.Background()
 		req := &pb.UpdateNoteRequest{}
-		resp, err := service.UpdateNote(ctx, req)
+		resp, err := service.Update(ctx, req)
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 		statusErr, ok := status.FromError(err)
@@ -306,7 +306,7 @@ func TestService_RemoveNote(t *testing.T) {
 		id := uuid.New().String()
 		mockRepo.On("RemoveNote", ctx, id, uid).Return(nil)
 
-		resp, err := service.RemoveNote(ctx, &pb.RemoveNoteRequest{ID: id})
+		resp, err := service.Remove(ctx, &pb.RemoveNoteRequest{ID: id})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -314,7 +314,7 @@ func TestService_RemoveNote(t *testing.T) {
 	})
 
 	t.Run("Ошибка валидации идентификатора", func(t *testing.T) {
-		resp, err := service.RemoveNote(ctx, &pb.RemoveNoteRequest{ID: "invalid-id"})
+		resp, err := service.Remove(ctx, &pb.RemoveNoteRequest{ID: "invalid-id"})
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 		statusErr, ok := status.FromError(err)
@@ -326,7 +326,7 @@ func TestService_RemoveNote(t *testing.T) {
 		id := uuid.New().String()
 		mockRepo.On("RemoveNote", ctx, id, uid).Return(assert.AnError)
 
-		resp, err := service.RemoveNote(ctx, &pb.RemoveNoteRequest{ID: id})
+		resp, err := service.Remove(ctx, &pb.RemoveNoteRequest{ID: id})
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -340,7 +340,7 @@ func TestService_RemoveNote(t *testing.T) {
 		service, _ := setupService()
 		ctx := context.Background()
 		req := &pb.RemoveNoteRequest{}
-		resp, err := service.RemoveNote(ctx, req)
+		resp, err := service.Remove(ctx, req)
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 		statusErr, ok := status.FromError(err)
@@ -378,7 +378,7 @@ func TestService_ListNotes(t *testing.T) {
 
 		mockRepo.On("SearchNote", ctx, mock.AnythingOfType("*models.NoteSearch")).Return(expectedNotes, nil)
 
-		resp, err := service.ListNotes(ctx, &pb.ListNoteRequest{})
+		resp, err := service.List(ctx, &pb.ListNoteRequest{})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -392,7 +392,7 @@ func TestService_ListNotes(t *testing.T) {
 		service, mockRepo := setupService()
 		mockRepo.On("SearchNote", ctx, mock.AnythingOfType("*models.NoteSearch")).Return(nil, assert.AnError)
 
-		resp, err := service.ListNotes(ctx, &pb.ListNoteRequest{})
+		resp, err := service.List(ctx, &pb.ListNoteRequest{})
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -405,7 +405,7 @@ func TestService_ListNotes(t *testing.T) {
 	t.Run("Ошибка валидации идентификатора пользователя", func(t *testing.T) {
 		service, _ := setupService()
 		ctx := context.Background()
-		resp, err := service.ListNotes(ctx, &pb.ListNoteRequest{})
+		resp, err := service.List(ctx, &pb.ListNoteRequest{})
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -442,7 +442,7 @@ func TestService_SearchNotes(t *testing.T) {
 			Limit:   10,
 			Offset:  0,
 		}
-		resp, err := service.SearchNotes(ctx, req)
+		resp, err := service.Search(ctx, req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
@@ -456,7 +456,7 @@ func TestService_SearchNotes(t *testing.T) {
 		mockRepo.On("SearchNote", ctx, mock.AnythingOfType("*models.NoteSearch")).Return(nil, assert.AnError)
 
 		req := &pb.SearchNoteRequest{}
-		resp, err := service.SearchNotes(ctx, req)
+		resp, err := service.Search(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
@@ -470,7 +470,7 @@ func TestService_SearchNotes(t *testing.T) {
 		service, _ := setupService()
 		ctx := context.Background()
 		req := &pb.SearchNoteRequest{}
-		resp, err := service.SearchNotes(ctx, req)
+		resp, err := service.Search(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, resp)
