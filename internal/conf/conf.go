@@ -110,6 +110,11 @@ func GetCnf() (Configurator, error) {
 		} else {
 			Config.jwtSecret = jwt.GetRandomSecret()
 		}
+
+		encryptKey, err := reader.GetEncryptKey()
+		if err == nil {
+			Config.encryptKey = encryptKey
+		}
 	}
 
 	if Config.IsValid() {

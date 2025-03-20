@@ -18,6 +18,7 @@ type Configurator struct {
 	dbPassword       string
 	dbName           string
 	jwtSecret        string
+	encryptKey       string
 }
 
 // ServerHost возвращает адрес сервера
@@ -104,15 +105,13 @@ func (c Configurator) JWTSecret() string {
 func (c Configurator) IsValid() bool {
 	isValidHost := c.serverHost != "" && c.serverPort != ""
 
-	isValidLOcalFileStorage := c.fileStorageType == FileStorageLocal && c.fileStoragePath != ""
-
 	isValidS3FileStorage := c.fileStorageType == FileStorageS3 && c.s3Endpoint != "" && c.s3SecretKey != "" && c.s3AccessKey != "" && c.s3Bucket != ""
-
-	isValidInMemoryDataStorage := c.dataStorageType == DataStorageInMemory
 
 	isValidDataStoragePostgres := c.dataStorageType == DataStoragePostgres && c.dbHost != "" && c.dbPort != "" && c.dbUser != "" && c.dbPassword != "" && c.dbName != ""
 
 	isValidJWTSecret := c.jwtSecret != ""
 
-	return isValidHost && (isValidLOcalFileStorage || isValidS3FileStorage) && (isValidInMemoryDataStorage || isValidDataStoragePostgres) && isValidJWTSecret
+	isValidEncrytKey := c.encryptKey != ""
+
+	return isValidHost && isValidS3FileStorage && isValidDataStoragePostgres && isValidJWTSecret && isValidEncrytKey
 }

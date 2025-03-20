@@ -1,9 +1,7 @@
 package conf
 
 const (
-	FileStorageLocal    = "local"
 	FileStorageS3       = "s3"
-	DataStorageInMemory = "inmemory"
 	DataStoragePostgres = "postgres"
 )
 
@@ -43,4 +41,6 @@ type Reader interface {
 	GetDBName() (string, error)
 	// GetJWTSecret возвращает ключ JWT
 	GetJWTSecret() (string, error)
+	// GetEncryptKey возвращает ключ шифрования
+	GetEncryptKey() (string, error)
 }

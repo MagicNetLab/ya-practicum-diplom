@@ -22,6 +22,7 @@ const (
 	dbPasswordKey       = "dbPassword"
 	dbNameKey           = "dbName"
 	jwtSecretKey        = "jwtSecret"
+	encryptSecretKey    = "encryptKey"
 )
 
 type FlagReader struct {
@@ -41,11 +42,12 @@ type FlagReader struct {
 	dbPassword       string
 	dbName           string
 	jwtSecret        string
+	encryptKey       string
 }
 
 // Parse читает установленные параметры конфигурации
 func (r *FlagReader) Parse() error {
-	var serverHost, serverPort, fileStorageType, fileStoragePath, s3Endpoint, s3SecretKey, s3AccessKey, s3Bucket, dataStorageType, inMemoryDumpPath, dbHost, dbPort, dbUser, dbPassword, dbName, jwtSecret string
+	var serverHost, serverPort, fileStorageType, fileStoragePath, s3Endpoint, s3SecretKey, s3AccessKey, s3Bucket, dataStorageType, inMemoryDumpPath, dbHost, dbPort, dbUser, dbPassword, dbName, jwtSecret, encryptKey string
 
 	flag.StringVar(&serverHost, serverHostKey, "", "server host")
 	flag.StringVar(&serverPort, serverPortKey, "", "server port")
@@ -63,6 +65,7 @@ func (r *FlagReader) Parse() error {
 	flag.StringVar(&dbName, dbNameKey, "", "database name")
 	flag.StringVar(&jwtSecret, jwtSecretKey, "", "jwt secret")
 	flag.StringVar(&inMemoryDumpPath, inMemoryDumpPathKey, "", "in memory dump path")
+	flag.StringVar(&encryptKey, encryptSecretKey, "", "encrypt key")
 	flag.Parse()
 
 	if serverHost != "" {
@@ -125,10 +128,14 @@ func (r *FlagReader) Parse() error {
 		r.dbName = dbName
 	}
 
+	if encryptKey != "" {
+		r.encryptKey = encryptKey
+	}
+
 	return nil
 }
 
-func (r FlagReader) GetServerHost() (string, error) {
+func (r *FlagReader) GetServerHost() (string, error) {
 	if r.serverHost == "" {
 		return "", errors.New("serverHost is not set")
 	}
@@ -136,7 +143,7 @@ func (r FlagReader) GetServerHost() (string, error) {
 }
 
 // GetServerPort возвращает порт сервера
-func (r FlagReader) GetServerPort() (string, error) {
+func (r *FlagReader) GetServerPort() (string, error) {
 	if r.serverPort == "" {
 		return "", errors.New("serverPort is not set")
 	}
@@ -144,7 +151,7 @@ func (r FlagReader) GetServerPort() (string, error) {
 }
 
 // GetFileStorageType возвращает тип хранилища (local, s3)
-func (r FlagReader) GetFileStorageType() (string, error) {
+func (r *FlagReader) GetFileStorageType() (string, error) {
 	if r.fileStorageType == "" {
 		return "", errors.New("fileStorageType is not set")
 	}
@@ -152,7 +159,7 @@ func (r FlagReader) GetFileStorageType() (string, error) {
 }
 
 // GetFileStoragePath возвращает путь к файлу хранилища
-func (r FlagReader) GetFileStoragePath() (string, error) {
+func (r *FlagReader) GetFileStoragePath() (string, error) {
 	if r.fileStoragePath == "" {
 		return "", errors.New("fileStoragePath is not set")
 	}
@@ -160,7 +167,7 @@ func (r FlagReader) GetFileStoragePath() (string, error) {
 }
 
 // GetS3EndPoint возвращает адрес S3
-func (r FlagReader) GetS3EndPoint() (string, error) {
+func (r *FlagReader) GetS3EndPoint() (string, error) {
 	if r.s3Endpoint == "" {
 		return "", errors.New("s3Endpoint is not set")
 	}
@@ -168,7 +175,7 @@ func (r FlagReader) GetS3EndPoint() (string, error) {
 }
 
 // GetS3AccessKey возвращает ключ S3
-func (r FlagReader) GetS3AccessKey() (string, error) {
+func (r *FlagReader) GetS3AccessKey() (string, error) {
 	if r.s3AccessKey == "" {
 		return "", errors.New("s3AccessKey is not set")
 	}
@@ -176,7 +183,7 @@ func (r FlagReader) GetS3AccessKey() (string, error) {
 }
 
 // GetS3SecretKey возвращает ключ S3
-func (r FlagReader) GetS3SecretKey() (string, error) {
+func (r *FlagReader) GetS3SecretKey() (string, error) {
 	if r.s3SecretKey == "" {
 		return "", errors.New("s3SecretKey is not set")
 	}
@@ -184,7 +191,7 @@ func (r FlagReader) GetS3SecretKey() (string, error) {
 }
 
 // GetS3BucketName возвращает имя бакета S3
-func (r FlagReader) GetS3BucketName() (string, error) {
+func (r *FlagReader) GetS3BucketName() (string, error) {
 	if r.s3Bucket == "" {
 		return "", errors.New("s3Bucket is not set")
 	}
@@ -192,7 +199,7 @@ func (r FlagReader) GetS3BucketName() (string, error) {
 }
 
 // GetDataStorageType возвращает тип хранилища данных (inmemory, postgres)
-func (r FlagReader) GetDataStorageType() (string, error) {
+func (r *FlagReader) GetDataStorageType() (string, error) {
 	if r.dataStorageType == "" {
 		return "", errors.New("dataStorageType is not set")
 	}
@@ -200,7 +207,7 @@ func (r FlagReader) GetDataStorageType() (string, error) {
 }
 
 // GetInMemoryDumpPath возвращает путь к папке с дамп
-func (r FlagReader) GetInMemoryDumpPath() (string, error) {
+func (r *FlagReader) GetInMemoryDumpPath() (string, error) {
 	if r.inMemoryDumpPath == "" {
 		return "", errors.New("inMemoryDumpPath is not set")
 	}
@@ -208,7 +215,7 @@ func (r FlagReader) GetInMemoryDumpPath() (string, error) {
 }
 
 // GetDBHost возвращает адрес базы данных
-func (r FlagReader) GetDBHost() (string, error) {
+func (r *FlagReader) GetDBHost() (string, error) {
 	if r.dbHost == "" {
 		return "", errors.New("dbHost is not set")
 	}
@@ -216,7 +223,7 @@ func (r FlagReader) GetDBHost() (string, error) {
 }
 
 // GetDBPort возвращает порт базы данных
-func (r FlagReader) GetDBPort() (string, error) {
+func (r *FlagReader) GetDBPort() (string, error) {
 	if r.dbPort == "" {
 		return "", errors.New("dbPort is not set")
 	}
@@ -224,7 +231,7 @@ func (r FlagReader) GetDBPort() (string, error) {
 }
 
 // GetDBUser возвращает имя пользователя для подключения к базе данных
-func (r FlagReader) GetDBUser() (string, error) {
+func (r *FlagReader) GetDBUser() (string, error) {
 	if r.dbUser == "" {
 		return "", errors.New("dbUser is not set")
 	}
@@ -232,7 +239,7 @@ func (r FlagReader) GetDBUser() (string, error) {
 }
 
 // GetDBPassword возвращает пароль для подключения к базе данных
-func (r FlagReader) GetDBPassword() (string, error) {
+func (r *FlagReader) GetDBPassword() (string, error) {
 	if r.dbPassword == "" {
 		return "", errors.New("dbPassword is not set")
 	}
@@ -240,7 +247,7 @@ func (r FlagReader) GetDBPassword() (string, error) {
 }
 
 // GetDBName возвращает имя базы данных
-func (r FlagReader) GetDBName() (string, error) {
+func (r *FlagReader) GetDBName() (string, error) {
 	if r.dbName == "" {
 		return "", errors.New("dbName is not set")
 	}
@@ -248,9 +255,17 @@ func (r FlagReader) GetDBName() (string, error) {
 }
 
 // GetJWTSecret возвращает секрет JWT
-func (r FlagReader) GetJWTSecret() (string, error) {
+func (r *FlagReader) GetJWTSecret() (string, error) {
 	if r.jwtSecret == "" {
 		return "", errors.New("jwtSecret is not set")
 	}
 	return r.jwtSecret, nil
+}
+
+// GetEncryptKey возвращает ключ шифрования
+func (r *FlagReader) GetEncryptKey() (string, error) {
+	if r.encryptKey == "" {
+		return "", errors.New("encryptKey is not set")
+	}
+	return r.encryptKey, nil
 }

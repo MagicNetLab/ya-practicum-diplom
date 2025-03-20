@@ -26,6 +26,7 @@ type EnvReader struct {
 	dbPassword       string
 	dbName           string
 	jwtSecret        string
+	encryptKey       string
 }
 
 // Parse читает установленные параметры конфигурации
@@ -115,11 +116,16 @@ func (r *EnvReader) Parse() error {
 		r.jwtSecret = jwtSecret
 	}
 
+	encryptKey := os.Getenv("ENCRIPT_KEY")
+	if encryptKey != "" {
+		r.encryptKey = encryptKey
+	}
+
 	return nil
 }
 
 // GetServerHost возвращает адрес сервера
-func (r EnvReader) GetServerHost() (string, error) {
+func (r *EnvReader) GetServerHost() (string, error) {
 	if r.serverHost == "" {
 		return "", errors.New("serverHost is not set")
 	}
@@ -127,7 +133,7 @@ func (r EnvReader) GetServerHost() (string, error) {
 }
 
 // GetServerPort возвращает порт сервера
-func (r EnvReader) GetServerPort() (string, error) {
+func (r *EnvReader) GetServerPort() (string, error) {
 	if r.serverPort == "" {
 		return "", errors.New("serverPort is not set")
 	}
@@ -135,7 +141,7 @@ func (r EnvReader) GetServerPort() (string, error) {
 }
 
 // GetFileStorageType возвращает тип хранилища (local, s3)
-func (r EnvReader) GetFileStorageType() (string, error) {
+func (r *EnvReader) GetFileStorageType() (string, error) {
 	if r.fileStorageType == "" {
 		return "", errors.New("fileStorageType is not set")
 	}
@@ -143,7 +149,7 @@ func (r EnvReader) GetFileStorageType() (string, error) {
 }
 
 // GetFileStoragePath возвращает путь к файлу хранилища
-func (r EnvReader) GetFileStoragePath() (string, error) {
+func (r *EnvReader) GetFileStoragePath() (string, error) {
 	if r.fileStoragePath == "" {
 		return "", errors.New("fileStoragePath is not set")
 	}
@@ -151,7 +157,7 @@ func (r EnvReader) GetFileStoragePath() (string, error) {
 }
 
 // GetS3EndPoint возвращает адрес S3
-func (r EnvReader) GetS3EndPoint() (string, error) {
+func (r *EnvReader) GetS3EndPoint() (string, error) {
 	if r.s3Endpoint == "" {
 		return "", errors.New("s3Endpoint is not set")
 	}
@@ -159,7 +165,7 @@ func (r EnvReader) GetS3EndPoint() (string, error) {
 }
 
 // GetS3AccessKey возвращает ключ S3
-func (r EnvReader) GetS3AccessKey() (string, error) {
+func (r *EnvReader) GetS3AccessKey() (string, error) {
 	if r.s3AccessKey == "" {
 		return "", errors.New("s3AccessKey is not set")
 	}
@@ -167,7 +173,7 @@ func (r EnvReader) GetS3AccessKey() (string, error) {
 }
 
 // GetS3SecretKey возвращает ключ S3
-func (r EnvReader) GetS3SecretKey() (string, error) {
+func (r *EnvReader) GetS3SecretKey() (string, error) {
 	if r.s3SecretKey == "" {
 		return "", errors.New("s3SecretKey is not set")
 	}
@@ -175,7 +181,7 @@ func (r EnvReader) GetS3SecretKey() (string, error) {
 }
 
 // GetS3BucketName возвращает имя бакета S3
-func (r EnvReader) GetS3BucketName() (string, error) {
+func (r *EnvReader) GetS3BucketName() (string, error) {
 	if r.s3Bucket == "" {
 		return "", errors.New("s3Bucket is not set")
 	}
@@ -183,7 +189,7 @@ func (r EnvReader) GetS3BucketName() (string, error) {
 }
 
 // GetDataStorageType возвращает тип хранилища данных (inmemory, postgres)
-func (r EnvReader) GetDataStorageType() (string, error) {
+func (r *EnvReader) GetDataStorageType() (string, error) {
 	if r.dataStorageType == "" {
 		return "", errors.New("dataStorageType is not set")
 	}
@@ -191,7 +197,7 @@ func (r EnvReader) GetDataStorageType() (string, error) {
 }
 
 // GetInMemoryDumpPath возвращает путь к папке с дамп
-func (r EnvReader) GetInMemoryDumpPath() (string, error) {
+func (r *EnvReader) GetInMemoryDumpPath() (string, error) {
 	if r.inMemoryDumpPath == "" {
 		return "", errors.New("inMemoryDumpPath is not set")
 	}
@@ -199,7 +205,7 @@ func (r EnvReader) GetInMemoryDumpPath() (string, error) {
 }
 
 // GetDBHost возвращает адрес базы данных
-func (r EnvReader) GetDBHost() (string, error) {
+func (r *EnvReader) GetDBHost() (string, error) {
 	if r.dbHost == "" {
 		return "", errors.New("dbHost is not set")
 	}
@@ -207,7 +213,7 @@ func (r EnvReader) GetDBHost() (string, error) {
 }
 
 // GetDBPort возвращает порт базы данных
-func (r EnvReader) GetDBPort() (string, error) {
+func (r *EnvReader) GetDBPort() (string, error) {
 	if r.dbPort == "" {
 		return "", errors.New("dbPort is not set")
 	}
@@ -215,7 +221,7 @@ func (r EnvReader) GetDBPort() (string, error) {
 }
 
 // GetDBUser возвращает имя пользователя для подключения к базе данных
-func (r EnvReader) GetDBUser() (string, error) {
+func (r *EnvReader) GetDBUser() (string, error) {
 	if r.dbUser == "" {
 		return "", errors.New("dbUser is not set")
 	}
@@ -223,7 +229,7 @@ func (r EnvReader) GetDBUser() (string, error) {
 }
 
 // GetDBPassword возвращает пароль для подключения к базе данных
-func (r EnvReader) GetDBPassword() (string, error) {
+func (r *EnvReader) GetDBPassword() (string, error) {
 	if r.dbPassword == "" {
 		return "", errors.New("dbPassword is not set")
 	}
@@ -231,7 +237,7 @@ func (r EnvReader) GetDBPassword() (string, error) {
 }
 
 // GetDBName возвращает имя базы данных
-func (r EnvReader) GetDBName() (string, error) {
+func (r *EnvReader) GetDBName() (string, error) {
 	if r.dbName == "" {
 		return "", errors.New("dbName is not set")
 	}
@@ -239,9 +245,17 @@ func (r EnvReader) GetDBName() (string, error) {
 }
 
 // GetJWTSecret возвращает секрет JWT
-func (r EnvReader) GetJWTSecret() (string, error) {
+func (r *EnvReader) GetJWTSecret() (string, error) {
 	if r.jwtSecret == "" {
 		return "", errors.New("jwtSecret is not set")
 	}
 	return r.jwtSecret, nil
+}
+
+// GetEncryptKey возвращает ключ шифрования
+func (r *EnvReader) GetEncryptKey() (string, error) {
+	if r.encryptKey == "" {
+		return "", errors.New("encryptKey is not set")
+	}
+	return r.encryptKey, nil
 }
