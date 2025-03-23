@@ -9,12 +9,10 @@ type NoteSearchModel interface {
 
 // NoteSearch - модель поиска заметок
 type NoteSearch struct {
-	UID     string
-	Title   string
-	Content string
-	Meta    string
-	Limit   int32
-	Offset  int32
+	UID    string
+	Search string
+	Limit  int32
+	Offset int32
 }
 
 type searchNoteValue struct {
@@ -32,16 +30,8 @@ func (n *NoteSearch) GetSubQuery() (string, []any) {
 		items = append(items, searchNoteValue{"uid", n.UID})
 	}
 
-	if n.Title != "" {
-		items = append(items, searchNoteValue{"title", n.Title})
-	}
-
-	if n.Content != "" {
-		items = append(items, searchNoteValue{"content", n.Content})
-	}
-
-	if n.Meta != "" {
-		items = append(items, searchNoteValue{"meta", n.Meta})
+	if n.Search != "" {
+		items = append(items, searchNoteValue{"title", n.Search})
 	}
 
 	if len(items) > 0 {

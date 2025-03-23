@@ -156,24 +156,19 @@ func fileDownload(ctx context.Context) {
 }
 
 func fileSearch(ctx context.Context) {
-	var name, meta string
+	var name string
 
 	fmt.Print("Введите название файла для поиска: ")
 	in := bufio.NewReader(os.Stdin)
 	n, _ := in.ReadString('\n')
 	name = strings.TrimSpace(n)
 
-	fmt.Print("Введите описание файла для поиска: ")
-	in = bufio.NewReader(os.Stdin)
-	m, _ := in.ReadString('\n')
-	meta = strings.TrimSpace(m)
-
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)
 
-	resp, err := nav.Client.FileSearch(rCtx, name, meta)
+	resp, err := nav.Client.FileSearch(rCtx, name)
 	if err != nil {
-		printErr("Ошибка получения списка файлов" + err.Error())
+		printErr("Ошибка получения списка файлов: " + err.Error())
 		return
 	}
 

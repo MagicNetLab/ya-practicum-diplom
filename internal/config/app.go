@@ -15,6 +15,7 @@ type AppConfig struct {
 	dbConf     DataBaseConfigurator
 	s3Conf     S3Configurator
 	jwtConf    JWTConfigurator
+	secretConf SecretConfigurator
 }
 
 // GetServerConf возвращает конфигурацию сервера
@@ -39,5 +40,10 @@ func (a AppConfig) GetJWTConf() JWTConfigurator {
 
 // IsValid возвращает утверждение корректности конфигурации приложения
 func (a AppConfig) IsValid() bool {
-	return a.serverConf.IsValid() && a.dbConf.IsValid() && a.s3Conf.IsValid() && a.jwtConf.IsValid()
+	return a.serverConf.IsValid() && a.dbConf.IsValid() && a.s3Conf.IsValid() && a.jwtConf.IsValid() && a.secretConf.IsValid()
+}
+
+// GetSecretConf возвращает конфигурацию шифровальщика
+func (a AppConfig) GetSecretConf() SecretConfigurator {
+	return a.secretConf
 }

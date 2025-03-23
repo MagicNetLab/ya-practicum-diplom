@@ -138,7 +138,7 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchCardRequest) (*pb.Se
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
 
-	search := models.CardSearch{UID: uid, Number: req.Number, Name: req.Name, Year: int(req.Year), Limit: int(req.Limit), Offset: int(req.Offset)}
+	search := models.CardSearch{UID: uid, Name: req.Name, Limit: int(req.Limit), Offset: int(req.Offset)}
 	res, err := s.store.SearchCards(ctx, search)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to search cards")

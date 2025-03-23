@@ -40,11 +40,9 @@ message RemoveAccountRequest {
 message RemoveAccountResponse {}
 
 message SearchAccountRequest {
-  string Login = 1;
-  string Url = 2;
-  string Description = 3;
-  string Limit = 4;
-  string Offset = 5;
+  string Search = 1;
+  string Limit = 2;
+  string Offset = 3;
 }
 
 message SearchAccountResponse {

@@ -226,18 +226,6 @@ func TestCardRepo_SearchCard(t *testing.T) {
 		assert.Len(t, res, 3)
 	})
 
-	t.Run("Проверка поиска по номеру", func(t *testing.T) {
-		search := models.CardSearch{Number: "4532015112830366"}
-		res, err := repo.SearchCards(ctx, search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 1)
-
-		search = models.CardSearch{Number: "45320"}
-		res, err = repo.SearchCards(ctx, search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 2)
-	})
-
 	t.Run("Проверка поиска по имени", func(t *testing.T) {
 		search := models.CardSearch{Name: "VASYA PUPKIN"}
 		res, err := repo.SearchCards(ctx, search)
@@ -248,13 +236,6 @@ func TestCardRepo_SearchCard(t *testing.T) {
 		res, err = repo.SearchCards(ctx, search)
 		assert.NoError(t, err)
 		assert.Len(t, res, 5)
-	})
-
-	t.Run("Проверка поиска по году", func(t *testing.T) {
-		search := models.CardSearch{Year: 2025}
-		res, err := repo.SearchCards(ctx, search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 1)
 	})
 
 	t.Run("Проверка поиска c параметрами, limit и offset", func(t *testing.T) {

@@ -90,7 +90,7 @@ func (c *Client) PutObject(ctx context.Context, name string, obj io.Reader, size
 		size,
 		minio.PutObjectOptions{},
 	); err != nil {
-		logger.Error("Failed to put object", logger.StrArg("err", err.Error()))
+		logger.Error("failed to put object", logger.StrArg("err", err.Error()))
 		return errors.New("failed to put object")
 	}
 

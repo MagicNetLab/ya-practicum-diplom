@@ -4,10 +4,9 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"os"
-
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/client"
 	"google.golang.org/grpc/metadata"
+	"os"
 )
 
 // cardsList выводит список карт клиента на экран
@@ -36,7 +35,7 @@ func cardsList(ctx context.Context) {
 func cardsCreate(ctx context.Context) {
 	data := client.CardData{}
 
-	fmt.Println("Введите название карты: ")
+	fmt.Print("Введите название карты: ")
 	_, err := fmt.Scan(&data.Name)
 	if err != nil {
 		printErr("Ошибка: не заполнено название карты")
@@ -81,6 +80,9 @@ func cardsCreate(ctx context.Context) {
 	fmt.Print("Введите дополнительную информацию (не обязательно): ")
 	in := bufio.NewReader(os.Stdin)
 	data.Meta, _ = in.ReadString('\n')
+	if data.Meta == "\n" {
+		data.Meta = ""
+	}
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)
@@ -149,17 +151,12 @@ func cardDetail(ctx context.Context) {
 func cardsSearch(ctx context.Context) {
 	var data client.CardSearchData
 
-	fmt.Print("Введите номер карты для поиска (не обязательно): ")
-	fmt.Scanln(&data.Number)
-
-	fmt.Print("Введите имя карты для поиска (не обязательно): ")
-	fmt.Scanln(&data.Name)
-
-	fmt.Print("Введите meta карты для поиска (не обязательно): ")
-	fmt.Scanln(&data.Meta)
-
-	fmt.Print("Введите год карты для поиска (не обязательно): ")
-	fmt.Scanln(&data.Year)
+	fmt.Print("Введите имя карты для поиска: ")
+	_, err := fmt.Scanln(&data.Name)
+	if err != nil {
+		printErr("Ошибка: не заполнено имя карты")
+		return
+	}
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)

@@ -31,9 +31,11 @@ func GetAppConfig() AppConfigurator {
 		dbConf:     GetDBConfig(),
 		s3Conf:     GetS3Config(),
 		jwtConf:    GetJWTConfig(),
+		secretConf: GetSecretConfig(),
 	}
 }
 
+// GetServerConfig возвращает секреты для приложения
 func GetServerConfig() ServerConfigurator {
 	return &ServerConfig{
 		host: os.Getenv("SERVER_HOST"),
@@ -87,5 +89,12 @@ func GetJWTConfig() JWTConfigurator {
 		secret:               secretKey,
 		tokenLifeTime:        tlf,
 		refreshTokenLifeTime: rtlf,
+	}
+}
+
+// GetSecretConfig возвращает секрет для приложения
+func GetSecretConfig() SecretConfigurator {
+	return &SecretConfig{
+		secretKey: os.Getenv("ENCRYPT_KEY"),
 	}
 }

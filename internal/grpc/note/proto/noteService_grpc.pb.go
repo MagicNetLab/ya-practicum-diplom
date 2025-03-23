@@ -22,7 +22,6 @@ const (
 	Note_Create_FullMethodName = "/gophkeeper_grpc.Note/Create"
 	Note_Remove_FullMethodName = "/gophkeeper_grpc.Note/Remove"
 	Note_Get_FullMethodName    = "/gophkeeper_grpc.Note/Get"
-	Note_Update_FullMethodName = "/gophkeeper_grpc.Note/Update"
 	Note_Search_FullMethodName = "/gophkeeper_grpc.Note/Search"
 	Note_List_FullMethodName   = "/gophkeeper_grpc.Note/List"
 )
@@ -34,7 +33,6 @@ type NoteClient interface {
 	Create(ctx context.Context, in *CreateNoteRequest, opts ...grpc.CallOption) (*CreateNoteResponse, error)
 	Remove(ctx context.Context, in *RemoveNoteRequest, opts ...grpc.CallOption) (*RemoveNoteResponse, error)
 	Get(ctx context.Context, in *GetNoteRequest, opts ...grpc.CallOption) (*GetNoteResponse, error)
-	Update(ctx context.Context, in *UpdateNoteRequest, opts ...grpc.CallOption) (*UpdateNoteResponse, error)
 	Search(ctx context.Context, in *SearchNoteRequest, opts ...grpc.CallOption) (*SearchNoteResponse, error)
 	List(ctx context.Context, in *ListNoteRequest, opts ...grpc.CallOption) (*ListNoteResponse, error)
 }
@@ -77,16 +75,6 @@ func (c *noteClient) Get(ctx context.Context, in *GetNoteRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *noteClient) Update(ctx context.Context, in *UpdateNoteRequest, opts ...grpc.CallOption) (*UpdateNoteResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateNoteResponse)
-	err := c.cc.Invoke(ctx, Note_Update_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *noteClient) Search(ctx context.Context, in *SearchNoteRequest, opts ...grpc.CallOption) (*SearchNoteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SearchNoteResponse)
@@ -114,7 +102,6 @@ type NoteServer interface {
 	Create(context.Context, *CreateNoteRequest) (*CreateNoteResponse, error)
 	Remove(context.Context, *RemoveNoteRequest) (*RemoveNoteResponse, error)
 	Get(context.Context, *GetNoteRequest) (*GetNoteResponse, error)
-	Update(context.Context, *UpdateNoteRequest) (*UpdateNoteResponse, error)
 	Search(context.Context, *SearchNoteRequest) (*SearchNoteResponse, error)
 	List(context.Context, *ListNoteRequest) (*ListNoteResponse, error)
 	mustEmbedUnimplementedNoteServer()
@@ -135,9 +122,6 @@ func (UnimplementedNoteServer) Remove(context.Context, *RemoveNoteRequest) (*Rem
 }
 func (UnimplementedNoteServer) Get(context.Context, *GetNoteRequest) (*GetNoteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
-}
-func (UnimplementedNoteServer) Update(context.Context, *UpdateNoteRequest) (*UpdateNoteResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedNoteServer) Search(context.Context, *SearchNoteRequest) (*SearchNoteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
@@ -220,24 +204,6 @@ func _Note_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Note_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateNoteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NoteServer).Update(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Note_Update_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NoteServer).Update(ctx, req.(*UpdateNoteRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Note_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SearchNoteRequest)
 	if err := dec(in); err != nil {
@@ -292,10 +258,6 @@ var Note_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _Note_Get_Handler,
-		},
-		{
-			MethodName: "Update",
-			Handler:    _Note_Update_Handler,
 		},
 		{
 			MethodName: "Search",

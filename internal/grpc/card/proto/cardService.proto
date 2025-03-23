@@ -51,12 +51,9 @@ message DeleteCardRequest {
 message DeleteCardResponse {}
 
 message SearchCardRequest {
-  string Number = 1;
-  string Name = 2;
-  string Meta = 3;
-  int32 Year = 4;
-  int32 Limit = 5;
-  int32 Offset = 6;
+  string Name = 1;
+  int32 Limit = 2;
+  int32 Offset = 3;
 }
 
 message SearchCardResponse {

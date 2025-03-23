@@ -88,55 +88,6 @@ func (s *Service) Get(ctx context.Context, req *pb.GetNoteRequest) (*pb.GetNoteR
 	return &pb.GetNoteResponse{Note: note}, nil
 }
 
-// Update обновление заметки
-func (s *Service) Update(ctx context.Context, req *pb.UpdateNoteRequest) (*pb.UpdateNoteResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
-	}
-
-	if uuid.Validate(req.GetID()) != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid id")
-	}
-
-	model, err := s.store.GetNote(ctx, req.GetID(), uid)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
-	}
-
-	err = model.SetTitle(req.GetTitle())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	err = model.SetContent(req.GetContent())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	err = model.SetMeta(req.GetMeta())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	err = s.store.UpdateNote(ctx, model)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	note := &pb.NoteModel{
-		ID:        model.GetID(),
-		UID:       model.GetUID(),
-		Title:     model.GetTitle(),
-		Content:   model.GetContent(),
-		Meta:      model.GetMeta(),
-		CreatedAt: model.GetCreatedAt().Format(time.DateTime),
-		UpdatedAt: model.GetUpdatedAt().Format(time.DateTime),
-	}
-
-	return &pb.UpdateNoteResponse{Note: note}, nil
-}
-
 // Remove удаление заметки
 func (s *Service) Remove(ctx context.Context, req *pb.RemoveNoteRequest) (*pb.RemoveNoteResponse, error) {
 	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
@@ -199,12 +150,10 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchNoteRequest) (*pb.Se
 	}
 
 	search := models.NoteSearch{
-		UID:     uid,
-		Title:   req.GetTitle(),
-		Content: req.GetContent(),
-		Meta:    req.GetMeta(),
-		Limit:   req.GetLimit(),
-		Offset:  req.GetOffset(),
+		UID:    uid,
+		Search: req.GetSearch(),
+		Limit:  req.GetLimit(),
+		Offset: req.GetOffset(),
 	}
 
 	result, err := s.store.SearchNote(ctx, &search)

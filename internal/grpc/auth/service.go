@@ -29,7 +29,7 @@ type Service struct {
 
 // Auth авторизация пользователя
 func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthResponse, error) {
-	user, err := s.store.GetUserByLoginAndPassword(ctx, req.Login, req.Secret)
+	user, err := s.store.GetUserByLogin(ctx, req.Login)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "user not found")
 	}

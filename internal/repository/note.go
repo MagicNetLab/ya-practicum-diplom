@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,7 +16,6 @@ import (
 type NoteRepository interface {
 	GetNote(ctx context.Context, id string, uid string) (models.NoteModel, error)
 	CreateNote(ctx context.Context, note models.NoteModel) error
-	UpdateNote(ctx context.Context, note models.NoteModel) error
 	RemoveNote(ctx context.Context, id string, uid string) error
 	SearchNote(ctx context.Context, search models.NoteSearchModel) ([]models.NoteModel, error)
 }
@@ -44,23 +44,43 @@ func (n NoteRepo) GetNote(ctx context.Context, id string, uid string) (models.No
 		return nil, err
 	}
 
+	decryptContent, err := encryptor.DecryptData(note.Content)
+	if err != nil {
+		return nil, err
+	}
+	note.Content = decryptContent
+
+	decryptMeta, err := encryptor.DecryptData(note.Meta)
+	if err != nil {
+		return nil, err
+	}
+	note.Meta = decryptMeta
+
 	return &note, nil
 }
 
 // CreateNote - создание новой заметки
 func (n NoteRepo) CreateNote(ctx context.Context, note models.NoteModel) error {
-	sql := "INSERT INTO notes (id, uid, title, content, meta, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err := n.pool.Exec(ctx, sql, note.GetID(), note.GetUID(), note.GetTitle(), note.GetContent(), note.GetMeta(), note.GetCreatedAt(), note.GetUpdatedAt())
+	encryptContent, err := encryptor.EncryptData(note.GetContent())
 	if err != nil {
 		return err
 	}
-	return nil
-}
+	err = note.SetContent(encryptContent)
+	if err != nil {
+		return err
+	}
 
-// UpdateNote - обновление заметки
-func (n NoteRepo) UpdateNote(ctx context.Context, note models.NoteModel) error {
-	sql := "UPDATE notes SET title=$1, content=$2, meta=$3, updated_at=$4 WHERE id=$5"
-	_, err := n.pool.Exec(ctx, sql, note.GetTitle(), note.GetContent(), note.GetMeta(), note.GetUpdatedAt(), note.GetID())
+	encryptMeta, err := encryptor.EncryptData(note.GetMeta())
+	if err != nil {
+		return err
+	}
+	err = note.SetMeta(encryptMeta)
+	if err != nil {
+		return err
+	}
+
+	sql := "INSERT INTO notes (id, uid, title, content, meta, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	_, err = n.pool.Exec(ctx, sql, note.GetID(), note.GetUID(), note.GetTitle(), note.GetContent(), note.GetMeta(), note.GetCreatedAt(), note.GetUpdatedAt())
 	if err != nil {
 		return err
 	}
@@ -103,6 +123,19 @@ func (n NoteRepo) SearchNote(ctx context.Context, search models.NoteSearchModel)
 			logger.Error("error scanning note row", logger.StrArg("error", err.Error()))
 			continue
 		}
+		decryptContent, err := encryptor.DecryptData(note.Content)
+		if err != nil {
+			logger.Error("error decrypting note content", logger.StrArg("error", err.Error()))
+			continue
+		}
+		note.Content = decryptContent
+
+		decryptMeta, err := encryptor.DecryptData(note.Meta)
+		if err != nil {
+			logger.Error("error decrypting note meta", logger.StrArg("error", err.Error()))
+		}
+		note.Meta = decryptMeta
+
 		result = append(result, note)
 	}
 

@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"google.golang.org/grpc/metadata"
 	"os"
+	"strings"
+
+	"google.golang.org/grpc/metadata"
 )
 
 // accountList получает список аккаунтов пользователя и выводит его в консоль.
@@ -58,6 +60,7 @@ func accountAdd(ctx context.Context) {
 	fmt.Print("Введите дополнительную информацию (не обязательно): ")
 	in := bufio.NewReader(os.Stdin)
 	meta, _ = in.ReadString('\n')
+	meta = strings.TrimSpace(meta)
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)
@@ -121,23 +124,15 @@ func accountDetail(ctx context.Context) {
 
 // accountSearch получает список аккаунтов по поисковому запросу.
 func accountSearch(ctx context.Context) {
-	var login, url, meta string
+	var url string
 
-	printInfo("Введите данные для поиска аккаунта:")
-
-	fmt.Print("Логин: ")
-	fmt.Scanln(&login)
-
-	fmt.Print("Url сайта: ")
+	fmt.Print("Укажите адрес сайта: ")
 	fmt.Scanln(&url)
-
-	fmt.Print("Meta: ")
-	fmt.Scanln(&meta)
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)
 
-	res, err := nav.Client.SearchAccount(rCtx, login, url, meta)
+	res, err := nav.Client.SearchAccount(rCtx, url)
 	if err != nil {
 		printErr("Ошибка при поиске аккаунтов: " + err.Error())
 		return

@@ -8,9 +8,7 @@ type CardSearchModel interface {
 
 type CardSearch struct {
 	UID    string
-	Number string
 	Name   string
-	Year   int
 	Limit  int
 	Offset int
 }
@@ -29,14 +27,8 @@ func (cs *CardSearch) GetSubQuery() (string, []any) {
 	if cs.UID != "" {
 		items = append(items, cardSearchValue{item: "uid", value: cs.UID})
 	}
-	if cs.Number != "" {
-		items = append(items, cardSearchValue{item: "number", value: cs.Number})
-	}
 	if cs.Name != "" {
 		items = append(items, cardSearchValue{item: "name", value: cs.Name})
-	}
-	if cs.Year != 0 {
-		items = append(items, cardSearchValue{item: "year", value: strconv.Itoa(cs.Year)})
 	}
 
 	if len(items) > 0 {
@@ -47,7 +39,7 @@ func (cs *CardSearch) GetSubQuery() (string, []any) {
 			if i > 1 {
 				str += " AND "
 			}
-			if v.item == "uid" || v.item == "year" {
+			if v.item == "uid" {
 				str += v.item + " = $" + strconv.Itoa(i)
 				values = append(values, v.value)
 			} else {

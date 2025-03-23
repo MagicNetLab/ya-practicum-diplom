@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"os"
-	"strconv"
 )
 
 type AccountData struct {
@@ -43,10 +42,7 @@ type ShortCardData struct {
 }
 
 type CardSearchData struct {
-	Name   string
-	Number string
-	Meta   string
-	Year   string
+	Name string
 }
 
 type NoteData struct {
@@ -66,9 +62,7 @@ type FileData struct {
 }
 
 type NoteSearchData struct {
-	Title   string
-	Meta    string
-	Content string
+	Search string
 }
 
 type AppClient interface {
@@ -78,7 +72,7 @@ type AppClient interface {
 	AddAccount(ctx context.Context, username string, password string, url string, meta string) error
 	RemoveAccount(ctx context.Context, username string) error
 	GetAccount(ctx context.Context, id string) (AccountData, error)
-	SearchAccount(ctx context.Context, login, url, meta string) ([]AccountData, error)
+	SearchAccount(ctx context.Context, search string) ([]AccountData, error)
 	ListCards(ctx context.Context) ([]ShortCardData, error)
 	AddCard(ctx context.Context, data CardData) error
 	RemoveCard(ctx context.Context, id string) error
@@ -93,7 +87,7 @@ type AppClient interface {
 	FileAdd(ctx context.Context, data FileData) error
 	FileRemove(ctx context.Context, id string) error
 	FileDownload(ctx context.Context, id string) (FileData, error)
-	FileSearch(ctx context.Context, title, meta string) ([]FileData, error)
+	FileSearch(ctx context.Context, title string) ([]FileData, error)
 }
 
 // NewAppClient - конструктор объекта реализующего интерфейс AppClient
@@ -229,12 +223,8 @@ func (c *AppClientImpl) GetAccount(ctx context.Context, id string) (AccountData,
 }
 
 // SearchAccount - метод поиска аккаунтов по фильтрам
-func (c *AppClientImpl) SearchAccount(ctx context.Context, login, url, meta string) ([]AccountData, error) {
-	req := &accpb.SearchAccountRequest{
-		Login:       login,
-		Url:         url,
-		Description: meta,
-	}
+func (c *AppClientImpl) SearchAccount(ctx context.Context, search string) ([]AccountData, error) {
+	req := &accpb.SearchAccountRequest{Search: search}
 
 	resp, err := c.accounts.Search(ctx, req)
 	if err != nil {
@@ -328,14 +318,6 @@ func (c *AppClientImpl) CardDetail(ctx context.Context, id string) (CardData, er
 func (c *AppClientImpl) CardSearch(ctx context.Context, data CardSearchData) ([]ShortCardData, error) {
 	req := &cardpb.SearchCardRequest{}
 	req.Name = data.Name
-	req.Number = data.Number
-	req.Meta = data.Meta
-	if data.Year != "" {
-		y, err := strconv.Atoi(data.Year)
-		if err == nil {
-			req.Year = int32(y)
-		}
-	}
 	res, err := c.cards.Search(ctx, req)
 
 	if err != nil {
@@ -399,11 +381,7 @@ func (c *AppClientImpl) NoteDelete(ctx context.Context, id string) error {
 
 // NoteSearch - метод поиска заметок по фильтрам
 func (c *AppClientImpl) NoteSearch(ctx context.Context, data NoteSearchData) ([]NoteData, error) {
-	resp, err := c.notes.Search(ctx, &notepb.SearchNoteRequest{
-		Title:   data.Title,
-		Meta:    data.Meta,
-		Content: data.Content,
-	})
+	resp, err := c.notes.Search(ctx, &notepb.SearchNoteRequest{Search: data.Search})
 
 	if err != nil {
 		return nil, err
@@ -497,8 +475,8 @@ func (c *AppClientImpl) FileDownload(ctx context.Context, id string) (FileData, 
 }
 
 // FileSearch - метод поиска файлов по фильтрам
-func (c *AppClientImpl) FileSearch(ctx context.Context, title, meta string) ([]FileData, error) {
-	resp, err := c.files.Search(ctx, &filepb.SearchFilesRequest{Name: title, Meta: meta})
+func (c *AppClientImpl) FileSearch(ctx context.Context, title string) ([]FileData, error) {
+	resp, err := c.files.Search(ctx, &filepb.SearchFilesRequest{Name: title})
 	if err != nil {
 		return nil, err
 	}

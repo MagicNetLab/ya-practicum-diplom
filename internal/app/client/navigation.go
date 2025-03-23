@@ -2,16 +2,6 @@ package client
 
 import appClianet "github.com/MagicNetLab/ya-practicum-diplom/internal/services/client"
 
-const (
-	rootCategory     = "root"
-	authCategory     = "auth"
-	registerCategory = "register"
-	accountsCategory = "accounts"
-	cardsCategory    = "cards"
-	notesCategory    = "notes"
-	filesCategory    = "files"
-)
-
 type navigation struct {
 	Token  string
 	Client appClianet.AppClient

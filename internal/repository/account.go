@@ -7,10 +7,10 @@ import (
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"github.com/google/uuid"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 )
 
 func NewAccountRepo(pool *pgxpool.Pool) AccountRepository {
@@ -39,6 +39,24 @@ func (a *AccountRepo) GetAccount(ctx context.Context, id string, uid string) (mo
 		return nil, err
 	}
 
+	decryptLogin, err := encryptor.DecryptData(account.Login)
+	if err != nil {
+		return nil, err
+	}
+	account.Login = decryptLogin
+
+	decryptPass, err := encryptor.DecryptData(account.Password)
+	if err != nil {
+		return nil, err
+	}
+	account.Password = decryptPass
+
+	decryptDesc, err := encryptor.DecryptData(account.Description)
+	if err != nil {
+		return nil, err
+	}
+	account.Description = decryptDesc
+
 	return account, nil
 }
 
@@ -55,12 +73,20 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 		return nil, err
 	}
 
-	err = account.SetLogin(login)
+	encryptLogin, err := encryptor.EncryptData(login)
+	if err != nil {
+		return nil, err
+	}
+	err = account.SetLogin(encryptLogin)
 	if err != nil {
 		return nil, err
 	}
 
-	err = account.SetPassword(password)
+	encryptPass, err := encryptor.EncryptData(password)
+	if err != nil {
+		return nil, err
+	}
+	err = account.SetPassword(encryptPass)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +96,8 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 		return nil, err
 	}
 
-	err = account.SetDescription(description)
+	encryptDesc, err := encryptor.EncryptData(description)
+	err = account.SetDescription(encryptDesc)
 	if err != nil {
 		return nil, err
 	}
@@ -88,6 +115,7 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 	sql := "INSERT INTO accounts (id, uid, login, password, url, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 	_, err = a.pool.Exec(ctx, sql, account.ID, account.UID, account.Login, account.Password, account.URL, account.Description, account.CreatedAt, account.UpdatedAt)
 	if err != nil {
+		logger.Error("account insert error", logger.StrArg("error", err.Error()))
 		return nil, err
 	}
 
@@ -134,6 +162,24 @@ func (a *AccountRepo) SearchAccounts(ctx context.Context, search models.AccountS
 			logger.Error("account scan error", logger.StrArg("error", err.Error()))
 			continue
 		}
+
+		decryptLogin, err := encryptor.DecryptData(account.Login)
+		if err != nil {
+			return nil, err
+		}
+		account.Login = decryptLogin
+
+		decryptPass, err := encryptor.DecryptData(account.Password)
+		if err != nil {
+			return nil, err
+		}
+		account.Password = decryptPass
+
+		decryptDesc, err := encryptor.DecryptData(account.Description)
+		if err != nil {
+			return nil, err
+		}
+		account.Description = decryptDesc
 
 		result = append(result, &account)
 	}

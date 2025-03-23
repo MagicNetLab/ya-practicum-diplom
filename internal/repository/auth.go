@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,8 +62,13 @@ func (r *AuthRepo) GetUserByLogin(ctx context.Context, login string) (models.Use
 // GetUserByLoginAndPassword получение пользователя по логину и паролю
 func (r *AuthRepo) GetUserByLoginAndPassword(ctx context.Context, login, password string) (models.UserModel, error) {
 	user := models.User{}
+	password, err := encryptor.EncryptPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
 	rows := r.pool.QueryRow(ctx, "SELECT uid, login, password, created_at, updated_at FROM users WHERE login=$1 AND password=$2", login, password)
-	err := rows.Scan(&user.UID, &user.Login, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err = rows.Scan(&user.UID, &user.Login, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		logger.Error("failed get user by login and password", logger.StrArg("login", login), logger.StrArg("error", err.Error()))
 		return nil, err
@@ -73,18 +79,30 @@ func (r *AuthRepo) GetUserByLoginAndPassword(ctx context.Context, login, passwor
 // CreateUser создание пользователя
 func (r *AuthRepo) CreateUser(ctx context.Context, login, password string) (models.UserModel, error) {
 	uid := uuid.New().String()
+	encryptPassword, err := encryptor.EncryptPassword(password)
+	if err != nil {
+		return nil, err
+	}
 	user := models.User{
 		UID:       uid,
 		Login:     login,
-		Password:  password,
+		Password:  encryptPassword,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
 	sql := "INSERT INTO users (uid, login, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
-	_, err := r.pool.Exec(ctx, sql, user.UID, user.Login, user.Password, user.CreatedAt, user.UpdatedAt)
+	_, err = r.pool.Exec(ctx, sql, user.UID, user.Login, user.Password, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
-		logger.Error("failed create user", logger.StrArg("uid", uid), logger.StrArg("error", err.Error()))
+		logger.Error(
+			"failed create user",
+			logger.StrArg("uid", uid),
+			logger.StrArg("login", login),
+			logger.StrArg("password", user.Password),
+			logger.StrArg("created_at", user.CreatedAt.String()),
+			logger.StrArg("updated_at", user.UpdatedAt.String()),
+			logger.StrArg("error", err.Error()),
+		)
 		return nil, err
 	}
 	return &user, nil

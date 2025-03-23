@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/client"
-	"google.golang.org/grpc/metadata"
 	"os"
 	"strings"
 	"unicode/utf8"
+
+	"google.golang.org/grpc/metadata"
+
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/client"
 )
 
 // notesList отображает список заметок пользователя
@@ -50,7 +52,7 @@ func notesList(ctx context.Context) {
 func notesAdd(ctx context.Context) {
 	data := client.NoteData{}
 
-	fmt.Print("Введите заголовок заметки:")
+	fmt.Print("Введите заголовок заметки: ")
 	in := bufio.NewReader(os.Stdin)
 	title, _ := in.ReadString('\n')
 	data.Title = strings.TrimSpace(title)
@@ -82,7 +84,7 @@ func notesAdd(ctx context.Context) {
 		return
 	}
 
-	fmt.Println("Заметка успешно добавлена")
+	printInfo("Заметка успешно добавлена")
 
 }
 
@@ -127,11 +129,10 @@ func notesDetail(ctx context.Context) {
 		return
 	}
 
-	printInfo("Заметка :" + model.ID)
-	printInfo("Заголовок :" + model.Title)
-	printInfo("Метаинформация :" + model.Meta)
-	printInfo("Содержание:")
-	printInfo(model.Content)
+	printInfo("Заметка: " + model.ID)
+	printInfo("Заголовок: " + model.Title)
+	printInfo("Мета информация: " + model.Meta)
+	printInfo("Содержание: \n" + model.Content)
 }
 
 // noteSearch осуществляет поиск заметок по тексту в заголовках, метах и содержании
@@ -141,17 +142,7 @@ func notesSearch(ctx context.Context) {
 	fmt.Print("Введите текст для поиска в заголовках заметок: ")
 	in := bufio.NewReader(os.Stdin)
 	t, _ := in.ReadString('\n')
-	data.Title = strings.TrimSpace(t)
-
-	fmt.Print("Введите текст для поиска в meta заметок: ")
-	in = bufio.NewReader(os.Stdin)
-	m, _ := in.ReadString('\n')
-	data.Meta = strings.TrimSpace(m)
-
-	fmt.Print("Введите текст для поиска в содержании заметок: ")
-	in = bufio.NewReader(os.Stdin)
-	c, _ := in.ReadString('\n')
-	data.Content = strings.TrimSpace(c)
+	data.Search = strings.TrimSpace(t)
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)

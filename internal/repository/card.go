@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
@@ -18,7 +19,7 @@ func NewCardRepo(pool *pgxpool.Pool) CardRepository {
 type CardRepository interface {
 	// GetCardByID возвращает карту по ID
 	GetCardByID(ctx context.Context, id string, uid string) (models.CardModel, error)
-	// GetCardByNumber возвращает карту по номеру
+	// CreateCard возвращает карту по номеру
 	CreateCard(ctx context.Context, card models.CardModel) error
 	// DeleteCard удаляет карту по ID
 	DeleteCard(ctx context.Context, id string, uid string) error
@@ -42,13 +43,74 @@ func (r *CardRepo) GetCardByID(ctx context.Context, id string, uid string) (mode
 		return nil, errors.New("card not found")
 	}
 
+	decryptNumber, err := encryptor.DecryptData(model.Number)
+	if err != nil {
+		return nil, err
+	}
+	model.Number = decryptNumber
+
+	decryptMeta, err := encryptor.DecryptData(model.Meta)
+	if err != nil {
+		return nil, err
+	}
+	model.Meta = decryptMeta
+
+	decryptCVC, err := encryptor.DecryptData(model.CVC)
+	if err != nil {
+		return nil, err
+	}
+	model.CVC = decryptCVC
+
+	decryptPin, err := encryptor.DecryptData(model.PIN)
+	if err != nil {
+		return nil, err
+	}
+	model.PIN = decryptPin
+
 	return &model, nil
 }
 
 // CreateCard создает новую карту
 func (r *CardRepo) CreateCard(ctx context.Context, card models.CardModel) error {
+
+	encryptMeta, err := encryptor.EncryptData(card.GetMeta())
+	if err != nil {
+		return err
+	}
+	err = card.SetMeta(encryptMeta)
+	if err != nil {
+		return err
+	}
+
+	encryptNumber, err := encryptor.EncryptData(card.GetNumber())
+	if err != nil {
+		return err
+	}
+	err = card.SetNumber(encryptNumber)
+	if err != nil {
+		return err
+	}
+
+	encryptCVC, err := encryptor.EncryptData(card.GetCVC())
+	if err != nil {
+		return err
+	}
+	err = card.SetCVC(encryptCVC)
+	if err != nil {
+		return err
+	}
+
+	encryptPIN, err := encryptor.EncryptData(card.GetPIN())
+	if err != nil {
+		return err
+	}
+	err = card.SetPIN(encryptPIN)
+	if err != nil {
+		return err
+	}
+
 	sql := "INSERT INTO cards (id, uid, name, meta, number, mask, month, year, cvc, pin, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
-	_, err := r.pool.Exec(ctx, sql, card.GetID(), card.GetUID(), card.GetName(), card.GetMeta(), card.GetNumber(), card.GetMask(), card.GetMonth(), card.GetYear(), card.GetCVC(), card.GetPIN(), card.GetCreatedAt())
+	_, err = r.pool.Exec(ctx, sql, card.GetID(), card.GetUID(), card.GetName(), card.GetMeta(), card.GetNumber(), card.GetMask(), card.GetMonth(), card.GetYear(), card.GetCVC(), card.GetPIN(), card.GetCreatedAt())
 	return err
 }
 
@@ -86,6 +148,35 @@ func (r *CardRepo) SearchCards(ctx context.Context, search models.CardSearch) ([
 			logger.Error("account scan error", logger.StrArg("error", err.Error()))
 			continue
 		}
+
+		decryptNumber, err := encryptor.DecryptData(card.Number)
+		if err != nil {
+			logger.Error("decrypt error", logger.StrArg("error", err.Error()))
+			continue
+		}
+		card.Number = decryptNumber
+
+		decryptMeta, err := encryptor.DecryptData(card.Meta)
+		if err != nil {
+			logger.Error("decrypt error", logger.StrArg("error", err.Error()))
+			continue
+		}
+		card.Meta = decryptMeta
+
+		decryptCVC, err := encryptor.DecryptData(card.CVC)
+		if err != nil {
+			logger.Error("decrypt error", logger.StrArg("error", err.Error()))
+			continue
+		}
+		card.CVC = decryptCVC
+
+		decryptPin, err := encryptor.DecryptData(card.PIN)
+		if err != nil {
+			logger.Error("decrypt error", logger.StrArg("error", err.Error()))
+			continue
+		}
+		card.PIN = decryptPin
+
 		result = append(result, &card)
 	}
 

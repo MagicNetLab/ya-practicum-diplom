@@ -2,16 +2,18 @@ package account
 
 import (
 	"context"
+	"strconv"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"strconv"
 )
 
 // MakeService возвращает настроенный сервис аккаунтов
@@ -106,16 +108,8 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchAccountRequest) (*pb
 	search := models.AccountSearch{}
 	search.UID = userUID
 
-	if req.GetLogin() != "" {
-		search.Login = req.GetLogin()
-	}
-
-	if req.GetUrl() != "" {
-		search.URL = req.GetUrl()
-	}
-
-	if req.GetDescription() != "" {
-		search.Description = req.GetDescription()
+	if req.GetSearch() != "" {
+		search.Search = req.GetSearch()
 	}
 
 	if req.GetLimit() != "" {

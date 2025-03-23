@@ -10,7 +10,6 @@ type FilesSearchModel interface {
 type FilesSearch struct {
 	UID    string
 	Name   string
-	Meta   string
 	Limit  int32
 	Offset int32
 }
@@ -28,9 +27,6 @@ func (s *FilesSearch) GetSubQuery() (string, []any) {
 	}
 	if s.Name != "" {
 		items = append(items, cardSearchValue{item: "name", value: s.Name})
-	}
-	if s.Meta != "" {
-		items = append(items, cardSearchValue{item: "meta", value: s.Meta})
 	}
 
 	if len(items) > 0 {

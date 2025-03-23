@@ -9,12 +9,19 @@ import (
 // FilesModel интерфейс модели файла
 type FilesModel interface {
 	GetID() string
+	SetID(id string) error
 	GetUID() string
+	SetUID(uid string) error
 	GetName() string
+	SetName(name string) error
 	GetSize() int
+	SetSize(size int) error
 	GetPath() string
+	SetPath(path string) error
 	GetMeta() string
+	SetMeta(meta string) error
 	GetCreatedAt() time.Time
+	SetCreatedAt(createdAt time.Time) error
 	IsValid() bool
 }
 
@@ -51,42 +58,83 @@ type File struct {
 }
 
 // GetID возвращает ID файла
-func (f File) GetID() string {
+func (f *File) GetID() string {
 	return f.ID
 }
 
+// SetID устанавливает
+func (f *File) SetID(id string) error {
+	f.ID = id
+	return nil
+}
+
 // GetUID возвращает UID файла
-func (f File) GetUID() string {
+func (f *File) GetUID() string {
 	return f.UID
 }
 
+// SetUID устанавливает UID файла
+func (f *File) SetUID(uid string) error {
+	f.UID = uid
+	return nil
+}
+
 // GetName возвращает имя файла
-func (f File) GetName() string {
+func (f *File) GetName() string {
 	return f.Name
 }
 
+// SetName устанавливает имя файла
+func (f *File) SetName(name string) error {
+	f.Name = name
+	return nil
+}
+
 // GetMeta возвращает мета данные файла
-func (f File) GetMeta() string {
+func (f *File) GetMeta() string {
 	return f.Meta
 }
 
+func (f *File) SetMeta(meta string) error {
+	f.Meta = meta
+	return nil
+}
+
 // GetSize возвращает размер файла
-func (f File) GetSize() int {
+func (f *File) GetSize() int {
 	return f.Size
 }
 
+// SetSize устанавливает мета данные
+func (f *File) SetSize(size int) error {
+	f.Size = size
+	return nil
+}
+
 // GetPath возвращает путь к файлу
-func (f File) GetPath() string {
+func (f *File) GetPath() string {
 	return f.Path
 }
 
+// SetPath устанавливает путь к файлу
+func (f *File) SetPath(path string) error {
+	f.Path = path
+	return nil
+}
+
 // GetCreatedAt возвращает дату создания файла
-func (f File) GetCreatedAt() time.Time {
+func (f *File) GetCreatedAt() time.Time {
 	return f.CreatedAt
 }
 
+// SetCreatedAt устанавливает дату создания файла
+func (f *File) SetCreatedAt(createdAt time.Time) error {
+	f.CreatedAt = createdAt
+	return nil
+}
+
 // IsValid валидация модели файла
-func (f File) IsValid() bool {
+func (f *File) IsValid() bool {
 	if uuid.Validate(f.ID) != nil {
 		return false
 	}

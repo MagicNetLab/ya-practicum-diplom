@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 	"google.golang.org/grpc"
 	"time"
 
@@ -37,18 +38,24 @@ func (s *Service) Put(ctx context.Context, req *pb.PutFileRequest) (*pb.PutFileR
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
 
-	reader := bytes.NewReader(req.GetContent())
+	encryptContent, err := encryptor.EncryptData(string(req.GetContent()))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("error encrypting file content: %s", err.Error()))
+	}
+
+	reader := bytes.NewReader([]byte(encryptContent))
 	file, err := models.NewFile(uid, req.GetName(), req.GetMeta(), int(reader.Size()))
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	}
+	storePath := file.GetPath()
 
 	err = s.db.CreateFile(ctx, file)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("error creating file: %s", err.Error()))
 	}
 
-	err = s.storage.PutObject(ctx, file.GetPath(), reader, reader.Size())
+	err = s.storage.PutObject(ctx, storePath, reader, reader.Size())
 	if err != nil {
 		_ = s.db.DeleteFile(ctx, file.GetID(), uid)
 		return nil, status.Errorf(codes.Internal, fmt.Sprintf("error uploading file to storage: %s", err.Error()))
@@ -117,9 +124,14 @@ func (s *Service) Download(ctx context.Context, req *pb.DownloadFileRequest) (*p
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error downloading file from storage: %s", err.Error()))
 	}
 
+	decryptContent, err := encryptor.DecryptData(string(fileContent))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("error decrypting file content: %s", err.Error()))
+	}
+
 	return &pb.DownloadFileResponse{
 		Name:    file.GetName(),
-		Content: fileContent,
+		Content: []byte(decryptContent),
 		Size:    int64(file.GetSize()),
 	}, nil
 }
@@ -131,7 +143,7 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchFilesRequest) (*pb.S
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
 
-	search := &models.FilesSearch{UID: uid, Limit: req.GetLimit(), Offset: req.GetOffset(), Name: req.GetName(), Meta: req.GetMeta()}
+	search := &models.FilesSearch{UID: uid, Limit: req.GetLimit(), Offset: req.GetOffset(), Name: req.GetName()}
 	res, err := s.db.SearchFile(ctx, search)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
