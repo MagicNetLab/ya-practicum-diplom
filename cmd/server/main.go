@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/app"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
@@ -30,13 +33,17 @@ func main() {
 		application.Stop()
 		log.Fatalf("appInit err: %v", err)
 	}
-	defer application.Stop()
+
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	go func() {
+		<-sigint
+		application.Stop()
+	}()
 
 	err = application.Start()
 	if err != nil {
 		application.Stop()
 		log.Fatalf("appStart error: %v", err)
 	}
-
-	logger.Info("Application started")
 }

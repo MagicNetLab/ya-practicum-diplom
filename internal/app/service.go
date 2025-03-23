@@ -97,6 +97,7 @@ func (app *Application) Start() error {
 	}
 
 	logger.Info("serv listening", logger.StrArg("address", listener.Addr().String()))
+	logger.Info("Application started")
 
 	if err := app.server.Serve(listener); err != nil {
 		logger.Error("failed to serve serv", logger.StrArg("error", err.Error()))
@@ -109,4 +110,5 @@ func (app *Application) Start() error {
 func (app *Application) Stop() {
 	app.server.GracefulStop()
 	app.repo.Close()
+	logger.Info("app stopped")
 }
