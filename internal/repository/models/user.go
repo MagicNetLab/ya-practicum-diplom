@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -113,6 +114,11 @@ func (u *User) SetUpdatedAt(updatedAt time.Time) error {
 	}
 
 	if updatedAt.After(time.Now()) {
+		log.Printf("invalid updated_at: %v", updatedAt)
+		return errors.New("invalid updated_at")
+	}
+
+	if updatedAt.Before(u.CreatedAt) {
 		return errors.New("invalid updated_at")
 	}
 

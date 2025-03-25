@@ -19,15 +19,43 @@ func TestAccountSearch_GetSubQuery(t *testing.T) {
 	t.Run("Проверка запроса по UID", func(t *testing.T) {
 		search := AccountSearch{UID: "test-UID"}
 		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE UID = $1", str)
+		assert.Equal(t, " WHERE uid = $1", str)
 		assert.Equal(t, []any{"test-UID"}, values)
 	})
 
 	t.Run("Проверка запроса с несколькими параметрами", func(t *testing.T) {
-		search := AccountSearch{UID: "test-UID", Login: "test-Login", URL: "test-URL"}
+		search := AccountSearch{UID: "test-UID", Search: "test-URL"}
 		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE UID = $1 AND Login ilike '%$2%' AND URL ilike '%$3%'", str)
-		assert.Equal(t, []any{"test-UID", "test-Login", "test-URL"}, values)
+		assert.Equal(t, " WHERE uid = $1 AND url ilike $2", str)
+		assert.Equal(t, []any{"test-UID", "%test-URL%"}, values)
+	})
+
+	t.Run("Проверка запроса с пустой строкой поиска", func(t *testing.T) {
+		search := AccountSearch{Search: ""}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка запроса со специальными символами в строке поиска", func(t *testing.T) {
+		search := AccountSearch{Search: "test%_URL"}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " WHERE url ilike $1", str)
+		assert.Equal(t, []any{"%test%_URL%"}, values)
+	})
+
+	t.Run("Проверка запроса с отрицательным Limit", func(t *testing.T) {
+		search := AccountSearch{Limit: -10}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка запроса с отрицательным Offset", func(t *testing.T) {
+		search := AccountSearch{Offset: -20}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
 	})
 
 	t.Run("Проверка запроса с параметром Limit", func(t *testing.T) {
@@ -52,9 +80,9 @@ func TestAccountSearch_GetSubQuery(t *testing.T) {
 	})
 
 	t.Run("Проверка запроса с несколькими параметрам, Limit и Offset", func(t *testing.T) {
-		search := AccountSearch{UID: "test-UID", Login: "test-Login", URL: "test-URL", Description: "test-Description", Limit: 10, Offset: 20}
+		search := AccountSearch{UID: "test-UID", Search: "test-URL", Limit: 10, Offset: 20}
 		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE UID = $1 AND Login ilike '%$2%' AND URL ilike '%$3%' AND Description ilike '%$4%' LIMIT $5 OFFSET $6", str)
-		assert.Equal(t, []any{"test-UID", "test-Login", "test-URL", "test-Description", 10, 20}, values)
+		assert.Equal(t, " WHERE uid = $1 AND url ilike $2 LIMIT $3 OFFSET $4", str)
+		assert.Equal(t, []any{"test-UID", "%test-URL%", 10, 20}, values)
 	})
 }

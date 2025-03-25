@@ -23,6 +23,7 @@ func getNoteTestDB(t *testing.T) *pgxpool.Pool {
 
 func getNoteTestRepo(t *testing.T) (NoteRepository, *pgxpool.Pool) {
 	pool := getNoteTestDB(t)
+	t.Setenv("ENCRYPT_KEY", "test-encryption-key-32-bytes-length!")
 	return NewNoteRepository(pool), pool
 }
 
@@ -30,17 +31,12 @@ func getNoteTestRepo(t *testing.T) (NoteRepository, *pgxpool.Pool) {
 func TestNoteRepo_GetNoteByID(t *testing.T) {
 	repo, pgx := getNoteTestRepo(t)
 	ctx := context.Background()
-	defer pgx.Close()
 
 	// Тестовые данные
 	id := uuid.New().String()
 	uid := uuid.New().String()
-	t.Cleanup(func() {
-		_, _ = pgx.Exec(ctx, "DELETE FROM notes WHERE id=$1", id)
-	})
 
-	sql := "INSERT INTO notes (id, uid, title, content, meta, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err := pgx.Exec(ctx, sql,
+	note := &models.Note{
 		id,
 		uid,
 		"Test Note",
@@ -48,8 +44,12 @@ func TestNoteRepo_GetNoteByID(t *testing.T) {
 		"Test Meta",
 		time.Now(),
 		time.Now(),
-	)
-	assert.NoError(t, err)
+	}
+	err := repo.CreateNote(ctx, note)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = pgx.Exec(ctx, "DELETE FROM notes WHERE id=$1", id)
+	})
 
 	t.Run("Проверка поиска существующей заметки", func(t *testing.T) {
 		res, err := repo.GetNote(ctx, id, uid)
@@ -176,9 +176,8 @@ func TestNoteRepo_SearchNotes(t *testing.T) {
 		_, _ = pgx.Exec(ctx, "DELETE FROM notes WHERE uid IN ($1, $2)", uid1, uid2)
 	})
 
-	sql := "INSERT INTO notes (id, uid, title, content, meta, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	for _, note := range testData {
-		_, err := pgx.Exec(ctx, sql, note.ID, note.UID, note.Title, note.Content, note.Meta, note.CreatedAt, note.UpdatedAt)
+		err := repo.CreateNote(ctx, &note)
 		assert.NoError(t, err)
 	}
 
@@ -210,43 +209,19 @@ func TestNoteRepo_SearchNotes(t *testing.T) {
 	})
 
 	t.Run("Проверка поиска по заголовку", func(t *testing.T) {
-		search := models.NoteSearch{Title: "Note 1"}
+		search := models.NoteSearch{Search: "Note 1"}
 		res, err := repo.SearchNote(ctx, &search)
 		assert.NoError(t, err)
 		assert.Len(t, res, 2)
 
-		search = models.NoteSearch{Title: "Other"}
-		res, err = repo.SearchNote(ctx, &search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 2)
-	})
-
-	t.Run("Проверка поиска по содержимому", func(t *testing.T) {
-		search := models.NoteSearch{Content: "Content 1"}
-		res, err := repo.SearchNote(ctx, &search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 2)
-
-		search = models.NoteSearch{Content: "Other Content"}
-		res, err = repo.SearchNote(ctx, &search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 2)
-	})
-
-	t.Run("Проверка поиска по мета-данным", func(t *testing.T) {
-		search := models.NoteSearch{Meta: "Meta 1"}
-		res, err := repo.SearchNote(ctx, &search)
-		assert.NoError(t, err)
-		assert.Len(t, res, 2)
-
-		search = models.NoteSearch{Meta: "Other Meta"}
+		search = models.NoteSearch{Search: "Other"}
 		res, err = repo.SearchNote(ctx, &search)
 		assert.NoError(t, err)
 		assert.Len(t, res, 2)
 	})
 
 	t.Run("Проверка поиска c параметрами, limit и offset", func(t *testing.T) {
-		search := models.NoteSearch{Title: "Note", Limit: 3, Offset: 3}
+		search := models.NoteSearch{Search: "Note", Limit: 3, Offset: 3}
 		res, err := repo.SearchNote(ctx, &search)
 		assert.NoError(t, err)
 		assert.Len(t, res, 2)

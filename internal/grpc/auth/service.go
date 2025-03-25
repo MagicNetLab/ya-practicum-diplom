@@ -2,8 +2,9 @@ package auth
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"time"
+
+	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/codes"
 	_ "google.golang.org/grpc/metadata"
@@ -13,6 +14,7 @@ import (
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/auth/proto"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 )
 
 // MakeService возвращает настроенный сервис авторизации
@@ -32,6 +34,16 @@ func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthRespon
 	user, err := s.store.GetUserByLogin(ctx, req.Login)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "user not found")
+	}
+
+	// Verify password
+	hashedPassword, err := encryptor.EncryptPassword(req.Secret)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to process password")
+	}
+
+	if hashedPassword != user.GetPassword() {
+		return nil, status.Errorf(codes.PermissionDenied, "Invalid credentials")
 	}
 
 	token, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())

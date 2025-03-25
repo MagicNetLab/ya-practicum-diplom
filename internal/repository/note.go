@@ -115,7 +115,7 @@ func (n NoteRepo) SearchNote(ctx context.Context, search models.NoteSearchModel)
 		return nil, err
 	}
 
-	var result []models.NoteModel
+	result := make([]models.NoteModel, 0)
 	for rows.Next() {
 		note := &models.Note{}
 		err = rows.Scan(&note.ID, &note.UID, &note.Title, &note.Content, &note.Meta, &note.CreatedAt, &note.UpdatedAt)

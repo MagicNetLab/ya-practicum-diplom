@@ -58,6 +58,14 @@ func TestUser_SetLogin(t *testing.T) {
 		err := user.SetLogin("")
 		assert.Error(t, err)
 	})
+
+	t.Run("Проверка установки длинного логина", func(t *testing.T) {
+		user := &User{}
+		longLogin := string(make([]byte, 1000))
+		err := user.SetLogin(longLogin)
+		assert.NoError(t, err)
+		assert.Equal(t, longLogin, user.Login)
+	})
 }
 
 // TestUser_GetPassword проверяет правильность получения пароля пользователя.
@@ -79,6 +87,14 @@ func TestUser_SetPassword(t *testing.T) {
 		user := &User{}
 		err := user.SetPassword("")
 		assert.Error(t, err)
+	})
+
+	t.Run("Проверка установки длинного пароля", func(t *testing.T) {
+		user := &User{}
+		longPassword := string(make([]byte, 1000))
+		err := user.SetPassword(longPassword)
+		assert.NoError(t, err)
+		assert.Equal(t, longPassword, user.Password)
 	})
 }
 
@@ -142,22 +158,44 @@ func TestUser_SetUpdatedAt(t *testing.T) {
 	t.Run("Проверка успешной установки времени обновления пользователя", func(t *testing.T) {
 		user := &User{}
 		updatedAt := time.Now()
-		err := user.SetCreatedAt(updatedAt)
+		err := user.SetUpdatedAt(updatedAt)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedAt, user.CreatedAt)
+		assert.Equal(t, updatedAt, user.UpdatedAt)
 	})
 
 	t.Run("Проверка попытки установки нулевого времени обновления пользователя", func(t *testing.T) {
 		user := &User{}
 		updatedAt := time.Time{}
-		err := user.SetCreatedAt(updatedAt)
+		err := user.SetUpdatedAt(updatedAt)
 		assert.Error(t, err)
 	})
 
 	t.Run("Проверка попытки установки времени обновления пользователя в будущем", func(t *testing.T) {
 		user := &User{}
 		updatedAt := time.Now().Add(time.Minute)
-		err := user.SetCreatedAt(updatedAt)
+		err := user.SetUpdatedAt(updatedAt)
+		assert.Error(t, err)
+	})
+
+	t.Run("Проверка установки времени обновления раньше времени создания", func(t *testing.T) {
+		user := &User{}
+		createdAt := time.Now()
+		err := user.SetCreatedAt(createdAt)
+		assert.NoError(t, err)
+
+		updatedAt := createdAt.Add(-time.Hour)
+		err = user.SetUpdatedAt(updatedAt)
+		assert.Error(t, err)
+	})
+
+	t.Run("Проверка установки времени обновления раньше времени создания", func(t *testing.T) {
+		user := &User{}
+		createdAt := time.Now()
+		err := user.SetCreatedAt(createdAt)
+		assert.NoError(t, err)
+
+		updatedAt := createdAt.Add(-time.Hour)
+		err = user.SetUpdatedAt(updatedAt)
 		assert.Error(t, err)
 	})
 }

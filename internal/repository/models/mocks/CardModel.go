@@ -216,6 +216,204 @@ func (_m *CardModel) MaskNumber() {
 	_m.Called()
 }
 
+// SetCVC provides a mock function with given fields: cvc
+func (_m *CardModel) SetCVC(cvc string) error {
+	ret := _m.Called(cvc)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetCVC")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(cvc)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetCreatedAt provides a mock function with given fields: createdAt
+func (_m *CardModel) SetCreatedAt(createdAt time.Time) error {
+	ret := _m.Called(createdAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetCreatedAt")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(time.Time) error); ok {
+		r0 = rf(createdAt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetID provides a mock function with given fields: id
+func (_m *CardModel) SetID(id string) error {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetID")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetMask provides a mock function with given fields: mask
+func (_m *CardModel) SetMask(mask string) error {
+	ret := _m.Called(mask)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetMask")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(mask)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetMeta provides a mock function with given fields: meta
+func (_m *CardModel) SetMeta(meta string) error {
+	ret := _m.Called(meta)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetMeta")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(meta)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetMonth provides a mock function with given fields: month
+func (_m *CardModel) SetMonth(month int) error {
+	ret := _m.Called(month)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetMonth")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(month)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetName provides a mock function with given fields: name
+func (_m *CardModel) SetName(name string) error {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetName")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetNumber provides a mock function with given fields: number
+func (_m *CardModel) SetNumber(number string) error {
+	ret := _m.Called(number)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetNumber")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(number)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetPIN provides a mock function with given fields: pin
+func (_m *CardModel) SetPIN(pin string) error {
+	ret := _m.Called(pin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetPIN")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(pin)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetUID provides a mock function with given fields: uid
+func (_m *CardModel) SetUID(uid string) error {
+	ret := _m.Called(uid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetUID")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(uid)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetYear provides a mock function with given fields: year
+func (_m *CardModel) SetYear(year int) error {
+	ret := _m.Called(year)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetYear")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(year)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Validate provides a mock function with no fields
 func (_m *CardModel) Validate() error {
 	ret := _m.Called()

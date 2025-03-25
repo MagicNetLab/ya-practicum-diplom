@@ -157,6 +157,132 @@ func (_m *FilesModel) IsValid() bool {
 	return r0
 }
 
+// SetCreatedAt provides a mock function with given fields: createdAt
+func (_m *FilesModel) SetCreatedAt(createdAt time.Time) error {
+	ret := _m.Called(createdAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetCreatedAt")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(time.Time) error); ok {
+		r0 = rf(createdAt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetID provides a mock function with given fields: id
+func (_m *FilesModel) SetID(id string) error {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetID")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetMeta provides a mock function with given fields: meta
+func (_m *FilesModel) SetMeta(meta string) error {
+	ret := _m.Called(meta)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetMeta")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(meta)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetName provides a mock function with given fields: name
+func (_m *FilesModel) SetName(name string) error {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetName")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetPath provides a mock function with given fields: path
+func (_m *FilesModel) SetPath(path string) error {
+	ret := _m.Called(path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetPath")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(path)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetSize provides a mock function with given fields: size
+func (_m *FilesModel) SetSize(size int) error {
+	ret := _m.Called(size)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetSize")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(size)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetUID provides a mock function with given fields: uid
+func (_m *FilesModel) SetUID(uid string) error {
+	ret := _m.Called(uid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetUID")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(uid)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewFilesModel creates a new instance of FilesModel. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewFilesModel(t interface {

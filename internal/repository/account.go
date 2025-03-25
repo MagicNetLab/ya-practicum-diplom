@@ -73,6 +73,9 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 		return nil, err
 	}
 
+	if login == "" {
+		return nil, errors.New("login is empty")
+	}
 	encryptLogin, err := encryptor.EncryptData(login)
 	if err != nil {
 		return nil, err
@@ -82,6 +85,9 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 		return nil, err
 	}
 
+	if password == "" {
+		return nil, errors.New("password is empty")
+	}
 	encryptPass, err := encryptor.EncryptData(password)
 	if err != nil {
 		return nil, err
@@ -142,7 +148,6 @@ func (a *AccountRepo) RemoveAccount(ctx context.Context, id string, uid string) 
 
 // SearchAccounts возвращает список аккаунтов по критериям поиска
 func (a *AccountRepo) SearchAccounts(ctx context.Context, search models.AccountSearchModel) ([]models.AccountModel, error) {
-
 	sql := "SELECT id, uid, login, password, url, description, created_at, updated_at FROM accounts"
 	where, values := search.GetSubQuery()
 	sql += where

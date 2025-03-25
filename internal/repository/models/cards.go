@@ -155,6 +155,10 @@ func (c *Card) GetCreatedAt() time.Time {
 
 // SetCreatedAt устанавливает дату создания карты
 func (c *Card) SetCreatedAt(createdAt time.Time) error {
+	if createdAt.IsZero() || createdAt.After(time.Now()) {
+		return errors.New("invalid date")
+	}
+
 	c.CreatedAt = createdAt
 	return nil
 }

@@ -28,8 +28,12 @@ func (a AccountSearch) GetSubQuery() (string, []any) {
 	values := make([]any, 0)
 	items := make([]searchValue, 0)
 
+	if a.UID != "" {
+		items = append(items, searchValue{item: "uid", value: a.UID})
+	}
+
 	if a.Search != "" {
-		items = append(items, searchValue{"url", a.Search})
+		items = append(items, searchValue{item: "url", value: a.Search})
 
 	}
 
@@ -42,8 +46,13 @@ func (a AccountSearch) GetSubQuery() (string, []any) {
 				str += " AND "
 			}
 
-			str += v.item + " ilike $" + strconv.Itoa(i)
-			values = append(values, "%"+v.value+"%")
+			if v.item == "uid" {
+				str += v.item + " = $" + strconv.Itoa(i)
+				values = append(values, v.value)
+			} else {
+				str += v.item + " ilike $" + strconv.Itoa(i)
+				values = append(values, "%"+v.value+"%")
+			}
 
 			i++
 		}

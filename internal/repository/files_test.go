@@ -18,6 +18,7 @@ const testFileDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?
 func getFileTestDB(t *testing.T) *pgxpool.Pool {
 	pool, err := pgxpool.New(context.Background(), testFileDSN)
 	require.NoError(t, err)
+	t.Setenv("ENCRYPT_KEY", "test-encryption-key-32-bytes-length!")
 	return pool
 }
 
@@ -29,19 +30,13 @@ func getFileTestRepo(t *testing.T) (FileRepository, *pgxpool.Pool) {
 // TestFileRepo_GetFile проверка получения файла по ID
 func TestFileRepo_GetFile(t *testing.T) {
 	repo, pgx := getFileTestRepo(t)
-	defer pgx.Close()
 
 	ctx := context.Background()
 
 	// Тестовые данные
 	id := uuid.New().String()
 	uid := uuid.New().String()
-	t.Cleanup(func() {
-		_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE id=$1", id)
-	})
-
-	sql := "INSERT INTO files (id, uid, name, path, meta, size, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err := pgx.Exec(ctx, sql,
+	file := &models.File{
 		id,
 		uid,
 		"test.txt",
@@ -49,8 +44,12 @@ func TestFileRepo_GetFile(t *testing.T) {
 		"text/plain",
 		1024,
 		time.Now(),
-	)
+	}
+	err := repo.CreateFile(ctx, file)
 	assert.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE id=$1", id)
+	})
 
 	t.Run("Проверка поиска существующего файла", func(t *testing.T) {
 		res, err := repo.GetFile(ctx, id, uid)
@@ -192,15 +191,13 @@ func TestFileRepo_SearchFile(t *testing.T) {
 		{ID: uuid.New().String(), UID: uid2, Name: "doc2.pdf", Path: "/path/5.pdf", Meta: "application/pdf", Size: 8192, CreatedAt: time.Now()},
 	}
 
+	for _, file := range testData {
+		err := repo.CreateFile(ctx, &file)
+		assert.NoError(t, err)
+	}
 	t.Cleanup(func() {
 		_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE uid IN ($1, $2)", uid1, uid2)
 	})
-
-	sql := "INSERT INTO files (id, uid, name, path, meta, size, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	for _, file := range testData {
-		_, err := pgx.Exec(ctx, sql, file.ID, file.UID, file.Name, file.Path, file.Meta, file.Size, file.CreatedAt)
-		assert.NoError(t, err)
-	}
 
 	t.Run("Проверка поиска без условий", func(t *testing.T) {
 		search := models.FilesSearch{}

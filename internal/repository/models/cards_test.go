@@ -22,6 +22,25 @@ func TestCard_Getters(t *testing.T) {
 		CreatedAt: time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 	}
 
+	t.Run("Test SetCreatedAt", func(t *testing.T) {
+		card := Card{}
+
+		// Test valid time
+		validTime := time.Now().Add(-time.Hour)
+		err := card.SetCreatedAt(validTime)
+		assert.NoError(t, err)
+		assert.Equal(t, validTime, card.GetCreatedAt())
+
+		// Test zero time
+		err = card.SetCreatedAt(time.Time{})
+		assert.Error(t, err)
+
+		// Test future time
+		futureTime := time.Now().Add(time.Hour)
+		err = card.SetCreatedAt(futureTime)
+		assert.Error(t, err)
+	})
+
 	tests := []struct {
 		name     string
 		method   func() string
@@ -118,6 +137,11 @@ func TestCard_Validate(t *testing.T) {
 			"invalid cvc value",
 		},
 		{
+			"Empty CVC",
+			func(c *Card) { c.CVC = "" },
+			"invalid cvc value",
+		},
+		{
 			"Invalid PIN length (3)",
 			func(c *Card) { c.PIN = "123" },
 			"invalid pin value",
@@ -125,6 +149,11 @@ func TestCard_Validate(t *testing.T) {
 		{
 			"Invalid PIN length (7)",
 			func(c *Card) { c.PIN = "1234567" },
+			"invalid pin value",
+		},
+		{
+			"Empty PIN",
+			func(c *Card) { c.PIN = "" },
 			"invalid pin value",
 		},
 		{
@@ -140,6 +169,11 @@ func TestCard_Validate(t *testing.T) {
 		{
 			"Long card number (20 digits)",
 			func(c *Card) { c.Number = "12345678901234567890" },
+			"invalid number value",
+		},
+		{
+			"Empty card number",
+			func(c *Card) { c.Number = "" },
 			"invalid number value",
 		},
 	}

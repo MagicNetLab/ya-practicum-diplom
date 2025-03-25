@@ -58,6 +58,14 @@ func TestToken_SetToken(t *testing.T) {
 		err := token.SetToken("")
 		assert.Error(t, err)
 	})
+
+	t.Run("Проверка попытки установки очень длинного значения токена", func(t *testing.T) {
+		token := &Token{}
+		longToken := string(make([]byte, 1000))
+		err := token.SetToken(longToken)
+		assert.NoError(t, err)
+		assert.Equal(t, longToken, token.token)
+	})
 }
 
 // TestToken_GetUID проверяет правильность получения UID владельца токена.
@@ -86,6 +94,13 @@ func TestToken_SetUID(t *testing.T) {
 	t.Run("Проверка попытки установки пустого UID", func(t *testing.T) {
 		token := &Token{}
 		err := token.SetUID("")
+		assert.Error(t, err)
+	})
+
+	t.Run("Проверка попытки установки некорректного формата UUID", func(t *testing.T) {
+		token := &Token{}
+		uid := "123e4567-e89b-12d3-a456-42661417400" // Неполный UUID
+		err := token.SetUID(uid)
 		assert.Error(t, err)
 	})
 }
@@ -148,5 +163,20 @@ func TestToken_SetExpired(t *testing.T) {
 		expiredTime := time.Now().Add(-time.Hour)
 		err := token.SetExpired(expiredTime)
 		assert.Error(t, err)
+	})
+
+	t.Run("Проверка установки времени истечения в текущий момент", func(t *testing.T) {
+		token := &Token{}
+		expiredTime := time.Now()
+		err := token.SetExpired(expiredTime)
+		assert.Error(t, err)
+	})
+
+	t.Run("Проверка установки времени истечения в далеком будущем", func(t *testing.T) {
+		token := &Token{}
+		expiredTime := time.Now().AddDate(1, 0, 0) // год в будущем
+		err := token.SetExpired(expiredTime)
+		assert.NoError(t, err)
+		assert.Equal(t, expiredTime, token.expired)
 	})
 }

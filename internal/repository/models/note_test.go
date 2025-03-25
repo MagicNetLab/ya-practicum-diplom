@@ -129,3 +129,77 @@ func TestNote_GetUpdatedAt(t *testing.T) {
 	note := Note{UpdatedAt: updatedAt}
 	assert.Equal(t, updatedAt, note.GetUpdatedAt())
 }
+
+// TestNote_SetMethods тест методов установки значений
+func TestNote_SetMethods(t *testing.T) {
+	t.Run("Проверка метода SetTitle", func(t *testing.T) {
+		note := &Note{}
+
+		// Корректный заголовок
+		err := note.SetTitle("Test Title")
+		assert.NoError(t, err)
+		assert.Equal(t, "Test Title", note.GetTitle())
+
+		// Пустой заголовок
+		err = note.SetTitle("")
+		assert.Error(t, err)
+
+		// Заголовок со спецсимволами
+		err = note.SetTitle("Test\nTitle\tWith\rSpecial")
+		assert.NoError(t, err)
+		assert.Equal(t, "Test\nTitle\tWith\rSpecial", note.GetTitle())
+	})
+
+	t.Run("Проверка метода SetContent", func(t *testing.T) {
+		note := &Note{}
+
+		// Корректное содержимое
+		err := note.SetContent("Test Content")
+		assert.NoError(t, err)
+		assert.Equal(t, "Test Content", note.GetContent())
+
+		// Пустое содержимое
+		err = note.SetContent("")
+		assert.Error(t, err)
+
+		// Содержимое со спецсимволами
+		err = note.SetContent("Content\nWith\tSpecial\rChars")
+		assert.NoError(t, err)
+		assert.Equal(t, "Content\nWith\tSpecial\rChars", note.GetContent())
+	})
+
+	t.Run("Проверка метода SetMeta", func(t *testing.T) {
+		note := &Note{}
+
+		// Корректные метаданные
+		err := note.SetMeta("Test Meta")
+		assert.NoError(t, err)
+		assert.Equal(t, "Test Meta", note.GetMeta())
+
+		// Пустые метаданные
+		err = note.SetMeta("")
+		assert.Error(t, err)
+
+		// Метаданные со спецсимволами
+		err = note.SetMeta("Meta\nWith\tSpecial\rChars")
+		assert.NoError(t, err)
+		assert.Equal(t, "Meta\nWith\tSpecial\rChars", note.GetMeta())
+	})
+}
+
+// TestNote_TimeFields тест полей времени
+func TestNote_TimeFields(t *testing.T) {
+	t.Run("Проверка времени создания и обновления", func(t *testing.T) {
+		// Создание новой заметки
+		note, err := NewNote(uuid.New().String(), "Test", "Content", "Meta")
+		assert.NoError(t, err)
+
+		// Проверка что время создания установлено
+		assert.False(t, note.GetCreatedAt().IsZero())
+		assert.False(t, note.GetUpdatedAt().IsZero())
+
+		// Проверка что время обновления не раньше времени создания
+		assert.True(t, note.GetUpdatedAt().After(note.GetCreatedAt()) ||
+			note.GetUpdatedAt().Equal(note.GetCreatedAt()))
+	})
+}

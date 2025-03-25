@@ -110,24 +110,6 @@ func (_m *NoteRepository) SearchNote(ctx context.Context, search models.NoteSear
 	return r0, r1
 }
 
-// UpdateNote provides a mock function with given fields: ctx, note
-func (_m *NoteRepository) UpdateNote(ctx context.Context, note models.NoteModel) error {
-	ret := _m.Called(ctx, note)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateNote")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.NoteModel) error); ok {
-		r0 = rf(ctx, note)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // NewNoteRepository creates a new instance of NoteRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewNoteRepository(t interface {

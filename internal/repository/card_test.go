@@ -16,12 +16,13 @@ import (
 const testCardDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable"
 
 func getCardTestDB(t *testing.T) *pgxpool.Pool {
-	pool, err := pgxpool.New(context.Background(), testAccountDSN)
+	pool, err := pgxpool.New(context.Background(), testCardDSN)
 	require.NoError(t, err)
 	return pool
 }
 
 func getCardTestRepo(t *testing.T) (CardRepository, *pgxpool.Pool) {
+	t.Setenv("ENCRYPT_KEY", "test-encryption-key-32-bytes-length!")
 	pool := getCardTestDB(t)
 	return NewCardRepo(pool), pool
 }
@@ -29,7 +30,6 @@ func getCardTestRepo(t *testing.T) (CardRepository, *pgxpool.Pool) {
 // TestCardRepo_GetCardByID проверка получения карты по ID
 func TestCardRepo_GetCardByID(t *testing.T) {
 	repo, pgx := getCardTestRepo(t)
-	defer pgx.Close()
 
 	ctx := context.Background()
 
@@ -40,19 +40,20 @@ func TestCardRepo_GetCardByID(t *testing.T) {
 		_, _ = pgx.Exec(ctx, "DELETE FROM cards WHERE id=$1", id)
 	})
 
-	sql := "INSERT INTO cards (id, uid, name, number, mask, month, year, cvc, pin, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
-	_, err := pgx.Exec(ctx, sql,
-		id,
-		uid,
-		"VASYA PUPKIN",
-		"4532015112830366",
-		"453201******0366",
-		1,
-		2026,
-		"123",
-		"1234",
-		time.Now(),
-	)
+	account := models.Card{
+		ID:        id,
+		UID:       uid,
+		Name:      "VASYA PUPKIN",
+		Number:    "4532015112830366",
+		Mask:      "453201******0366",
+		Month:     1,
+		Year:      2026,
+		CVC:       "123",
+		PIN:       "1234",
+		Meta:      "skjkasjdlkjaskldjalk lsak dlask dklasd",
+		CreatedAt: time.Now(),
+	}
+	err := repo.CreateCard(ctx, &account)
 	assert.NoError(t, err)
 
 	t.Run("Проверка поиска существующей карты", func(t *testing.T) {
@@ -84,6 +85,7 @@ func TestCardRepo_CreatedCard(t *testing.T) {
 		Year:      2026,
 		CVC:       "123",
 		PIN:       "1234",
+		Meta:      "skjkasjdlkjaskldjalk lsak dlask dklasd",
 		CreatedAt: time.Now(),
 	}
 	err := card.Validate()
@@ -189,15 +191,13 @@ func TestCardRepo_SearchCard(t *testing.T) {
 		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "45320005112830300", Mask: "453200******0300", Month: 5, Year: 2029, CVC: "123", PIN: "1", CreatedAt: time.Now()},
 	}
 
+	for _, card := range testData {
+		err := repo.CreateCard(ctx, &card)
+		assert.NoError(t, err)
+	}
 	t.Cleanup(func() {
 		_, _ = pgx.Exec(ctx, "DELETE FROM cards WHERE uid IN ($1, $2)", uid1, uid2)
 	})
-
-	sql := "INSERT INTO cards (id, uid, name, number, mask, month, year, cvc, pin, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
-	for _, card := range testData {
-		_, err := pgx.Exec(ctx, sql, card.ID, card.UID, card.Name, card.Number, card.Mask, card.Month, card.Year, card.CVC, card.PIN, card.CreatedAt)
-		assert.NoError(t, err)
-	}
 
 	t.Run("Проверка поиска без условий", func(t *testing.T) {
 		search := models.CardSearch{}

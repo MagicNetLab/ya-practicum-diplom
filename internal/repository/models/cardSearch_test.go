@@ -15,6 +15,34 @@ func TestCardSearch_GetSubQuery(t *testing.T) {
 		assert.Empty(t, values)
 	})
 
+	t.Run("Проверка поиска с пустой строкой в поле Name", func(t *testing.T) {
+		search := CardSearch{Name: ""}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка поиска со специальными символами в имени", func(t *testing.T) {
+		search := CardSearch{Name: "John%_Doe"}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " WHERE name ilike $1", str)
+		assert.Equal(t, []any{"%John%_Doe%"}, values)
+	})
+
+	t.Run("Проверка поиска с отрицательным значением Limit", func(t *testing.T) {
+		search := CardSearch{Limit: -10}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка поиска с отрицательным значением Offset", func(t *testing.T) {
+		search := CardSearch{Offset: -20}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
 	t.Run("Проверка поиска с устновленным UID", func(t *testing.T) {
 		search := CardSearch{UID: "test-UID"}
 		str, values := search.GetSubQuery()
@@ -22,37 +50,21 @@ func TestCardSearch_GetSubQuery(t *testing.T) {
 		assert.Equal(t, []any{"test-UID"}, values)
 	})
 
-	t.Run("Проверка поиска с установленным номером карты", func(t *testing.T) {
-		search := CardSearch{Number: "1234"}
-		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE number ilike $1", str)
-		assert.Equal(t, []any{"%1234%"}, values)
-	})
-
-	t.Run("Проверка условия поиска с установленным имененем", func(t *testing.T) {
+	t.Run("Проверка условия поиска с установленным именем", func(t *testing.T) {
 		search := CardSearch{Name: "John Doe"}
 		str, values := search.GetSubQuery()
 		assert.Equal(t, " WHERE name ilike $1", str)
 		assert.Equal(t, []any{"%John Doe%"}, values)
 	})
 
-	t.Run("Проверка условия поиска с установленным годом", func(t *testing.T) {
-		search := CardSearch{Year: 2025}
-		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE year = $1", str)
-		assert.Equal(t, []any{"2025"}, values)
-	})
-
 	t.Run("Проверка условия поиска со всеми установленными параметрами", func(t *testing.T) {
 		search := CardSearch{
-			UID:    "test-UID",
-			Number: "1234",
-			Name:   "John Doe",
-			Year:   2025,
+			UID:  "test-UID",
+			Name: "John Doe",
 		}
 		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE uid = $1 AND number ilike $2 AND name ilike $3 AND year = $4", str)
-		assert.Equal(t, []any{"test-UID", "%1234%", "%John Doe%", "2025"}, values)
+		assert.Equal(t, " WHERE uid = $1 AND name ilike $2", str)
+		assert.Equal(t, []any{"test-UID", "%John Doe%"}, values)
 	})
 
 	t.Run("Проверка условия с установленным LIMIT", func(t *testing.T) {
@@ -79,14 +91,12 @@ func TestCardSearch_GetSubQuery(t *testing.T) {
 	t.Run("Проверка условия поиска со всеми установленными параметрами, LIMIT и OFFSET", func(t *testing.T) {
 		search := CardSearch{
 			UID:    "test-UID",
-			Number: "1234",
 			Name:   "John Doe",
-			Year:   2025,
 			Limit:  10,
 			Offset: 20,
 		}
 		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE uid = $1 AND number ilike $2 AND name ilike $3 AND year = $4 LIMIT $5 OFFSET $6", str)
-		assert.Equal(t, []any{"test-UID", "%1234%", "%John Doe%", "2025", 10, 20}, values)
+		assert.Equal(t, " WHERE uid = $1 AND name ilike $2 LIMIT $3 OFFSET $4", str)
+		assert.Equal(t, []any{"test-UID", "%John Doe%", 10, 20}, values)
 	})
 }

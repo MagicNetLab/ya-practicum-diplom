@@ -15,6 +15,41 @@ func TestFilesSearch_GetSubQuery(t *testing.T) {
 		assert.Empty(t, values)
 	})
 
+	t.Run("Проверка поиска с пустой строкой в поле Name", func(t *testing.T) {
+		search := FilesSearch{Name: ""}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка поиска со специальными символами в имени файла", func(t *testing.T) {
+		search := FilesSearch{Name: "test%_file.txt"}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, " WHERE name ilike $1", str)
+		assert.Equal(t, []any{"%test%_file.txt%"}, values)
+	})
+
+	t.Run("Проверка поиска с отрицательным значением Limit", func(t *testing.T) {
+		search := FilesSearch{Limit: -10}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка поиска с отрицательным значением Offset", func(t *testing.T) {
+		search := FilesSearch{Offset: -20}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
+	t.Run("Проверка пустых условий поиска файлов", func(t *testing.T) {
+		search := FilesSearch{}
+		str, values := search.GetSubQuery()
+		assert.Equal(t, "", str)
+		assert.Empty(t, values)
+	})
+
 	t.Run("Проверка поиска с установленным UID", func(t *testing.T) {
 		search := FilesSearch{UID: "test-UID"}
 		str, values := search.GetSubQuery()
@@ -29,13 +64,6 @@ func TestFilesSearch_GetSubQuery(t *testing.T) {
 		assert.Equal(t, []any{"%document.pdf%"}, values)
 	})
 
-	t.Run("Проверка поиска с установленными метаданными", func(t *testing.T) {
-		search := FilesSearch{Meta: "image/jpeg"}
-		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE meta ilike $1", str)
-		assert.Equal(t, []any{"%image/jpeg%"}, values)
-	})
-
 	t.Run("Проверка поиска с установленными UID и именем файла", func(t *testing.T) {
 		search := FilesSearch{
 			UID:  "test-UID",
@@ -44,37 +72,6 @@ func TestFilesSearch_GetSubQuery(t *testing.T) {
 		str, values := search.GetSubQuery()
 		assert.Equal(t, " WHERE uid = $1 AND name ilike $2", str)
 		assert.Equal(t, []any{"test-UID", "%document.pdf%"}, values)
-	})
-
-	t.Run("Проверка поиска с установленными UID и метаданными", func(t *testing.T) {
-		search := FilesSearch{
-			UID:  "test-UID",
-			Meta: "image/jpeg",
-		}
-		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE uid = $1 AND meta ilike $2", str)
-		assert.Equal(t, []any{"test-UID", "%image/jpeg%"}, values)
-	})
-
-	t.Run("Проверка поиска с установленными именем файла и метаданными", func(t *testing.T) {
-		search := FilesSearch{
-			Name: "document.pdf",
-			Meta: "image/jpeg",
-		}
-		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE name ilike $1 AND meta ilike $2", str)
-		assert.Equal(t, []any{"%document.pdf%", "%image/jpeg%"}, values)
-	})
-
-	t.Run("Проверка поиска со всеми установленными параметрами", func(t *testing.T) {
-		search := FilesSearch{
-			UID:  "test-UID",
-			Name: "document.pdf",
-			Meta: "image/jpeg",
-		}
-		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE uid = $1 AND name ilike $2 AND meta ilike $3", str)
-		assert.Equal(t, []any{"test-UID", "%document.pdf%", "%image/jpeg%"}, values)
 	})
 
 	t.Run("Проверка условия с установленным LIMIT", func(t *testing.T) {
@@ -102,12 +99,11 @@ func TestFilesSearch_GetSubQuery(t *testing.T) {
 		search := FilesSearch{
 			UID:    "test-UID",
 			Name:   "document.pdf",
-			Meta:   "image/jpeg",
 			Limit:  10,
 			Offset: 20,
 		}
 		str, values := search.GetSubQuery()
-		assert.Equal(t, " WHERE uid = $1 AND name ilike $2 AND meta ilike $3 LIMIT $4 OFFSET $5", str)
-		assert.Equal(t, []any{"test-UID", "%document.pdf%", "%image/jpeg%", int32(10), int32(20)}, values)
+		assert.Equal(t, " WHERE uid = $1 AND name ilike $2 LIMIT $3 OFFSET $4", str)
+		assert.Equal(t, []any{"test-UID", "%document.pdf%", int32(10), int32(20)}, values)
 	})
 }

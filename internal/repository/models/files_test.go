@@ -1,10 +1,11 @@
 package models
 
 import (
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestNewFile Тестирование создания модели файла.
@@ -24,22 +25,137 @@ func TestNewFile(t *testing.T) {
 	})
 
 	t.Run("Попытка создать модель файла с некорректными данными", func(t *testing.T) {
-
+		// Некорректный UID
 		model, err := NewFile("invalid_uid", "text.txt", "test meta", 1024)
 		assert.Error(t, err)
 		assert.Nil(t, model)
 
+		// Отрицательный размер
 		model, err = NewFile(uuid.New().String(), "text.txt", "test meta", -1)
 		assert.Error(t, err)
 		assert.Nil(t, model)
 
+		// Нулевой размер
+		model, err = NewFile(uuid.New().String(), "text.txt", "test meta", 0)
+		assert.Error(t, err)
+		assert.Nil(t, model)
+
+		// Пустое имя файла
 		model, err = NewFile(uuid.New().String(), "", "test meta", 1024)
 		assert.Error(t, err)
 		assert.Nil(t, model)
 
-		model, err = NewFile(uuid.New().String(), "test", "", 1024)
+		// Пустые мета-данные (допустимо)
+		model, err = NewFile(uuid.New().String(), "test.txt", "", 1024)
 		assert.NoError(t, err)
 		assert.NotNil(t, model)
+	})
+
+	t.Run("Проверка генерации пути к файлу", func(t *testing.T) {
+		uid := uuid.New().String()
+		name := "test.txt"
+		model, err := NewFile(uid, name, "test meta", 1024)
+		assert.NoError(t, err)
+		expectedPath := "/files/" + uid + "/" + name
+		assert.Equal(t, expectedPath, model.GetPath())
+	})
+}
+
+// TestFile_SetMethods Тестирование методов установки значений модели файла.
+func TestFile_SetMethods(t *testing.T) {
+	model := &File{}
+
+	t.Run("Установка ID", func(t *testing.T) {
+		// Корректный ID
+		id := uuid.New().String()
+		err := model.SetID(id)
+		assert.NoError(t, err)
+		assert.Equal(t, id, model.GetID())
+
+		// Некорректный ID
+		err = model.SetID("")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Установка UID", func(t *testing.T) {
+		// Корректный UID
+		uid := uuid.New().String()
+		err := model.SetUID(uid)
+		assert.NoError(t, err)
+		assert.Equal(t, uid, model.GetUID())
+
+		// Некорректный UID
+		err = model.SetUID("")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Установка имени файла", func(t *testing.T) {
+		// Корректное имя
+		name := "test.txt"
+		err := model.SetName(name)
+		assert.NoError(t, err)
+		assert.Equal(t, name, model.GetName())
+
+		// Пустое имя
+		err = model.SetName("")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Установка мета-информации", func(t *testing.T) {
+		// Корректные мета-данные
+		meta := "test meta"
+		err := model.SetMeta(meta)
+		assert.NoError(t, err)
+		assert.Equal(t, meta, model.GetMeta())
+
+		// Пустые мета-данные
+		err = model.SetMeta("")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Установка пути к файлу", func(t *testing.T) {
+		// Корректный путь
+		path := "/path/to/file"
+		err := model.SetPath(path)
+		assert.NoError(t, err)
+		assert.Equal(t, path, model.GetPath())
+
+		// Пустой путь
+		err = model.SetPath("")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Установка размера файла", func(t *testing.T) {
+		// Корректный размер
+		size := 1024
+		err := model.SetSize(size)
+		assert.NoError(t, err)
+		assert.Equal(t, size, model.GetSize())
+
+		// Отрицательный размер
+		err = model.SetSize(-1)
+		assert.NoError(t, err)
+
+		// Нулевой размер
+		err = model.SetSize(0)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Установка времени создания", func(t *testing.T) {
+		// Текущее время
+		createdAt := time.Now()
+		err := model.SetCreatedAt(createdAt)
+		assert.NoError(t, err)
+		assert.Equal(t, createdAt, model.GetCreatedAt())
+
+		// Время в прошлом
+		pastTime := time.Now().Add(-24 * time.Hour)
+		err = model.SetCreatedAt(pastTime)
+		assert.NoError(t, err)
+
+		// Нулевое время
+		err = model.SetCreatedAt(time.Time{})
+		assert.NoError(t, err)
 	})
 }
 
