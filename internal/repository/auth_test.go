@@ -19,15 +19,15 @@ func getTestDB(t *testing.T) *pgxpool.Pool {
 	return pool
 }
 
-func getTestRepo(t *testing.T) AuthRepository {
+func getTestRepo(t *testing.T) (AuthRepository, *pgxpool.Pool) {
 	pool := getTestDB(t)
-	return NewAuthRepository(pool)
+	return NewAuthRepository(pool), pool
 }
 
 // TestAuthRepo_GetUserByUID проверка получения пользователя по UID
 func TestAuthRepo_GetUserByUID(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testLogin := "test_login"
 	testPassword := "test_password"
@@ -35,9 +35,8 @@ func TestAuthRepo_GetUserByUID(t *testing.T) {
 	// Создание тестового пользователя
 	user, err := repo.CreateUser(ctx, testLogin, testPassword)
 	require.NoError(t, err)
-
 	t.Cleanup(func() {
-		_ = repo.RemoveUser(ctx, user.GetUID())
+		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
 	})
 
 	t.Run("Проверка успешного получения пользователя по UID", func(t *testing.T) {
@@ -56,7 +55,7 @@ func TestAuthRepo_GetUserByUID(t *testing.T) {
 // TestAuthRepo_GetUserByLogin проверка получения пользователя по логину
 func TestAuthRepo_GetUserByLogin(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testLogin := "test_login"
 	testPassword := "test_password"
@@ -64,9 +63,8 @@ func TestAuthRepo_GetUserByLogin(t *testing.T) {
 	// создание тестового пользователя
 	user, err := repo.CreateUser(ctx, testLogin, testPassword)
 	require.NoError(t, err)
-
 	t.Cleanup(func() {
-		_ = repo.RemoveUser(ctx, user.GetUID())
+		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid = $1", user.GetUID())
 	})
 
 	t.Run("Проверка успешного получения пользователя по логину", func(t *testing.T) {
@@ -84,7 +82,7 @@ func TestAuthRepo_GetUserByLogin(t *testing.T) {
 // TestAuthRepo_GetUserByLoginAndPassword проверка получения пользователя по логину и паролю
 func TestAuthRepo_GetUserByLoginAndPassword(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testLogin := "test_login"
 	testPassword := "test_password"
@@ -92,9 +90,8 @@ func TestAuthRepo_GetUserByLoginAndPassword(t *testing.T) {
 	// создание тестового пользователя
 	user, err := repo.CreateUser(ctx, testLogin, testPassword)
 	require.NoError(t, err)
-
 	t.Cleanup(func() {
-		_ = repo.RemoveUser(ctx, user.GetUID())
+		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
 	})
 
 	t.Run("Проверка успешного получения пользователя по логину и паролю", func(t *testing.T) {
@@ -117,7 +114,7 @@ func TestAuthRepo_GetUserByLoginAndPassword(t *testing.T) {
 // TestAuthRepo_CreateUser проверка создания пользователя
 func TestAuthRepo_CreateUser(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testLogin := "test_login"
 	testPassword := "test_password"
@@ -129,7 +126,7 @@ func TestAuthRepo_CreateUser(t *testing.T) {
 
 		// Cleanup
 		t.Cleanup(func() {
-			_ = repo.RemoveUser(ctx, user.GetUID())
+			_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
 		})
 	})
 
@@ -143,15 +140,139 @@ func TestAuthRepo_CreateUser(t *testing.T) {
 		assert.Error(t, err)
 
 		t.Cleanup(func() {
-			_ = repo.RemoveUser(ctx, user1.GetUID())
+			_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user1.GetUID())
 		})
+	})
+
+	t.Run("Проверка шифрования пароля при создании пользователя", func(t *testing.T) {
+		user, err := repo.CreateUser(ctx, testLogin, testPassword)
+		require.NoError(t, err)
+
+		// Проверяем, что пароль в базе зашифрован
+		var dbPassword string
+		err = pool.QueryRow(ctx, "SELECT password FROM users WHERE uid=$1", user.GetUID()).Scan(&dbPassword)
+		require.NoError(t, err)
+		assert.NotEqual(t, testPassword, dbPassword)
+
+		t.Cleanup(func() {
+			_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
+		})
+	})
+
+	t.Run("Проверка создания пользователя с пустым логином или паролем", func(t *testing.T) {
+		_, err := repo.CreateUser(ctx, "", testPassword)
+		assert.Error(t, err)
+
+		_, err = repo.CreateUser(ctx, testLogin, "")
+		assert.Error(t, err)
+	})
+}
+
+// TestAuthRepo_CreateToken проверка создания токена
+func TestAuthRepo_CreateToken(t *testing.T) {
+	ctx := context.Background()
+	repo, pool := getTestRepo(t)
+
+	testLogin := "test_login"
+	testPassword := "test_password"
+	testToken := "test_token"
+
+	// Создание тестового пользователя
+	user, err := repo.CreateUser(ctx, testLogin, testPassword)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
+	})
+
+	t.Cleanup(func() {
+		_ = repo.RemoveUser(ctx, user.GetUID())
+		_ = repo.RemoveToken(ctx, testToken)
+	})
+
+	t.Run("Проверка успешного создания токена", func(t *testing.T) {
+		expired := time.Now().Add(time.Hour)
+		err := repo.CreateToken(ctx, user.GetUID(), testToken, false, expired)
+		assert.NoError(t, err)
+
+		// Проверяем наличие токена
+		hasToken, err := repo.HasToken(ctx, testToken)
+		assert.NoError(t, err)
+		assert.True(t, hasToken)
+
+		t.Cleanup(func() {
+			_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
+		})
+	})
+
+	t.Run("Проверка создания токена с истекшим временем", func(t *testing.T) {
+		expired := time.Now().Add(-time.Hour) // Время истекло час назад
+		err := repo.CreateToken(ctx, user.GetUID(), "expired_token", false, expired)
+		assert.NoError(t, err)
+
+		// Проверяем что токен не действителен
+		hasToken, err := repo.HasToken(ctx, "expired_token")
+		assert.NoError(t, err)
+		assert.False(t, hasToken)
+
+		t.Cleanup(func() {
+			_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
+		})
+	})
+
+	t.Run("Проверка создания дубликата токена", func(t *testing.T) {
+		expired := time.Now().Add(time.Hour)
+		err := repo.CreateToken(ctx, user.GetUID(), testToken, false, expired)
+		require.NoError(t, err)
+
+		err = repo.CreateToken(ctx, user.GetUID(), testToken, false, expired)
+		assert.Error(t, err)
+
+		t.Cleanup(func() {
+			_ = repo.RemoveToken(ctx, testToken)
+		})
+	})
+}
+
+// TestAuthRepo_RemoveToken проверка удаления токена
+func TestAuthRepo_RemoveToken(t *testing.T) {
+	ctx := context.Background()
+	repo, pool := getTestRepo(t)
+
+	testLogin := "test_login"
+	testPassword := "test_password"
+	testToken := "test_token"
+
+	// Создание тестового пользователя и токена
+	user, err := repo.CreateUser(ctx, testLogin, testPassword)
+	require.NoError(t, err)
+	err = repo.CreateToken(ctx, user.GetUID(), testToken, false, time.Now().Add(time.Hour))
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
+		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
+	})
+
+	t.Run("Проверка успешного удаления токена", func(t *testing.T) {
+		err := repo.RemoveToken(ctx, testToken)
+		assert.NoError(t, err)
+
+		// Проверяем что токен удален
+		hasToken, err := repo.HasToken(ctx, testToken)
+		assert.NoError(t, err)
+		assert.False(t, hasToken)
+	})
+
+	t.Run("Проверка удаления несуществующего токена", func(t *testing.T) {
+		err := repo.RemoveToken(ctx, "non_existent_token")
+		assert.NoError(t, err)
 	})
 }
 
 // TestAuthRepo_RemoveUser проверка удаления пользователя
 func TestAuthRepo_RemoveUser(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testLogin := "test_login"
 	testPassword := "test_password"
@@ -159,6 +280,9 @@ func TestAuthRepo_RemoveUser(t *testing.T) {
 	// создание тестового пользователя
 	user, err := repo.CreateUser(ctx, testLogin, testPassword)
 	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
+	})
 
 	t.Run("Удаление существующего пользователя", func(t *testing.T) {
 		err := repo.RemoveUser(ctx, user.GetUID())
@@ -175,72 +299,10 @@ func TestAuthRepo_RemoveUser(t *testing.T) {
 	})
 }
 
-// TestAuthRepo_CreateToken проверка создания токена
-func TestAuthRepo_CreateToken(t *testing.T) {
-	ctx := context.Background()
-	repo := getTestRepo(t)
-
-	testUID := uuid.New().String()
-	testToken := "test_token"
-	expiredTime := time.Now().Add(time.Hour)
-
-	t.Run("Успешное создание токена", func(t *testing.T) {
-		err := repo.CreateToken(ctx, testUID, testToken, false, expiredTime)
-		assert.NoError(t, err)
-
-		exists, err := repo.HasToken(ctx, testToken)
-		assert.NoError(t, err)
-		assert.True(t, exists)
-
-		t.Cleanup(func() {
-			_ = repo.RemoveToken(ctx, testToken)
-		})
-	})
-
-	t.Run("Проверка создания дубликата токена", func(t *testing.T) {
-		err := repo.CreateToken(ctx, testUID, testToken, false, expiredTime)
-		require.NoError(t, err)
-
-		err = repo.CreateToken(ctx, testUID, testToken, false, expiredTime)
-		assert.Error(t, err)
-
-		t.Cleanup(func() {
-			_ = repo.RemoveToken(ctx, testToken)
-		})
-	})
-}
-
-// TestAuthRepo_RemoveToken проверка удаления токена
-func TestAuthRepo_RemoveToken(t *testing.T) {
-	ctx := context.Background()
-	repo := getTestRepo(t)
-
-	testUID := uuid.New().String()
-	testToken := "test_token"
-	expiredTime := time.Now().Add(time.Hour)
-
-	err := repo.CreateToken(ctx, testUID, testToken, false, expiredTime)
-	require.NoError(t, err)
-
-	t.Run("Проверка успешного удаления существующего токена", func(t *testing.T) {
-		err := repo.RemoveToken(ctx, testToken)
-		assert.NoError(t, err)
-
-		exists, err := repo.HasToken(ctx, testToken)
-		assert.NoError(t, err)
-		assert.False(t, exists)
-	})
-
-	t.Run("Проверка попытки удаления несуществующего токена", func(t *testing.T) {
-		err := repo.RemoveToken(ctx, "non_existent_token")
-		assert.NoError(t, err)
-	})
-}
-
 // TestAuthRepo_RemoveUserTokens проверка удаления всех токенов пользователя
 func TestAuthRepo_RemoveUserTokens(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testUID1 := uuid.New().String()
 	testUID2 := uuid.New().String()
@@ -254,9 +316,7 @@ func TestAuthRepo_RemoveUserTokens(t *testing.T) {
 	require.NoError(t, repo.CreateToken(ctx, testUID2, testToken3, false, expiredTime))
 
 	t.Cleanup(func() {
-		_ = repo.RemoveToken(ctx, testToken1)
-		_ = repo.RemoveToken(ctx, testToken2)
-		_ = repo.RemoveToken(ctx, testToken3)
+		_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token IN ($1, $2, $3)", testToken1, testToken2, testToken3)
 	})
 
 	t.Run("Успешное удаление всех токенов пользователя", func(t *testing.T) {
@@ -280,7 +340,7 @@ func TestAuthRepo_RemoveUserTokens(t *testing.T) {
 // TestAuthRepo_HasToken Проверка наличия токена в базе данных
 func TestAuthRepo_HasToken(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testUID := uuid.New().String()
 	testToken := "test_token"
@@ -288,9 +348,8 @@ func TestAuthRepo_HasToken(t *testing.T) {
 
 	err := repo.CreateToken(ctx, testUID, testToken, false, expiredTime)
 	require.NoError(t, err)
-
 	t.Cleanup(func() {
-		_ = repo.RemoveToken(ctx, testToken)
+		_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
 	})
 
 	t.Run("Проверка наличия существующего токена", func(t *testing.T) {
@@ -324,7 +383,7 @@ func TestAuthRepo_HasToken(t *testing.T) {
 // TestAuthRepo_HasLogin проверка наличия логина в базе данных
 func TestAuthRepo_HasLogin(t *testing.T) {
 	ctx := context.Background()
-	repo := getTestRepo(t)
+	repo, pool := getTestRepo(t)
 
 	testLogin := "test_login"
 	testPassword := "test_password"
@@ -333,7 +392,7 @@ func TestAuthRepo_HasLogin(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Cleanup(func() {
-		_ = repo.RemoveUser(ctx, user.GetUID())
+		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE uid=$1", user.GetUID())
 	})
 
 	t.Run("Успешная проверка наличия существующего логина", func(t *testing.T) {

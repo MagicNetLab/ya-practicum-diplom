@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 	"time"
 
@@ -78,6 +79,10 @@ func (r *AuthRepo) GetUserByLoginAndPassword(ctx context.Context, login, passwor
 
 // CreateUser создание пользователя
 func (r *AuthRepo) CreateUser(ctx context.Context, login, password string) (models.UserModel, error) {
+	if login == "" || password == "" {
+		return nil, errors.New("empty login or password")
+	}
+
 	uid := uuid.New().String()
 	encryptPassword, err := encryptor.EncryptPassword(password)
 	if err != nil {

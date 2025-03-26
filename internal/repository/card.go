@@ -72,6 +72,9 @@ func (r *CardRepo) GetCardByID(ctx context.Context, id string, uid string) (mode
 
 // CreateCard создает новую карту
 func (r *CardRepo) CreateCard(ctx context.Context, card models.CardModel) error {
+	if err := card.Validate(); err != nil {
+		return errors.New("invalid card")
+	}
 
 	encryptMeta, err := encryptor.EncryptData(card.GetMeta())
 	if err != nil {

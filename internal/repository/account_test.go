@@ -60,7 +60,7 @@ func TestAccountRepo_GetAccount(t *testing.T) {
 		_, _ = pgx.Exec(context.Background(), "DELETE FROM accounts WHERE id=$1", id)
 	})
 
-	t.Run("Проверка успешного получения аккаунта по идентификатору", func(t *testing.T) {
+	t.Run("Проверка успешного получения и дешифрования данных аккаунта", func(t *testing.T) {
 		account, err := repo.GetAccount(context.Background(), id, uid)
 		assert.NoError(t, err)
 		assert.Equal(t, id, account.GetID())
@@ -71,6 +71,14 @@ func TestAccountRepo_GetAccount(t *testing.T) {
 		assert.Equal(t, description, account.GetDescription())
 		assert.Equal(t, createdAt.Format(time.DateTime), account.GetCreatedAt().Format(time.DateTime))
 		assert.Equal(t, updatedAt.Format(time.DateTime), account.GetUpdatedAt().Format(time.DateTime))
+
+		// Проверка что данные действительно зашифрованы в БД
+		var dbLogin, dbPassword, dbDescription string
+		err = pgx.QueryRow(context.Background(), "SELECT login, password, description FROM accounts WHERE id=$1", id).Scan(&dbLogin, &dbPassword, &dbDescription)
+		assert.NoError(t, err)
+		assert.NotEqual(t, login, dbLogin)
+		assert.NotEqual(t, password, dbPassword)
+		assert.NotEqual(t, description, dbDescription)
 	})
 
 	t.Run("Проверка попытки получения несуществующего аккаунта", func(t *testing.T) {
@@ -83,6 +91,18 @@ func TestAccountRepo_GetAccount(t *testing.T) {
 		assert.Nil(t, account)
 	})
 
+	t.Run("Проверка ошибки дешифрования данных", func(t *testing.T) {
+		// Вставляем некорректно зашифрованные данные
+		_, err = pgx.Exec(
+			context.Background(),
+			"UPDATE accounts SET login='invalid-encrypted-data' WHERE id=$1",
+			id)
+		assert.NoError(t, err)
+
+		account, err := repo.GetAccount(context.Background(), id, uid)
+		assert.Error(t, err)
+		assert.Nil(t, account)
+	})
 }
 
 // TestAccountRepo_CreateAccount проверяет создание аккаунта
@@ -130,58 +150,51 @@ func TestAccountRepo_CreateAccount(t *testing.T) {
 // TestAccountRepo_RemoveAccount проверяет удаление аккаунта
 func TestAccountRepo_RemoveAccount(t *testing.T) {
 	repo, pgx := getAccountTestRepo(t)
-	id := uuid.New().String()
 	uid := uuid.New().String()
-	login, err := encryptor.EncryptData("test-login")
-	assert.NoError(t, err)
-	password, err := encryptor.EncryptPassword("test-password")
-	assert.NoError(t, err)
+	login := "test-login"
+	password := "test-password"
 	url := "test-url"
-	description, err := encryptor.EncryptData("test-description")
-	assert.NoError(t, err)
-	createdAt := time.Now()
-	updatedAt := time.Now()
+	description := "test-description"
 
-	// Создание тестового аккаунта
-	sql := "INSERT INTO accounts (id, uid, login, password, url, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
-	_, err = pgx.Exec(
-		context.Background(),
-		sql,
-		id, uid, login, password, url, description, createdAt, updatedAt)
+	// Создаем тестовый аккаунт
+	account, err := repo.CreateAccount(context.Background(), uid, login, password, url, description)
 	assert.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = pgx.Exec(context.Background(), "DELETE FROM accounts WHERE id=$1", id)
+		_, _ = pgx.Exec(context.Background(), "DELETE FROM accounts WHERE id=$1", account.GetID())
+	})
+
+	t.Run("Проверка успешного удаления аккаунта", func(t *testing.T) {
+		err := repo.RemoveAccount(context.Background(), account.GetID(), uid)
+		assert.NoError(t, err)
+
+		// Проверяем что аккаунт действительно удален
+		_, err = repo.GetAccount(context.Background(), account.GetID(), uid)
+		assert.Error(t, err)
+	})
+
+	t.Run("Проверка удаления с пустым ID", func(t *testing.T) {
+		err := repo.RemoveAccount(context.Background(), "", uid)
+		assert.Error(t, err)
+	})
+
+	t.Run("Проверка удаления с некорректным UID", func(t *testing.T) {
+		// Создаем новый аккаунт для теста
+		account, err := repo.CreateAccount(context.Background(), uid, login, password, url, description)
+		assert.NoError(t, err)
+
+		// Пытаемся удалить с неправильным UID
+		err = repo.RemoveAccount(context.Background(), account.GetID(), uuid.New().String())
+		assert.Error(t, err)
+
+		// Проверяем что аккаунт не был удален
+		_, err = repo.GetAccount(context.Background(), account.GetID(), uid)
+		assert.NoError(t, err)
 	})
 
 	t.Run("Проверка удаления несуществующего аккаунта", func(t *testing.T) {
-		var count int
-		err := pgx.QueryRow(context.Background(), "SELECT COUNT(*) FROM accounts WHERE id=$1", id).Scan(&count)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, count)
-
-		wrongID := uuid.New().String()
-		err = repo.RemoveAccount(context.Background(), wrongID, uid)
+		err := repo.RemoveAccount(context.Background(), uuid.New().String(), uid)
 		assert.Error(t, err)
-
-		err = pgx.QueryRow(context.Background(), "SELECT COUNT(*) FROM accounts WHERE id=$1", id).Scan(&count)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, count)
 	})
-
-	t.Run("Проверка успешного удаления существующего аккаунта", func(t *testing.T) {
-		var count int
-		err := pgx.QueryRow(context.Background(), "SELECT COUNT(*) FROM accounts WHERE id=$1", id).Scan(&count)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, count)
-
-		err = repo.RemoveAccount(context.Background(), id, uid)
-		assert.NoError(t, err)
-
-		err = pgx.QueryRow(context.Background(), "SELECT COUNT(*) FROM accounts WHERE id=$1", id).Scan(&count)
-		assert.NoError(t, err)
-		assert.Equal(t, 0, count)
-	})
-
 }
 
 // TestAccountRepo_SearchAccounts проверяет поиск аккаунтов
@@ -253,6 +266,41 @@ func TestAccountRepo_SearchAccounts(t *testing.T) {
 		results, err = repo.SearchAccounts(ctx, search)
 		assert.NoError(t, err)
 		assert.Len(t, results, 1)
+	})
+
+	t.Run("Проверка поиска с limit и offset", func(t *testing.T) {
+		search := models.AccountSearch{
+			UID:    uid1,
+			Limit:  2,
+			Offset: 1,
+		}
+		result, err := repo.SearchAccounts(context.Background(), search)
+		assert.NoError(t, err)
+		assert.Len(t, result, 2)
+	})
+
+	t.Run("Проверка поиска по несуществующему UID", func(t *testing.T) {
+		search := models.AccountSearch{
+			UID: uuid.New().String(),
+		}
+		result, err := repo.SearchAccounts(context.Background(), search)
+		assert.NoError(t, err)
+		assert.Len(t, result, 0)
+	})
+
+	t.Run("Проверка дешифрования данных при поиске", func(t *testing.T) {
+		search := models.AccountSearch{
+			UID: uid1,
+		}
+		result, err := repo.SearchAccounts(context.Background(), search)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, result)
+
+		// Проверяем что данные расшифрованы
+		for _, acc := range result {
+			assert.Contains(t, acc.GetLogin(), "test-login")
+			assert.Contains(t, acc.GetDescription(), "test-description")
+		}
 	})
 
 }

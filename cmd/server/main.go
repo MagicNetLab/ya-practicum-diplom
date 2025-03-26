@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/app"
+	app "github.com/MagicNetLab/ya-practicum-diplom/internal/app/server"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 )

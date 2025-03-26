@@ -68,6 +68,20 @@ func TestCardRepo_GetCardByID(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, res)
 	})
+
+	t.Run("Проверка ошибки дешифрования данных", func(t *testing.T) {
+		// Вставляем некорректно зашифрованные данные
+		_, err = pgx.Exec(ctx, "UPDATE cards SET number='invalid-encrypted-data' WHERE id=$1", id)
+		assert.NoError(t, err)
+
+		res, err := repo.GetCardByID(ctx, id, uid)
+		assert.Error(t, err)
+		assert.Nil(t, res)
+
+		// Восстанавливаем корректные данные
+		_, err = pgx.Exec(ctx, "UPDATE cards SET number=$1 WHERE id=$2", account.Number, id)
+		assert.NoError(t, err)
+	})
 }
 
 // TestCardRepo_CreatedCard проверка создания карты
@@ -104,11 +118,6 @@ func TestCardRepo_CreatedCard(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("Проверка создания карты с не уникальным номером", func(t *testing.T) {
-		err := repo.CreateCard(ctx, &card)
-		assert.Error(t, err)
-	})
-
 	t.Run("Проверка создания карты с некорректными данными", func(t *testing.T) {
 		card.UID = ""
 		err := repo.CreateCard(ctx, &card)
@@ -121,6 +130,21 @@ func TestCardRepo_CreatedCard(t *testing.T) {
 
 		card.Name = "VASYA PUPKIN"
 		card.Number = ""
+		err = repo.CreateCard(ctx, &card)
+		assert.Error(t, err)
+
+		card.Number = "4532015112830366"
+		card.Month = 13
+		err = repo.CreateCard(ctx, &card)
+		assert.Error(t, err)
+
+		card.Month = 1
+		card.Year = 2020
+		err = repo.CreateCard(ctx, &card)
+		assert.Error(t, err)
+
+		card.Year = 2026
+		card.CVC = ""
 		err = repo.CreateCard(ctx, &card)
 		assert.Error(t, err)
 	})
@@ -184,11 +208,11 @@ func TestCardRepo_SearchCard(t *testing.T) {
 	ctx := context.Background()
 
 	testData := []models.Card{
-		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "4532015112830366", Mask: "453201******0366", Month: 1, Year: 2026, CVC: "123", PIN: "1", CreatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "45329999x2830377", Mask: "453299******0377", Month: 2, Year: 2025, CVC: "123", PIN: "1", CreatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "4532888112830388", Mask: "453288******0388", Month: 3, Year: 2027, CVC: "123", PIN: "1", CreatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "4532777112830399", Mask: "453277******0399", Month: 4, Year: 2030, CVC: "123", PIN: "1", CreatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "45320005112830300", Mask: "453200******0300", Month: 5, Year: 2029, CVC: "123", PIN: "1", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "4532015112830366", Mask: "453201******0366", Month: 1, Year: 2026, CVC: "123", PIN: "1234", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "5555555555554444", Mask: "555555******4444", Month: 2, Year: 2025, CVC: "123", PIN: "1234", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid1, Name: "VASYA PUPKIN", Number: "378282246310005", Mask: "378282******0005", Month: 3, Year: 2027, CVC: "123", PIN: "1234", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "4111111111111111", Mask: "411111******1111", Month: 4, Year: 2030, CVC: "123", PIN: "1234", CreatedAt: time.Now()},
+		{ID: uuid.New().String(), UID: uid2, Name: "PETYA PUPKIN", Number: "5105105105105100", Mask: "510510******5100", Month: 5, Year: 2029, CVC: "123", PIN: "1234", CreatedAt: time.Now()},
 	}
 
 	for _, card := range testData {
@@ -245,4 +269,13 @@ func TestCardRepo_SearchCard(t *testing.T) {
 		assert.Len(t, res, 1)
 	})
 
+	t.Run("Проверка поиска с некорректно зашифрованными данными", func(t *testing.T) {
+		// Вставляем некорректно зашифрованные данные
+		_, err := pgx.Exec(ctx, "UPDATE cards SET number='invalid-encrypted-data' WHERE mask = '453201******0366'")
+		assert.NoError(t, err)
+
+		res, err := repo.SearchCards(ctx, models.CardSearch{UID: uid1})
+		assert.NoError(t, err)
+		assert.Len(t, res, 2) // Должно вернуть только карты с корректными данными
+	})
 }

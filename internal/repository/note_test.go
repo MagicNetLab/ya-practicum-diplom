@@ -37,13 +37,13 @@ func TestNoteRepo_GetNoteByID(t *testing.T) {
 	uid := uuid.New().String()
 
 	note := &models.Note{
-		id,
-		uid,
-		"Test Note",
-		"Test Content",
-		"Test Meta",
-		time.Now(),
-		time.Now(),
+		ID:        id,
+		UID:       uid,
+		Title:     "Test Note",
+		Content:   "Test Content",
+		Meta:      "Test Meta",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	err := repo.CreateNote(ctx, note)
 	require.NoError(t, err)
@@ -176,8 +176,10 @@ func TestNoteRepo_SearchNotes(t *testing.T) {
 		_, _ = pgx.Exec(ctx, "DELETE FROM notes WHERE uid IN ($1, $2)", uid1, uid2)
 	})
 
+	var testID string
 	for _, note := range testData {
 		err := repo.CreateNote(ctx, &note)
+		testID = note.GetID()
 		assert.NoError(t, err)
 	}
 
@@ -225,5 +227,26 @@ func TestNoteRepo_SearchNotes(t *testing.T) {
 		res, err := repo.SearchNote(ctx, &search)
 		assert.NoError(t, err)
 		assert.Len(t, res, 2)
+	})
+
+	t.Run("Проверка дешифрования данных в результатах поиска", func(t *testing.T) {
+		search := models.NoteSearch{UID: uid1}
+		res, err := repo.SearchNote(ctx, &search)
+		assert.NoError(t, err)
+		for _, note := range res {
+			assert.NotContains(t, note.GetContent(), "encrypted")
+			assert.NotContains(t, note.GetMeta(), "encrypted")
+		}
+	})
+
+	t.Run("Проверка поиска с некорректно зашифрованными данными", func(t *testing.T) {
+		// Вставляем некорректно зашифрованные данные
+		_, err := pgx.Exec(ctx, "UPDATE notes SET content='invalid-encrypted-data' WHERE id=$1", testID)
+		assert.NoError(t, err)
+
+		search := models.NoteSearch{UID: uid1}
+		res, err := repo.SearchNote(ctx, &search)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, res)
 	})
 }

@@ -37,13 +37,13 @@ func TestFileRepo_GetFile(t *testing.T) {
 	id := uuid.New().String()
 	uid := uuid.New().String()
 	file := &models.File{
-		id,
-		uid,
-		"test.txt",
-		"/path/to/test.txt",
-		"text/plain",
-		1024,
-		time.Now(),
+		ID:        id,
+		UID:       uid,
+		Name:      "test.txt",
+		Meta:      "/path/to/test.txt",
+		Path:      "text/plain",
+		Size:      1024,
+		CreatedAt: time.Now(),
 	}
 	err := repo.CreateFile(ctx, file)
 	assert.NoError(t, err)
@@ -77,6 +77,24 @@ func TestFileRepo_GetFile(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, res)
 	})
+
+	t.Run("Проверка ошибки дешифрования пути файла", func(t *testing.T) {
+		_, err := pgx.Exec(ctx, "UPDATE files SET path='invalid-encrypted-data' WHERE id=$1", id)
+		assert.NoError(t, err)
+
+		res, err := repo.GetFile(ctx, id, uid)
+		assert.Error(t, err)
+		assert.Nil(t, res)
+	})
+
+	t.Run("Проверка ошибки дешифрования метаданных файла", func(t *testing.T) {
+		_, err := pgx.Exec(ctx, "UPDATE files SET meta='invalid-encrypted-data' WHERE id=$1", id)
+		assert.NoError(t, err)
+
+		res, err := repo.GetFile(ctx, id, uid)
+		assert.Error(t, err)
+		assert.Nil(t, res)
+	})
 }
 
 // TestFileRepo_CreateFile проверка создания файла
@@ -94,10 +112,6 @@ func TestFileRepo_CreateFile(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 
-	t.Cleanup(func() {
-		_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE id=$1", file.GetID())
-	})
-
 	t.Run("Проверка успешной записи о файле", func(t *testing.T) {
 		err := repo.CreateFile(ctx, file)
 		assert.NoError(t, err)
@@ -107,6 +121,10 @@ func TestFileRepo_CreateFile(t *testing.T) {
 		err = row.Scan(&count)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count)
+
+		t.Cleanup(func() {
+			_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE id=$1", file.GetID())
+		})
 	})
 
 	t.Run("Проверка создания файла с некорректными данными", func(t *testing.T) {
@@ -117,7 +135,32 @@ func TestFileRepo_CreateFile(t *testing.T) {
 
 	t.Run("Проверка создания дубликата файла", func(t *testing.T) {
 		err := repo.CreateFile(ctx, file)
+		assert.NoError(t, err)
+
+		err = repo.CreateFile(ctx, file)
 		assert.Error(t, err)
+
+		t.Cleanup(func() {
+			_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE id=$1", file.GetID())
+		})
+	})
+
+	t.Run("Проверка создания файла с некорректным путем", func(t *testing.T) {
+		invalidFile := &models.File{
+			ID:        uuid.New().String(),
+			UID:       uuid.New().String(),
+			Name:      "test.txt",
+			Path:      "",
+			Meta:      "text/plain",
+			Size:      1024,
+			CreatedAt: time.Now(),
+		}
+		err := repo.CreateFile(ctx, invalidFile)
+		assert.Error(t, err)
+
+		t.Cleanup(func() {
+			_, _ = pgx.Exec(ctx, "DELETE FROM files WHERE id=$1", file.GetID())
+		})
 	})
 }
 
@@ -230,5 +273,28 @@ func TestFileRepo_SearchFile(t *testing.T) {
 		res, err := repo.SearchFile(ctx, &search)
 		assert.NoError(t, err)
 		assert.Len(t, res, 1)
+	})
+
+	t.Run("Проверка ошибки дешифрования при поиске", func(t *testing.T) {
+		// Создаем файл с некорректно зашифрованными данными
+		id := uuid.New().String()
+		_, err := pgx.Exec(ctx, "INSERT INTO files (id, uid, name, path, meta, size, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+			id, uid1, "test.txt", "invalid-encrypted-data", "invalid-encrypted-data", 1024, time.Now())
+		assert.NoError(t, err)
+
+		search := models.FilesSearch{UID: uid1}
+		res, err := repo.SearchFile(ctx, &search)
+		assert.NoError(t, err)
+		// Проверяем, что файл с некорректными данными был пропущен
+		for _, file := range res {
+			assert.NotEqual(t, id, file.GetID())
+		}
+	})
+
+	t.Run("Проверка поиска с некорректным UID", func(t *testing.T) {
+		search := models.FilesSearch{UID: "invalid-uid"}
+		res, err := repo.SearchFile(ctx, &search)
+		assert.NoError(t, err)
+		assert.Len(t, res, 0)
 	})
 }
