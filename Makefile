@@ -37,7 +37,6 @@ mock:
 	make mock-repo
 	make mock-repo-models
 	make mock-clients
-	make mock-conf
 
 mock-repo:
 	mockery --name=AuthRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
@@ -58,8 +57,13 @@ mock-repo-models:
 	mockery --name=FilesModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 	mockery --name=FilesSearchModel --dir=internal/repository/models --output=internal/repository/models/mocks --outpkg=mocks
 
-mock-conf:
-	mockery --name=Reader --dir=internal/conf --output=internal/conf/mocks --outpkg=mocks
-
 mock-clients:
 	mockery --name=S3Client --dir=internal/services/s3 --output=internal/services/s3/mocks --outpkg=mocks
+
+mock-conf:
+	mockery --name=ServerConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=SecretConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=S3Configurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=JWTConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=DataBaseConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=AppConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
