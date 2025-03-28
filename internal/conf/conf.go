@@ -2,6 +2,7 @@ package conf
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/conf/readers"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
@@ -10,13 +11,15 @@ import (
 
 var Config Configurator
 
+var getReadersFunc = getReaders
+
 // GetCnf возвращает конфигурацию приложения
 func GetCnf() (Configurator, error) {
 	if Config.IsValid() {
 		return Config, nil
 	}
 
-	cnfReaders, err := getReaders()
+	cnfReaders, err := getReadersFunc()
 	if err != nil {
 		logger.Error("Failed to get readers from config", logger.StrArg("error", err.Error()))
 		return Config, err
@@ -39,16 +42,6 @@ func GetCnf() (Configurator, error) {
 			Config.serverPort = servPort
 		}
 
-		fileStorageType, err := reader.GetFileStorageType()
-		if err == nil {
-			Config.fileStorageType = fileStorageType
-		}
-
-		fileStoragePath, err := reader.GetFileStoragePath()
-		if err == nil {
-			Config.fileStoragePath = fileStoragePath
-		}
-
 		s3Endpoint, err := reader.GetS3EndPoint()
 		if err == nil {
 			Config.s3Endpoint = s3Endpoint
@@ -67,16 +60,6 @@ func GetCnf() (Configurator, error) {
 		s3Bucket, err := reader.GetS3BucketName()
 		if err == nil {
 			Config.s3Bucket = s3Bucket
-		}
-
-		dataStorageType, err := reader.GetDataStorageType()
-		if err == nil {
-			Config.dataStorageType = dataStorageType
-		}
-
-		inMemoryDumpPath, err := reader.GetInMemoryDumpPath()
-		if err == nil {
-			Config.inMemoryDumpPath = inMemoryDumpPath
 		}
 
 		dbHost, err := reader.GetDBHost()
@@ -104,11 +87,32 @@ func GetCnf() (Configurator, error) {
 			Config.dbName = dbName
 		}
 
+		dbSSLMode, err := reader.GetDBSSLMode()
+		if err == nil {
+			Config.dbSSLMode = dbSSLMode
+		}
+
 		jwtSecret, err := reader.GetJWTSecret()
 		if err == nil {
 			Config.jwtSecret = jwtSecret
 		} else {
 			Config.jwtSecret = jwt.GetRandomSecret()
+		}
+
+		jwtTokenLifeTime, err := reader.GetJWTTokenLifeTime()
+		if err == nil {
+			val, err := strconv.Atoi(jwtTokenLifeTime)
+			if err == nil {
+				Config.jwtTokenLifeTime = val
+			}
+		}
+
+		jwtRefreshTokenLifeTime, err := reader.GetJWTRefreshTokenLifeTime()
+		if err == nil {
+			val, err := strconv.Atoi(jwtRefreshTokenLifeTime)
+			if err == nil {
+				Config.jwtTokenLifeTime = val
+			}
 		}
 
 		encryptKey, err := reader.GetEncryptKey()

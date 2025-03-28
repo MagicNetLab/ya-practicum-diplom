@@ -13,6 +13,9 @@ import (
 func EncryptData(data string) (string, error) {
 	cnf := config.GetSecretConfig()
 	secretKey, err := cnf.GetSecret()
+	if err != nil {
+		return "", err
+	}
 
 	aesGCM, nonce, err := prepareEncryptor(secretKey)
 	if err != nil {
@@ -27,6 +30,9 @@ func EncryptData(data string) (string, error) {
 func DecryptData(data string) (string, error) {
 	cnf := config.GetSecretConfig()
 	secretKey, err := cnf.GetSecret()
+	if err != nil {
+		return "", err
+	}
 
 	d, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {

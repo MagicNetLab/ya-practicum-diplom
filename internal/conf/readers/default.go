@@ -5,38 +5,38 @@ import (
 )
 
 type DefaultConfig struct {
-	serverHost       string
-	serverPort       string
-	fileStorageType  string
-	fileStoragePath  string
-	s3Endpoint       string
-	s3SecretKey      string
-	s3AccessKey      string
-	s3Bucket         string
-	dataStorageType  string
-	inMemoryDumpPath string
-	dbHost           string
-	dbPort           string
-	dbUser           string
-	dbPassword       string
-	dbName           string
-	jwtSecret        string
-	encryptKey       string
+	serverHost              string
+	serverPort              string
+	s3Endpoint              string
+	s3SecretKey             string
+	s3AccessKey             string
+	s3Bucket                string
+	dbHost                  string
+	dbPort                  string
+	dbUser                  string
+	dbPassword              string
+	dbName                  string
+	dbSSLMode               string
+	jwtSecret               string
+	jwtTokenLifeTime        string
+	jwtRefreshTokenLifeTime string
+	encryptKey              string
 }
 
 // Parse читает установленные параметры конфигурации
 func (r *DefaultConfig) Parse() error {
 	r.serverHost = "localhost"
 	r.serverPort = "8080"
-	r.fileStorageType = "local"
-	r.fileStoragePath = "/storage"
-	r.dataStorageType = "inmemory"
-	r.inMemoryDumpPath = "/values/inmemory-dump"
 	r.dbHost = "localhost"
 	r.dbPort = "5432"
 	r.dbUser = "gophkeeper"
 	r.dbPassword = "gophkeeper"
 	r.dbName = "gophkeeper"
+	r.dbSSLMode = "disable"
+	r.jwtSecret = "gophkeeper"
+	r.jwtTokenLifeTime = "60"
+	r.jwtRefreshTokenLifeTime = "3600"
+	r.encryptKey = "gophkeeper"
 
 	return nil
 }
@@ -55,22 +55,6 @@ func (r *DefaultConfig) GetServerPort() (string, error) {
 		return "", errors.New("serverPort is not set")
 	}
 	return r.serverPort, nil
-}
-
-// GetFileStorageType возвращает тип хранилища (local, s3)
-func (r *DefaultConfig) GetFileStorageType() (string, error) {
-	if r.fileStorageType == "" {
-		return "", errors.New("fileStorageType is not set")
-	}
-	return r.fileStorageType, nil
-}
-
-// GetFileStoragePath возвращает путь к файлу хранилища
-func (r *DefaultConfig) GetFileStoragePath() (string, error) {
-	if r.fileStoragePath == "" {
-		return "", errors.New("fileStoragePath is not set")
-	}
-	return r.fileStoragePath, nil
 }
 
 // GetS3EndPoint возвращает адрес S3
@@ -103,22 +87,6 @@ func (r *DefaultConfig) GetS3BucketName() (string, error) {
 		return "", errors.New("s3Bucket is not set")
 	}
 	return r.s3Bucket, nil
-}
-
-// GetDataStorageType возвращает тип хранилища данных (inmemory, postgres)
-func (r *DefaultConfig) GetDataStorageType() (string, error) {
-	if r.dataStorageType == "" {
-		return "", errors.New("dataStorageType is not set")
-	}
-	return r.dataStorageType, nil
-}
-
-// GetInMemoryDumpPath возвращает путь к папке с дампом данных
-func (r *DefaultConfig) GetInMemoryDumpPath() (string, error) {
-	if r.inMemoryDumpPath == "" {
-		return "", errors.New("inMemoryDumpPath is not set")
-	}
-	return r.inMemoryDumpPath, nil
 }
 
 // GetDBHost возвращает адрес базы данных
@@ -161,12 +129,36 @@ func (r *DefaultConfig) GetDBName() (string, error) {
 	return r.dbName, nil
 }
 
+// GetDBSSLMode возвращает режим шифрования базы данных
+func (r *DefaultConfig) GetDBSSLMode() (string, error) {
+	if r.dbSSLMode == "" {
+		return "", errors.New("dbSSLMode is not set")
+	}
+	return r.dbSSLMode, nil
+}
+
 // GetJWTSecret возвращает секрет JWT
 func (r *DefaultConfig) GetJWTSecret() (string, error) {
 	if r.jwtSecret == "" {
 		return "", errors.New("jwtSecret is not set")
 	}
 	return r.jwtSecret, nil
+}
+
+// GetJWTTokenLifeTime возвращает время жизни токена JWT
+func (r *DefaultConfig) GetJWTTokenLifeTime() (string, error) {
+	if r.jwtTokenLifeTime == "" {
+		return "", errors.New("jwtTokenLifeTime is not set")
+	}
+	return r.jwtTokenLifeTime, nil
+}
+
+// GetJWTRefreshTokenLifeTime возвращает время жизни токена JWT для обновления
+func (r *DefaultConfig) GetJWTRefreshTokenLifeTime() (string, error) {
+	if r.jwtRefreshTokenLifeTime == "" {
+		return "", errors.New("jwtRefreshTokenLifeTime is not set")
+	}
+	return r.jwtRefreshTokenLifeTime, nil
 }
 
 // GetEncryptKey возвращает ключ шифрования данных

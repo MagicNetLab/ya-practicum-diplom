@@ -6,66 +6,72 @@ import (
 )
 
 const (
-	serverHostKey       = "serverHost"
-	serverPortKey       = "serverPOrt"
-	fileStorageTypeKey  = "fileStorage"
-	fileStoragePathKey  = "filePath"
-	s3EndpointKey       = "s3Endpoint"
-	s3SecretKeyKey      = "s3Secret"
-	s3AccessKeyKey      = "s3Access"
-	s3BucketKey         = "s3Bucket"
-	dataStorageTypeKey  = "dataStorage"
-	inMemoryDumpPathKey = "dataDumpPath"
-	dbHostKey           = "dbHost"
-	dbPortKey           = "dbPort"
-	dbUserKey           = "dbUser"
-	dbPasswordKey       = "dbPassword"
-	dbNameKey           = "dbName"
-	jwtSecretKey        = "jwtSecret"
-	encryptSecretKey    = "encryptKey"
+	serverHostKey      = "serverHost"
+	serverPortKey      = "serverPOrt"
+	s3EndpointKey      = "s3Endpoint"
+	s3SecretKeyKey     = "s3Secret"
+	s3AccessKeyKey     = "s3Access"
+	s3BucketKey        = "s3Bucket"
+	dbHostKey          = "dbHost"
+	dbPortKey          = "dbPort"
+	dbUserKey          = "dbUser"
+	dbPasswordKey      = "dbPassword"
+	dbNameKey          = "dbName"
+	dbSSLModeKey       = "dbSSLMode"
+	jwtSecretKey       = "jwtSecret"
+	jwtTokenKey        = "tokenTime"
+	jwtRefreshTokenKey = "refreshTokenTime"
+	encryptSecretKey   = "encryptKey"
 )
 
 type FlagReader struct {
-	serverHost       string
-	serverPort       string
-	fileStorageType  string
-	fileStoragePath  string
-	s3Endpoint       string
-	s3SecretKey      string
-	s3AccessKey      string
-	s3Bucket         string
-	dataStorageType  string
-	inMemoryDumpPath string
-	dbHost           string
-	dbPort           string
-	dbUser           string
-	dbPassword       string
-	dbName           string
-	jwtSecret        string
-	encryptKey       string
+	serverHost              string
+	serverPort              string
+	s3Endpoint              string
+	s3SecretKey             string
+	s3AccessKey             string
+	s3Bucket                string
+	dbHost                  string
+	dbPort                  string
+	dbUser                  string
+	dbPassword              string
+	dbName                  string
+	dbSSLMode               string
+	jwtSecret               string
+	jwtTokenLifeTime        string
+	jwtRefreshTokenLifeTime string
+	encryptKey              string
 }
 
 // Parse читает установленные параметры конфигурации
 func (r *FlagReader) Parse() error {
-	var serverHost, serverPort, fileStorageType, fileStoragePath, s3Endpoint, s3SecretKey, s3AccessKey, s3Bucket, dataStorageType, inMemoryDumpPath, dbHost, dbPort, dbUser, dbPassword, dbName, jwtSecret, encryptKey string
+	var serverHost, serverPort string
+	var s3Endpoint, s3SecretKey, s3AccessKey, s3Bucket string
+	var dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode string
+	var jwtSecret, jwtTokenLifeTime, jwtRefreshTokenLifeTime string
+	var encryptKey string
 
 	flag.StringVar(&serverHost, serverHostKey, "", "server host")
 	flag.StringVar(&serverPort, serverPortKey, "", "server port")
-	flag.StringVar(&fileStorageType, fileStorageTypeKey, "", "file storage type")
-	flag.StringVar(&fileStoragePath, fileStoragePathKey, "", "file storage path")
+
 	flag.StringVar(&s3Endpoint, s3EndpointKey, "", "s3 endpoint")
 	flag.StringVar(&s3SecretKey, s3SecretKeyKey, "", "s3 secret key")
 	flag.StringVar(&s3AccessKey, s3AccessKeyKey, "", "s3 access key")
 	flag.StringVar(&s3Bucket, s3BucketKey, "", "s3 bucket")
-	flag.StringVar(&dataStorageType, dataStorageTypeKey, "", "data storage type")
+
 	flag.StringVar(&dbHost, dbHostKey, "", "database host")
 	flag.StringVar(&dbPort, dbPortKey, "", "database port")
 	flag.StringVar(&dbUser, dbUserKey, "", "database user")
 	flag.StringVar(&dbPassword, dbPasswordKey, "", "database password")
 	flag.StringVar(&dbName, dbNameKey, "", "database name")
+	flag.StringVar(&dbSSLMode, dbSSLModeKey, "", "database ssl mode")
+
 	flag.StringVar(&jwtSecret, jwtSecretKey, "", "jwt secret")
-	flag.StringVar(&inMemoryDumpPath, inMemoryDumpPathKey, "", "in memory dump path")
+	flag.StringVar(&jwtTokenLifeTime, jwtTokenKey, "", "jwt token life time")
+	flag.StringVar(&jwtRefreshTokenLifeTime, jwtRefreshTokenKey, "", "jwt refresh token life time")
+
 	flag.StringVar(&encryptKey, encryptSecretKey, "", "encrypt key")
+
 	flag.Parse()
 
 	if serverHost != "" {
@@ -74,14 +80,6 @@ func (r *FlagReader) Parse() error {
 
 	if serverPort != "" {
 		r.serverPort = serverPort
-	}
-
-	if fileStorageType != "" {
-		r.fileStorageType = fileStorageType
-	}
-
-	if fileStoragePath != "" {
-		r.fileStoragePath = fileStoragePath
 	}
 
 	if s3Endpoint != "" {
@@ -98,14 +96,6 @@ func (r *FlagReader) Parse() error {
 
 	if s3Bucket != "" {
 		r.s3Bucket = s3Bucket
-	}
-
-	if dataStorageType != "" {
-		r.dataStorageType = dataStorageType
-	}
-
-	if inMemoryDumpPath != "" {
-		r.inMemoryDumpPath = inMemoryDumpPath
 	}
 
 	if dbHost != "" {
@@ -128,6 +118,22 @@ func (r *FlagReader) Parse() error {
 		r.dbName = dbName
 	}
 
+	if dbSSLMode != "" {
+		r.dbSSLMode = dbSSLMode
+	}
+
+	if jwtSecret != "" {
+		r.jwtSecret = jwtSecret
+	}
+
+	if jwtTokenLifeTime != "" {
+		r.jwtTokenLifeTime = jwtTokenLifeTime
+	}
+
+	if jwtRefreshTokenLifeTime != "" {
+		r.jwtRefreshTokenLifeTime = jwtRefreshTokenLifeTime
+	}
+
 	if encryptKey != "" {
 		r.encryptKey = encryptKey
 	}
@@ -148,22 +154,6 @@ func (r *FlagReader) GetServerPort() (string, error) {
 		return "", errors.New("serverPort is not set")
 	}
 	return r.serverPort, nil
-}
-
-// GetFileStorageType возвращает тип хранилища (local, s3)
-func (r *FlagReader) GetFileStorageType() (string, error) {
-	if r.fileStorageType == "" {
-		return "", errors.New("fileStorageType is not set")
-	}
-	return r.fileStorageType, nil
-}
-
-// GetFileStoragePath возвращает путь к файлу хранилища
-func (r *FlagReader) GetFileStoragePath() (string, error) {
-	if r.fileStoragePath == "" {
-		return "", errors.New("fileStoragePath is not set")
-	}
-	return r.fileStoragePath, nil
 }
 
 // GetS3EndPoint возвращает адрес S3
@@ -196,22 +186,6 @@ func (r *FlagReader) GetS3BucketName() (string, error) {
 		return "", errors.New("s3Bucket is not set")
 	}
 	return r.s3Bucket, nil
-}
-
-// GetDataStorageType возвращает тип хранилища данных (inmemory, postgres)
-func (r *FlagReader) GetDataStorageType() (string, error) {
-	if r.dataStorageType == "" {
-		return "", errors.New("dataStorageType is not set")
-	}
-	return r.dataStorageType, nil
-}
-
-// GetInMemoryDumpPath возвращает путь к папке с дамп
-func (r *FlagReader) GetInMemoryDumpPath() (string, error) {
-	if r.inMemoryDumpPath == "" {
-		return "", errors.New("inMemoryDumpPath is not set")
-	}
-	return r.inMemoryDumpPath, nil
 }
 
 // GetDBHost возвращает адрес базы данных
@@ -254,12 +228,36 @@ func (r *FlagReader) GetDBName() (string, error) {
 	return r.dbName, nil
 }
 
+// GetDBSSLMode возвращает режим SSL для подключения к базе данных
+func (r *FlagReader) GetDBSSLMode() (string, error) {
+	if r.dbSSLMode == "" {
+		return "", errors.New("dbSSLMode is not set")
+	}
+	return r.dbSSLMode, nil
+}
+
 // GetJWTSecret возвращает секрет JWT
 func (r *FlagReader) GetJWTSecret() (string, error) {
 	if r.jwtSecret == "" {
 		return "", errors.New("jwtSecret is not set")
 	}
 	return r.jwtSecret, nil
+}
+
+// GetJWTTokenLifeTime возвращает время жизни JWT
+func (r *FlagReader) GetJWTTokenLifeTime() (string, error) {
+	if r.jwtTokenLifeTime == "" {
+		return "", errors.New("jwtTokenLifeTime is not set")
+	}
+	return r.jwtTokenLifeTime, nil
+}
+
+// GetJWTRefreshTokenLifeTime возвращает время жизни JWT
+func (r *FlagReader) GetJWTRefreshTokenLifeTime() (string, error) {
+	if r.jwtRefreshTokenLifeTime == "" {
+		return "", errors.New("jwtRefreshTokenLifeTime is not set")
+	}
+	return r.jwtRefreshTokenLifeTime, nil
 }
 
 // GetEncryptKey возвращает ключ шифрования

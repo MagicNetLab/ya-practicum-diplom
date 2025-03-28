@@ -2,23 +2,22 @@ package conf
 
 // Configurator конфигуратор сервера приложения
 type Configurator struct {
-	serverHost       string
-	serverPort       string
-	fileStorageType  string
-	fileStoragePath  string
-	s3Endpoint       string
-	s3SecretKey      string
-	s3AccessKey      string
-	s3Bucket         string
-	dataStorageType  string
-	inMemoryDumpPath string
-	dbHost           string
-	dbPort           string
-	dbUser           string
-	dbPassword       string
-	dbName           string
-	jwtSecret        string
-	encryptKey       string
+	serverHost              string
+	serverPort              string
+	s3Endpoint              string
+	s3SecretKey             string
+	s3AccessKey             string
+	s3Bucket                string
+	dbHost                  string
+	dbPort                  string
+	dbUser                  string
+	dbPassword              string
+	dbName                  string
+	dbSSLMode               string
+	jwtSecret               string
+	jwtTokenLifeTime        int
+	jwtRefreshTokenLifetime int
+	encryptKey              string
 }
 
 // ServerHost возвращает адрес сервера
@@ -29,16 +28,6 @@ func (c Configurator) ServerHost() string {
 // ServerPort возвращает порт сервера
 func (c Configurator) ServerPort() string {
 	return c.serverPort
-}
-
-// FileStorageType возвращает тип используемого хранилища
-func (c Configurator) FileStorageType() string {
-	return c.fileStorageType
-}
-
-// FileStoragePath возвращает путь к файлу хранилища
-func (c Configurator) FileStoragePath() string {
-	return c.fileStoragePath
 }
 
 // S3Endpoint возвращает адрес сервера s3
@@ -59,16 +48,6 @@ func (c Configurator) S3AccessKey() string {
 // S3Bucket возвращает bucket s3
 func (c Configurator) S3Bucket() string {
 	return c.s3Bucket
-}
-
-// DataStorageType возвращает тип используемого хранилища данных
-func (c Configurator) DataStorageType() string {
-	return c.dataStorageType
-}
-
-// InMemoryDumpPath возвращает путь к файлу в памяти
-func (c Configurator) InMemoryDumpPath() string {
-	return c.inMemoryDumpPath
 }
 
 // DBHost возвращает адрес базы данных
@@ -96,22 +75,37 @@ func (c Configurator) DBName() string {
 	return c.dbName
 }
 
+// DBSSLMode возвращает режим использования SSL при подключении к базе данных
+func (c Configurator) DBSSLMode() string {
+	return c.dbSSLMode
+}
+
 // JWTSecret возвращает secret key jwt
 func (c Configurator) JWTSecret() string {
 	return c.jwtSecret
+}
+
+// JWTTokenLifeTime возвращает время жизни токена jwt
+func (c Configurator) JWTTokenLifeTime() int {
+	return c.jwtTokenLifeTime
+}
+
+// JWTRefreshTokenLifetime возвращает время жизни refresh-токена jwt
+func (c Configurator) JWTRefreshTokenLifetime() int {
+	return c.jwtRefreshTokenLifetime
 }
 
 // IsValid проверяет корректность конфигурации
 func (c Configurator) IsValid() bool {
 	isValidHost := c.serverHost != "" && c.serverPort != ""
 
-	isValidS3FileStorage := c.fileStorageType == FileStorageS3 && c.s3Endpoint != "" && c.s3SecretKey != "" && c.s3AccessKey != "" && c.s3Bucket != ""
+	isValidS3FileStorage := c.s3Endpoint != "" && c.s3SecretKey != "" && c.s3AccessKey != "" && c.s3Bucket != ""
 
-	isValidDataStoragePostgres := c.dataStorageType == DataStoragePostgres && c.dbHost != "" && c.dbPort != "" && c.dbUser != "" && c.dbPassword != "" && c.dbName != ""
+	isValidDataStoragePostgres := c.dbHost != "" && c.dbPort != "" && c.dbUser != "" && c.dbPassword != "" && c.dbName != ""
 
 	isValidJWTSecret := c.jwtSecret != ""
 
-	isValidEncrytKey := c.encryptKey != ""
+	isValidEncryptKey := c.encryptKey != ""
 
-	return isValidHost && isValidS3FileStorage && isValidDataStoragePostgres && isValidJWTSecret && isValidEncrytKey
+	return isValidHost && isValidS3FileStorage && isValidDataStoragePostgres && isValidJWTSecret && isValidEncryptKey
 }

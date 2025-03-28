@@ -10,23 +10,22 @@ import (
 )
 
 type EnvReader struct {
-	serverHost       string
-	serverPort       string
-	fileStorageType  string
-	fileStoragePath  string
-	inMemoryDumpPath string
-	s3Endpoint       string
-	s3SecretKey      string
-	s3AccessKey      string
-	s3Bucket         string
-	dataStorageType  string
-	dbHost           string
-	dbPort           string
-	dbUser           string
-	dbPassword       string
-	dbName           string
-	jwtSecret        string
-	encryptKey       string
+	serverHost              string
+	serverPort              string
+	s3Endpoint              string
+	s3SecretKey             string
+	s3AccessKey             string
+	s3Bucket                string
+	dbHost                  string
+	dbPort                  string
+	dbUser                  string
+	dbPassword              string
+	dbName                  string
+	dbSSlMode               string
+	jwtSecret               string
+	jwtTokenLifeTime        string
+	jwtRefreshTokenLifeTime string
+	encryptKey              string
 }
 
 // Parse читает установленные параметры конфигурации
@@ -44,16 +43,6 @@ func (r *EnvReader) Parse() error {
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort != "" {
 		r.serverPort = serverPort
-	}
-
-	fileStorageType := os.Getenv("FILE_STORAGE_TYPE")
-	if fileStorageType != "" {
-		r.fileStorageType = fileStorageType
-	}
-
-	fileStoragePath := os.Getenv("FILE_STORAGE_PATH")
-	if fileStoragePath != "" {
-		r.fileStoragePath = fileStoragePath
 	}
 
 	s3Endpoint := os.Getenv("S3_ENDPOINT")
@@ -74,16 +63,6 @@ func (r *EnvReader) Parse() error {
 	s3Bucket := os.Getenv("S3_BUCKET")
 	if s3Bucket != "" {
 		r.s3Bucket = s3Bucket
-	}
-
-	dataStorageType := os.Getenv("DATA_STORAGE_TYPE")
-	if dataStorageType != "" {
-		r.dataStorageType = dataStorageType
-	}
-
-	inMemoryDumpPath := os.Getenv("IN_MEMORY_DUMP_PATH")
-	if inMemoryDumpPath != "" {
-		r.inMemoryDumpPath = inMemoryDumpPath
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -111,12 +90,27 @@ func (r *EnvReader) Parse() error {
 		r.dbName = dbName
 	}
 
+	dbSSLMode := os.Getenv("DB_SSL_MODE")
+	if dbSSLMode != "" {
+		r.dbSSlMode = dbSSLMode
+	}
+
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret != "" {
 		r.jwtSecret = jwtSecret
 	}
 
-	encryptKey := os.Getenv("ENCRIPT_KEY")
+	jwtTokenLifeTime := os.Getenv("JWT_TOKEN_LIFE_TIME")
+	if jwtTokenLifeTime != "" {
+		r.jwtTokenLifeTime = jwtTokenLifeTime
+	}
+
+	jwtRefreshTokenLifeTime := os.Getenv("JWT_REFRESH_TOKEN_LIFE_TIME")
+	if jwtRefreshTokenLifeTime != "" {
+		r.jwtRefreshTokenLifeTime = jwtRefreshTokenLifeTime
+	}
+
+	encryptKey := os.Getenv("ENCRYPT_KEY")
 	if encryptKey != "" {
 		r.encryptKey = encryptKey
 	}
@@ -138,22 +132,6 @@ func (r *EnvReader) GetServerPort() (string, error) {
 		return "", errors.New("serverPort is not set")
 	}
 	return r.serverPort, nil
-}
-
-// GetFileStorageType возвращает тип хранилища (local, s3)
-func (r *EnvReader) GetFileStorageType() (string, error) {
-	if r.fileStorageType == "" {
-		return "", errors.New("fileStorageType is not set")
-	}
-	return r.fileStorageType, nil
-}
-
-// GetFileStoragePath возвращает путь к файлу хранилища
-func (r *EnvReader) GetFileStoragePath() (string, error) {
-	if r.fileStoragePath == "" {
-		return "", errors.New("fileStoragePath is not set")
-	}
-	return r.fileStoragePath, nil
 }
 
 // GetS3EndPoint возвращает адрес S3
@@ -186,22 +164,6 @@ func (r *EnvReader) GetS3BucketName() (string, error) {
 		return "", errors.New("s3Bucket is not set")
 	}
 	return r.s3Bucket, nil
-}
-
-// GetDataStorageType возвращает тип хранилища данных (inmemory, postgres)
-func (r *EnvReader) GetDataStorageType() (string, error) {
-	if r.dataStorageType == "" {
-		return "", errors.New("dataStorageType is not set")
-	}
-	return r.dataStorageType, nil
-}
-
-// GetInMemoryDumpPath возвращает путь к папке с дамп
-func (r *EnvReader) GetInMemoryDumpPath() (string, error) {
-	if r.inMemoryDumpPath == "" {
-		return "", errors.New("inMemoryDumpPath is not set")
-	}
-	return r.inMemoryDumpPath, nil
 }
 
 // GetDBHost возвращает адрес базы данных
@@ -244,12 +206,33 @@ func (r *EnvReader) GetDBName() (string, error) {
 	return r.dbName, nil
 }
 
+func (r *EnvReader) GetDBSSLMode() (string, error) {
+	if r.dbSSlMode == "" {
+		return "", errors.New("dbSSLMode is not set")
+	}
+	return r.dbSSlMode, nil
+}
+
 // GetJWTSecret возвращает секрет JWT
 func (r *EnvReader) GetJWTSecret() (string, error) {
 	if r.jwtSecret == "" {
 		return "", errors.New("jwtSecret is not set")
 	}
 	return r.jwtSecret, nil
+}
+
+func (r *EnvReader) GetJWTTokenLifeTime() (string, error) {
+	if r.jwtTokenLifeTime == "" {
+		return "", errors.New("jwtTokenLifeTime is not set")
+	}
+	return r.jwtTokenLifeTime, nil
+}
+
+func (r *EnvReader) GetJWTRefreshTokenLifeTime() (string, error) {
+	if r.jwtRefreshTokenLifeTime == "" {
+		return "", errors.New("jwtRefreshTokenLifeTime is not set")
+	}
+	return r.jwtRefreshTokenLifeTime, nil
 }
 
 // GetEncryptKey возвращает ключ шифрования

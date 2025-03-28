@@ -103,6 +103,9 @@ func (a *AccountRepo) CreateAccount(ctx context.Context, uid, login, password, u
 	}
 
 	encryptDesc, err := encryptor.EncryptData(description)
+	if err != nil {
+		return nil, err
+	}
 	err = account.SetDescription(encryptDesc)
 	if err != nil {
 		return nil, err

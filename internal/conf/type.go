@@ -13,10 +13,6 @@ type Reader interface {
 	GetServerHost() (string, error)
 	// GetServerPort возвращает порт сервера
 	GetServerPort() (string, error)
-	// GetFileStorageType возвращает тип хранилища (local, s3)
-	GetFileStorageType() (string, error)
-	// GetFileStoragePath возвращает путь к файлу хранилища
-	GetFileStoragePath() (string, error)
 	// GetS3EndPoint возвращает адрес S3
 	GetS3EndPoint() (string, error)
 	// GetS3AccessKey возвращает ключ S3
@@ -25,10 +21,6 @@ type Reader interface {
 	GetS3SecretKey() (string, error)
 	// GetS3BucketName возвращает имя бакета S3
 	GetS3BucketName() (string, error)
-	// GetDataStorageType возвращает тип хранилища данных (inmemory, postgres)
-	GetDataStorageType() (string, error)
-	// GetInMemoryDumpPath возвращает путь к дампу в памяти
-	GetInMemoryDumpPath() (string, error)
 	// GetDBHost возвращает адрес базы данных
 	GetDBHost() (string, error)
 	// GetDBPort возвращает порт базы данных
@@ -39,8 +31,14 @@ type Reader interface {
 	GetDBPassword() (string, error)
 	// GetDBName возвращает имя базы данных
 	GetDBName() (string, error)
+	// GetDBSSLMode возвращает режим SSL базы данных
+	GetDBSSLMode() (string, error)
 	// GetJWTSecret возвращает ключ JWT
 	GetJWTSecret() (string, error)
+	// GetJWTTokenLifeTime возвращает время жизни токена JWT
+	GetJWTTokenLifeTime() (string, error)
+	// GetJWTRefreshTokenLifeTime возвращает время жизни токена обновления JWT
+	GetJWTRefreshTokenLifeTime() (string, error)
 	// GetEncryptKey возвращает ключ шифрования
 	GetEncryptKey() (string, error)
 }
