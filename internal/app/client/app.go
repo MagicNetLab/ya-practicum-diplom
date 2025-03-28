@@ -3,14 +3,14 @@ package client
 import (
 	"context"
 	"fmt"
-	appClianet "github.com/MagicNetLab/ya-practicum-diplom/internal/services/client"
+	appClient "github.com/MagicNetLab/ya-practicum-diplom/internal/services/client"
 	"github.com/urfave/cli/v3"
 	"log"
 	"os"
 	"os/exec"
 )
 
-func Run(ctx context.Context, client appClianet.AppClient) error {
+func Run(ctx context.Context, client appClient.AppClient) error {
 	commands := initApp(ctx, client)
 	err := commands.Run(ctx, os.Args)
 	if err != nil {
@@ -22,7 +22,7 @@ func Run(ctx context.Context, client appClianet.AppClient) error {
 
 var nav = navigation{Token: ""}
 
-func initApp(ctx context.Context, client appClianet.AppClient) *cli.Command {
+func initApp(ctx context.Context, client appClient.AppClient) *cli.Command {
 	nav.Client = client
 
 	return &cli.Command{
