@@ -250,11 +250,9 @@ func TestService_SearchAccounts(t *testing.T) {
 		mockRepo.On("SearchAccounts", ctx, mock.AnythingOfType("models.AccountSearch")).Return([]models.AccountModel{mockAccount1, mockAccount2}, nil)
 
 		req := &pb.SearchAccountRequest{
-			Login:       "test-login",
-			Url:         "test-url",
-			Description: "test-description",
-			Limit:       "10",
-			Offset:      "0",
+			Search: "test-login",
+			Limit:  "10",
+			Offset: "0",
 		}
 		resp, err := service.Search(ctx, req)
 
@@ -268,6 +266,7 @@ func TestService_SearchAccounts(t *testing.T) {
 	})
 
 	t.Run("Ошибка поиска аккаунтов", func(t *testing.T) {
+		service, mockRepo, _ := setupService()
 		ctx := setupAuthContext(uid1)
 		mockRepo.On("SearchAccounts", ctx, mock.AnythingOfType("models.AccountSearch")).Return(nil, errors.New("search failed"))
 

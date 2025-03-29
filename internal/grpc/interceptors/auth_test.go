@@ -2,85 +2,157 @@ package interceptors
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 	"github.com/google/uuid"
+	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
-
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
-	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
-// TestAuthInterceptor тестирование AuthInterceptor
-func TestAuthInterceptor(t *testing.T) {
-	cnf := config.GetJWTConfig()
-
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return "success", nil
-	}
-
-	t.Run("Успешная аутентификация", func(t *testing.T) {
-		mockUser := new(mm.UserModel)
-		mockUser.On("GetUID").Return(uuid.New().String())
-		token, _ := jwt.GenerateToken(mockUser, cnf.GetJWTSecret())
-
-		md := metadata.New(map[string]string{"token": token})
-		ctx := metadata.NewIncomingContext(context.Background(), md)
-
-		resp, err := AuthInterceptor(ctx, nil, &grpc.UnaryServerInfo{}, handler)
-		assert.NoError(t, err)
-		assert.Equal(t, "success", resp)
-	})
-
-	t.Run("Ошибка аутентификации: отсутствует токен", func(t *testing.T) {
-		ctx := context.Background()
-
-		_, err := AuthInterceptor(ctx, nil, &grpc.UnaryServerInfo{}, handler)
-		assert.Error(t, err)
-		assert.Equal(t, codes.Unauthenticated, status.Code(err))
-	})
-
-	t.Run("Ошибка аутентификации: неверный токен", func(t *testing.T) {
-		md := metadata.New(map[string]string{"token": "invalid_token"})
-		ctx := metadata.NewIncomingContext(context.Background(), md)
-
-		_, err := AuthInterceptor(ctx, nil, &grpc.UnaryServerInfo{}, handler)
-		assert.Error(t, err)
-		assert.Equal(t, codes.Unauthenticated, status.Code(err))
-	})
+type mockHandler struct {
+	mock.Mock
 }
 
-// TestGuestInterceptor тестирование GuestInterceptor
-func TestGuestInterceptor(t *testing.T) {
+func (m *mockHandler) Handle(ctx context.Context, req any) (any, error) {
+	args := m.Called(ctx, req)
+	return args.Get(0), args.Error(1)
+}
+
+func TestAuthInterceptor(t *testing.T) {
+	err := os.Setenv("JWT_SECRET", "secret")
+	assert.NoError(t, err)
 	cnf := config.GetJWTConfig()
 
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return "success", nil
-	}
+	t.Run("успешная авторизация с валидным токеном", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+		user := models.User{UID: uuid.New().String()}
+		token, err := jwt.GenerateToken(&user, cnf.GetJWTSecret())
+		assert.NoError(t, err)
 
-	t.Run("Успешный доступ для гостя", func(t *testing.T) {
+		ctx := context.Background()
+		md := metadata.New(map[string]string{"token": token})
+		ctx = metadata.NewIncomingContext(ctx, md)
+
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Method"}
+		result, err := AuthInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "success", result)
+	})
+
+	t.Run("пропуск авторизации для метода Auth", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+
+		ctx := context.Background()
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Auth"}
+		result, err := AuthInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "success", result)
+	})
+
+	t.Run("пропуск авторизации для метода Register", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+
+		ctx := context.Background()
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Register"}
+		result, err := AuthInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "success", result)
+	})
+
+	t.Run("отсутствие метаданных", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+
 		ctx := context.Background()
 
-		resp, err := GuestInterceptor(ctx, nil, &grpc.UnaryServerInfo{}, handler)
-		assert.NoError(t, err)
-		assert.Equal(t, "success", resp)
-	})
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Method"}
+		result, err := AuthInterceptor(ctx, "request", info, mockHandler.Handle)
 
-	t.Run("Ошибка доступа для авторизованного пользователя", func(t *testing.T) {
-		mockUser := new(mm.UserModel)
-		mockUser.On("GetUID").Return(uuid.New().String())
-		token, _ := jwt.GenerateToken(mockUser, cnf.GetJWTSecret())
-
-		md := metadata.New(map[string]string{"token": token})
-		ctx := metadata.NewIncomingContext(context.Background(), md)
-
-		_, err := GuestInterceptor(ctx, nil, &grpc.UnaryServerInfo{}, handler)
 		assert.Error(t, err)
-		assert.Equal(t, codes.PermissionDenied, status.Code(err))
+		assert.NotEqual(t, "success", result)
 	})
+
+	t.Run("невалидный токен", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+		token := "invalid_token"
+
+		ctx := context.Background()
+		md := metadata.New(map[string]string{"token": token})
+		ctx = metadata.NewIncomingContext(ctx, md)
+
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Method"}
+		result, err := AuthInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.Error(t, err)
+		assert.NotEqual(t, "success", result)
+	})
+
+	err = os.Unsetenv("JWT_SECRET")
+	assert.NoError(t, err)
+}
+
+func TestGuestInterceptor(t *testing.T) {
+	err := os.Setenv("JWT_SECRET", "secret")
+	assert.NoError(t, err)
+	cnf := config.GetJWTConfig()
+
+	t.Run("успешный доступ для гостя", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+
+		ctx := context.Background()
+
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Auth"}
+		result, err := GuestInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "success", result)
+	})
+
+	t.Run("запрет доступа для авторизованного пользователя", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+		user := models.User{UID: uuid.New().String()}
+		token, err := jwt.GenerateToken(&user, cnf.GetJWTSecret())
+		assert.NoError(t, err)
+
+		ctx := context.Background()
+		md := metadata.New(map[string]string{"token": token})
+		ctx = metadata.NewIncomingContext(ctx, md)
+
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Auth"}
+		result, err := GuestInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.Error(t, err)
+		assert.NotEqual(t, "success", result)
+	})
+
+	t.Run("пропуск для не-Auth методов", func(t *testing.T) {
+		mockHandler := &mockHandler{}
+		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
+
+		ctx := context.Background()
+
+		info := &grpc.UnaryServerInfo{FullMethod: "/service/Method"}
+		result, err := GuestInterceptor(ctx, "request", info, mockHandler.Handle)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "success", result)
+	})
+
+	err = os.Unsetenv("JWT_SECRET")
+	assert.NoError(t, err)
 }

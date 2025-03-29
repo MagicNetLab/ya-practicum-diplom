@@ -151,7 +151,7 @@ func TestService_Create(t *testing.T) {
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Card.ID)
 		assert.Equal(t, req.Name, resp.Card.Name)
-		assert.Equal(t, req.Number, resp.Card.Number)
+		assert.Equal(t, "**** **** **** 1111", resp.Card.Number)
 		assert.Equal(t, req.Meta, resp.Card.Meta)
 		mockRepo.AssertExpectations(t)
 	})
@@ -269,13 +269,10 @@ func TestService_Search(t *testing.T) {
 	uid := uuid.New().String()
 	ctx := setupAuthContext(uid)
 
-	t.Run("Success with all search parameters", func(t *testing.T) {
+	t.Run("Проверка успешного поиска карты с корректными параметрами поиска", func(t *testing.T) {
 		service, mockRepo, _ := setupService()
 		searchReq := &pb.SearchCardRequest{
-			Number: "4111",
-			Name:   "Test",
-			Meta:   "test-meta",
-			Year:   2025,
+			Name:   "test",
 			Limit:  10,
 			Offset: 0,
 		}
@@ -328,34 +325,6 @@ func TestService_Search(t *testing.T) {
 		mockRepo.On("SearchCards", ctx, mock.AnythingOfType("models.CardSearch")).Return(expectedCards, nil)
 
 		resp, err := service.Search(ctx, searchReq)
-		assert.NoError(t, err)
-		assert.NotNil(t, resp)
-		assert.Len(t, resp.Cards, 1)
-		mockRepo.AssertExpectations(t)
-	})
-
-	t.Run("Проверка успешного поиска карты по номеру", func(t *testing.T) {
-		service, mockRepo, _ := setupService()
-		uid := uuid.New().String()
-		ctx := setupAuthContext(uid)
-		searchReq := &pb.SearchCardRequest{
-			Number: "4111",
-		}
-
-		expectedCards := []models.CardModel{
-			&models.Card{
-				ID:     uuid.New().String(),
-				Name:   "Test Card",
-				Number: "4111111111111111",
-				Month:  12,
-				Year:   2025,
-			},
-		}
-
-		mockRepo.On("SearchCards", ctx, mock.AnythingOfType("models.CardSearch")).Return(expectedCards, nil)
-
-		resp, err := service.Search(ctx, searchReq)
-
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.Len(t, resp.Cards, 1)

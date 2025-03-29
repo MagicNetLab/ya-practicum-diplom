@@ -15,6 +15,15 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 )
 
+// TokenLifeTime время жизни токена
+const TokenLifeTime = time.Hour * 3
+
+// Claims структура токена
+type Claims struct {
+	jwt.RegisteredClaims
+	UID string
+}
+
 // GenerateToken генерирует JWT
 func GenerateToken(user models.UserModel, jwtSecret string) (string, error) {
 	uid := user.GetUID()

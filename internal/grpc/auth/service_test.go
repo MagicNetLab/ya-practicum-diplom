@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 	"github.com/google/uuid"
 	"testing"
 
@@ -27,10 +28,13 @@ func TestService_Auth(t *testing.T) {
 	service, mockRepo := setupService()
 	mockUser := new(mm.UserModel)
 	mockUser.On("GetUID").Return(uuid.New().String())
+	pass, err := encryptor.EncryptPassword("password")
+	assert.NoError(t, err)
+	mockUser.On("GetPassword").Return(pass)
 	ctx := context.Background()
 
 	t.Run("Успешная авторизация", func(t *testing.T) {
-		mockRepo.On("GetUserByLoginAndPassword", ctx, "testuser", "password").Return(mockUser, nil)
+		mockRepo.On("GetUserByLogin", ctx, "testuser").Return(mockUser, nil)
 		mockRepo.On("CreateToken", ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		req := &pb.AuthRequest{Login: "testuser", Secret: "password"}
@@ -38,11 +42,10 @@ func TestService_Auth(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.Token)
-		assert.NotEmpty(t, resp.RefreshToken)
 	})
 
 	t.Run("Ошибка авторизации: неверный логин или пароль", func(t *testing.T) {
-		mockRepo.On("GetUserByLoginAndPassword", ctx, "wronguser", "wrongpassword").Return(nil, errors.New("user not found"))
+		mockRepo.On("GetUserByLogin", ctx, "wronguser").Return(nil, errors.New("user not found"))
 
 		req := &pb.AuthRequest{Login: "wronguser", Secret: "wrongpassword"}
 		resp, err := service.Auth(ctx, req)

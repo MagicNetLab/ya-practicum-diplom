@@ -197,105 +197,6 @@ func TestService_GetNote(t *testing.T) {
 	})
 }
 
-// TestService_UpdateNote тест обновления заметки
-func TestService_UpdateNote(t *testing.T) {
-	uid := uuid.New().String()
-	ctx := setupAuthContext(uid)
-
-	t.Run("Успешное обновление заметки", func(t *testing.T) {
-		service, mockRepo := setupService()
-		id := uuid.New().String()
-		existingNote := &models.Note{
-			ID:        id,
-			UID:       uid,
-			Title:     "Old Title",
-			Content:   "Old Content",
-			Meta:      "Old Meta",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-
-		mockRepo.On("GetNote", ctx, id, uid).Return(existingNote, nil)
-		mockRepo.On("UpdateNote", ctx, mock.AnythingOfType("*models.Note")).Return(nil)
-
-		req := &pb.UpdateNoteRequest{
-			ID:      id,
-			Title:   "New Title",
-			Content: "New Content",
-			Meta:    "New Meta",
-		}
-
-		resp, err := service.Update(ctx, req)
-
-		assert.NoError(t, err)
-		assert.NotNil(t, resp)
-		assert.Equal(t, req.Title, resp.Note.Title)
-		assert.Equal(t, req.Content, resp.Note.Content)
-		assert.Equal(t, req.Meta, resp.Note.Meta)
-		mockRepo.AssertExpectations(t)
-	})
-
-	t.Run("Ошибка валидации идентификаторов", func(t *testing.T) {
-		service, _ := setupService()
-		req := &pb.UpdateNoteRequest{
-			ID: "invalid-id",
-		}
-
-		resp, err := service.Update(ctx, req)
-
-		assert.Error(t, err)
-		assert.Nil(t, resp)
-		statusErr, ok := status.FromError(err)
-		assert.True(t, ok)
-		assert.Equal(t, codes.InvalidArgument, statusErr.Code())
-	})
-
-	t.Run("Ошибка при обновлении заметки в репозитории", func(t *testing.T) {
-		service, mockRepo := setupService()
-		id := uuid.New().String()
-		existingNote := &models.Note{
-			ID:        id,
-			UID:       uid,
-			Title:     "Old Title",
-			Content:   "Old Content",
-			Meta:      "Old Meta",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-
-		mockRepo.On("GetNote", ctx, id, uid).Return(existingNote, nil)
-		mockRepo.On("UpdateNote", ctx, mock.AnythingOfType("*models.Note")).Return(assert.AnError)
-
-		req := &pb.UpdateNoteRequest{
-			ID:      id,
-			Title:   "New Title",
-			Content: "New Content",
-			Meta:    "New Meta",
-		}
-
-		resp, err := service.Update(ctx, req)
-
-		assert.Error(t, err)
-		assert.Nil(t, resp)
-		statusErr, ok := status.FromError(err)
-		assert.True(t, ok)
-		assert.Equal(t, codes.Internal, statusErr.Code())
-		mockRepo.AssertExpectations(t)
-	})
-
-	t.Run("Ошибка валидации токена", func(t *testing.T) {
-		service, _ := setupService()
-		ctx := context.Background()
-		req := &pb.UpdateNoteRequest{}
-		resp, err := service.Update(ctx, req)
-		assert.Error(t, err)
-		assert.Nil(t, resp)
-		statusErr, ok := status.FromError(err)
-		assert.True(t, ok)
-		assert.Equal(t, codes.Unauthenticated, statusErr.Code())
-	})
-}
-
 // TestService_RemoveNote тест удаления заметки
 func TestService_RemoveNote(t *testing.T) {
 	service, mockRepo := setupService()
@@ -436,11 +337,9 @@ func TestService_SearchNotes(t *testing.T) {
 		mockRepo.On("SearchNote", ctx, mock.AnythingOfType("*models.NoteSearch")).Return(expectedNotes, nil)
 
 		req := &pb.SearchNoteRequest{
-			Title:   "Test",
-			Content: "Content",
-			Meta:    "Meta",
-			Limit:   10,
-			Offset:  0,
+			Search: "Test",
+			Limit:  10,
+			Offset: 0,
 		}
 		resp, err := service.Search(ctx, req)
 
