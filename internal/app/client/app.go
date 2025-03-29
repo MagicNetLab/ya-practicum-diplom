@@ -201,6 +201,14 @@ func initApp(ctx context.Context, client appClient.AppClient) *cli.Command {
 					}
 				},
 			},
+			{
+				Name:  "help",
+				Usage: "Помощь",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					PrintHelp()
+					return nil
+				},
+			},
 		},
 	}
 }
