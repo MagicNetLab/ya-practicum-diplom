@@ -11,7 +11,6 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
 )
 
 type AccountData struct {
@@ -107,6 +106,7 @@ func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
 		cards:      cardpb.NewCardClient(connect),
 		notes:      notepb.NewNoteClient(connect),
 		files:      filepb.NewFilesClient(connect),
+		fileReader: &FileReader{},
 	}, nil
 }
 
@@ -118,6 +118,7 @@ type AppClientImpl struct {
 	cards      cardpb.CardClient
 	notes      notepb.NoteClient
 	files      filepb.FilesClient
+	fileReader FileManager
 }
 
 // Auth - метод аутентификации пользователя
@@ -437,7 +438,7 @@ func (c *AppClientImpl) FileList(ctx context.Context) ([]FileData, error) {
 
 // FileAdd - метод добавления нового файла
 func (c *AppClientImpl) FileAdd(ctx context.Context, data FileData) error {
-	fileContent, err := os.ReadFile(data.Path)
+	fileContent, err := c.fileReader.Read(data.Path)
 	if err != nil {
 		return err
 	}

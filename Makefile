@@ -37,6 +37,7 @@ mock:
 	make mock-repo
 	make mock-repo-models
 	make mock-clients
+	make mock-service
 
 mock-repo:
 	mockery --name=AuthRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
@@ -67,3 +68,19 @@ mock-conf:
 	mockery --name=JWTConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
 	mockery --name=DataBaseConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
 	mockery --name=AppConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+
+mock-service:
+	mockery --name=AppClient --dir=internal/services/client --output=internal/services/client/mocks --outpkg=mocks
+	mockery --name=FileManager --dir=internal/services/client --output=internal/services/client/mocks --outpkg=mocks
+
+mock-grpc:
+	mockery --name=AuthServer --dir=internal/grpc/auth/proto --output=internal/grpc/auth/mocks --outpkg=mocks
+	mockery --name=AuthClient --dir=internal/grpc/auth/proto --output=internal/grpc/auth/mocks --outpkg=mocks
+	mockery --name=AccountsServer --dir=internal/grpc/account/proto --output=internal/grpc/account/mocks --outpkg=mocks
+	mockery --name=AccountsClient --dir=internal/grpc/account/proto --output=internal/grpc/account/mocks --outpkg=mocks
+	mockery --name=CardServer --dir=internal/grpc/card/proto --output=internal/grpc/card/mocks --outpkg=mocks
+	mockery --name=CardClient --dir=internal/grpc/card/proto --output=internal/grpc/card/mocks --outpkg=mocks
+	mockery --name=FilesServer --dir=internal/grpc/files/proto --output=internal/grpc/files/mocks --outpkg=mocks
+	mockery --name=FilesClient --dir=internal/grpc/files/proto --output=internal/grpc/files/mocks --outpkg=mocks
+	mockery --name=NoteServer --dir=internal/grpc/note/proto --output=internal/grpc/note/mocks --outpkg=mocks
+	mockery --name=NoteClient --dir=internal/grpc/note/proto --output=internal/grpc/note/mocks --outpkg=mocks
