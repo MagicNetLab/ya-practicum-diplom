@@ -200,7 +200,7 @@ func TestAuthRepo_CreateToken(t *testing.T) {
 		assert.True(t, hasToken)
 
 		t.Cleanup(func() {
-			_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
+			_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE uid=$1", user.GetUID())
 		})
 	})
 
@@ -215,7 +215,7 @@ func TestAuthRepo_CreateToken(t *testing.T) {
 		assert.False(t, hasToken)
 
 		t.Cleanup(func() {
-			_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE token=$1", testToken)
+			_, _ = pool.Exec(ctx, "DELETE FROM tokens WHERE uid=$1", user.GetUID())
 		})
 	})
 

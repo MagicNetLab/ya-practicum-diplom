@@ -160,7 +160,7 @@ func TestAccountRepo_RemoveAccount(t *testing.T) {
 	account, err := repo.CreateAccount(context.Background(), uid, login, password, url, description)
 	assert.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = pgx.Exec(context.Background(), "DELETE FROM accounts WHERE id=$1", account.GetID())
+		_, _ = pgx.Exec(context.Background(), "DELETE FROM accounts WHERE uid=$1", uid)
 	})
 
 	t.Run("Проверка успешного удаления аккаунта", func(t *testing.T) {
@@ -205,13 +205,12 @@ func TestAccountRepo_SearchAccounts(t *testing.T) {
 	// Тестовые данные
 	uid1 := uuid.New().String()
 	uid2 := uuid.New().String()
-	testData := []models.Account{
-		{ID: uuid.New().String(), UID: uid1, Login: "test-login-1", Password: "test-password-1", URL: "test-url-1", Description: "test-description-1", CreatedAt: time.Now(), UpdatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid1, Login: "test-login-2", Password: "test-password-2", URL: "test-url-2", Description: "test-description-2", CreatedAt: time.Now(), UpdatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid1, Login: "test-login-3", Password: "test-password-3", URL: "test-url-3", Description: "test-description-3", CreatedAt: time.Now(), UpdatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid2, Login: "test-login-4", Password: "test-password-4", URL: "test-url-4", Description: "test-description-4", CreatedAt: time.Now(), UpdatedAt: time.Now()},
-		{ID: uuid.New().String(), UID: uid2, Login: "test-login-5", Password: "test-password-5", URL: "test-url-5", Description: "test-description-5", CreatedAt: time.Now(), UpdatedAt: time.Now()},
-	}
+	testData := make([]models.Account, 0)
+	testData = append(testData, models.Account{ID: uuid.New().String(), UID: uid1, Login: "test-login-1", Password: "test-password-1", URL: "test-url-1", Description: "test-description-1", CreatedAt: time.Now(), UpdatedAt: time.Now()})
+	testData = append(testData, models.Account{ID: uuid.New().String(), UID: uid1, Login: "test-login-2", Password: "test-password-2", URL: "test-url-2", Description: "test-description-2", CreatedAt: time.Now(), UpdatedAt: time.Now()})
+	testData = append(testData, models.Account{ID: uuid.New().String(), UID: uid1, Login: "test-login-3", Password: "test-password-3", URL: "test-url-3", Description: "test-description-3", CreatedAt: time.Now(), UpdatedAt: time.Now()})
+	testData = append(testData, models.Account{ID: uuid.New().String(), UID: uid2, Login: "test-login-4", Password: "test-password-4", URL: "test-url-4", Description: "test-description-4", CreatedAt: time.Now(), UpdatedAt: time.Now()})
+	testData = append(testData, models.Account{ID: uuid.New().String(), UID: uid2, Login: "test-login-5", Password: "test-password-5", URL: "test-url-5", Description: "test-description-5", CreatedAt: time.Now(), UpdatedAt: time.Now()})
 
 	// Encrypt test data
 	for _, account := range testData {

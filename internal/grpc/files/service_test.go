@@ -62,13 +62,13 @@ func setupAuthContext(uid string, secret string) context.Context {
 
 // TestService_Put тесты добавления файла в хранилище
 func TestService_Put(t *testing.T) {
-	service, mockRepo, mockStorage, _ := setupService()
-	uid := uuid.New().String()
-	ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
 	assert.NoError(t, err)
 
 	t.Run("Успешное добавление файла", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
 			Content: []byte("test content"),
@@ -90,6 +90,7 @@ func TestService_Put(t *testing.T) {
 	})
 
 	t.Run("Ошибка аутентификации", func(t *testing.T) {
+		service, _, _, _ := setupService()
 		ctx := context.Background()
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
@@ -106,6 +107,9 @@ func TestService_Put(t *testing.T) {
 	})
 
 	t.Run("Ошибка создания файла в БД", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
 			Content: []byte("test content"),
@@ -124,6 +128,9 @@ func TestService_Put(t *testing.T) {
 	})
 
 	t.Run("Ошибка загрузки файла в хранилище", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
 			Content: []byte("test content"),
@@ -148,14 +155,13 @@ func TestService_Put(t *testing.T) {
 
 // TestService_List тесты получения списка файлов
 func TestService_List(t *testing.T) {
-	service, mockRepo, _, _ := setupService()
-	uid := uuid.New().String()
-	ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
-
 	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
 	assert.NoError(t, err)
 
 	t.Run("Успешное получение списка файлов", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		expectedFiles := make([]models.FilesModel, 0)
 
 		expectedFiles = append(expectedFiles, &models.File{
@@ -190,6 +196,7 @@ func TestService_List(t *testing.T) {
 	})
 
 	t.Run("Ошибка аутентификации", func(t *testing.T) {
+		service, _, _, _ := setupService()
 		ctx := context.Background()
 		resp, err := service.List(ctx, &pb.ListFilesRequest{})
 
@@ -201,6 +208,9 @@ func TestService_List(t *testing.T) {
 	})
 
 	t.Run("Ошибка поиска файлов", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		mockRepo.On("SearchFile", ctx, mock.AnythingOfType("*models.FilesSearch")).Return(nil, assert.AnError)
 
 		resp, err := service.List(ctx, &pb.ListFilesRequest{})
@@ -216,14 +226,13 @@ func TestService_List(t *testing.T) {
 
 // TestService_Download тесты скачивания файла
 func TestService_Download(t *testing.T) {
-	service, mockRepo, mockStorage, _ := setupService()
-	uid := uuid.New().String()
-	ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
-
 	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
 	assert.NoError(t, err)
 
 	t.Run("Успешное скачивание файла", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:        fileID,
@@ -251,6 +260,7 @@ func TestService_Download(t *testing.T) {
 	})
 
 	t.Run("Ошибка аутентификации", func(t *testing.T) {
+		service, _, _, _ := setupService()
 		ctx := context.Background()
 		resp, err := service.Download(ctx, &pb.DownloadFileRequest{Id: uuid.New().String()})
 
@@ -262,6 +272,9 @@ func TestService_Download(t *testing.T) {
 	})
 
 	t.Run("Ошибка валидации ID", func(t *testing.T) {
+		service, _, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		resp, err := service.Download(ctx, &pb.DownloadFileRequest{Id: "invalid-id"})
 
 		assert.Error(t, err)
@@ -272,6 +285,9 @@ func TestService_Download(t *testing.T) {
 	})
 
 	t.Run("Файл не найден", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		mockRepo.On("GetFile", ctx, fileID, uid).Return(nil, assert.AnError)
 
@@ -286,6 +302,9 @@ func TestService_Download(t *testing.T) {
 	})
 
 	t.Run("Ошибка получения файла из хранилища", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
@@ -307,14 +326,13 @@ func TestService_Download(t *testing.T) {
 
 // TestService_Search тесты поиска файлов
 func TestService_Search(t *testing.T) {
-	service, mockRepo, _, _ := setupService()
-	uid := uuid.New().String()
-	ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
-
 	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
 	assert.NoError(t, err)
 
 	t.Run("Успешный поиск файлов", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		exportedFiles := make([]models.FilesModel, 0)
 		expectedFiles := append(exportedFiles, &models.File{
 			ID:        uuid.New().String(),
@@ -339,6 +357,7 @@ func TestService_Search(t *testing.T) {
 	})
 
 	t.Run("Ошибка аутентификации", func(t *testing.T) {
+		service, _, _, _ := setupService()
 		ctx := context.Background()
 		resp, err := service.Search(ctx, &pb.SearchFilesRequest{Name: "test"})
 
@@ -350,6 +369,9 @@ func TestService_Search(t *testing.T) {
 	})
 
 	t.Run("Ошибка поиска файлов", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		mockRepo.On("SearchFile", ctx, mock.AnythingOfType("*models.FilesSearch")).Return(nil, assert.AnError)
 
 		resp, err := service.Search(ctx, &pb.SearchFilesRequest{Name: "test"})
@@ -365,14 +387,13 @@ func TestService_Search(t *testing.T) {
 
 // TestService_Remove тесты удаления файла
 func TestService_Remove(t *testing.T) {
-	service, mockRepo, mockStorage, _ := setupService()
-	uid := uuid.New().String()
-	ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
-
 	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
 	assert.NoError(t, err)
 
 	t.Run("Успешное удаление файла", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
@@ -393,6 +414,7 @@ func TestService_Remove(t *testing.T) {
 	})
 
 	t.Run("Ошибка аутентификации", func(t *testing.T) {
+		service, _, _, _ := setupService()
 		ctx := context.Background()
 		resp, err := service.Remove(ctx, &pb.RemoveFileRequest{Id: uuid.New().String()})
 
@@ -404,6 +426,9 @@ func TestService_Remove(t *testing.T) {
 	})
 
 	t.Run("Ошибка валидации ID", func(t *testing.T) {
+		service, _, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		resp, err := service.Remove(ctx, &pb.RemoveFileRequest{Id: "invalid-id"})
 
 		assert.Error(t, err)
@@ -414,6 +439,9 @@ func TestService_Remove(t *testing.T) {
 	})
 
 	t.Run("Файл не найден", func(t *testing.T) {
+		service, mockRepo, _, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		mockRepo.On("GetFile", ctx, fileID, uid).Return(nil, assert.AnError)
 
@@ -428,6 +456,9 @@ func TestService_Remove(t *testing.T) {
 	})
 
 	t.Run("Ошибка удаления файла из хранилища", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
@@ -450,6 +481,9 @@ func TestService_Remove(t *testing.T) {
 	})
 
 	t.Run("Ошибка удаления информации о файле из БД", func(t *testing.T) {
+		service, mockRepo, mockStorage, _ := setupService()
+		uid := uuid.New().String()
+		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
