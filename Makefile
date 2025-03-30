@@ -19,9 +19,57 @@ migrate:
 create-migration:
 	migrate create -ext sql -dir migrations/ -seq change_this_text
 
-build-client:
+# Определение переменных для разных платформ
+BINARY_CLIENT=gophkeeper-client
+BINARY_SERVER=gophkeeper-server
+BUILD_DIR=bin
+BUILD_DIR_CLIENT=$(BUILD_DIR)/client
+BUILD_DIR_SERVER=$(BUILD_DIR)/server
 
-build-server:
+# Создание директорий для сборки
+build-dir:
+	mkdir -p $(BUILD_DIR_CLIENT)
+	mkdir -p $(BUILD_DIR_SERVER)
+
+# Сборка клиента
+build-client-linux: build-dir
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR_CLIENT)/$(BINARY_CLIENT)-linux-amd64 ./cmd/client/main.go
+
+build-client-windows: build-dir
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o $(BUILD_DIR_CLIENT)/$(BINARY_CLIENT)-windows-amd64.exe ./cmd/client/main.go
+
+build-client-macos: build-dir
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(BUILD_DIR_CLIENT)/$(BINARY_CLIENT)-darwin-amd64 ./cmd/client/main.go
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR_CLIENT)/$(BINARY_CLIENT)-darwin-arm64 ./cmd/client/main.go
+
+# Сборка сервера
+build-server-linux: build-dir
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR_SERVER)/$(BINARY_SERVER)-linux-amd64 ./cmd/server/main.go
+
+build-server-windows: build-dir
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o $(BUILD_DIR_SERVER)/$(BINARY_SERVER)-windows-amd64.exe ./cmd/server/main.go
+
+build-server-macos: build-dir
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(BUILD_DIR_SERVER)/$(BINARY_SERVER)-darwin-amd64 ./cmd/server/main.go
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR_SERVER)/$(BINARY_SERVER)-darwin-arm64 ./cmd/server/main.go
+
+# Сборка для всех платформ
+build-all-client: build-client-linux build-client-windows build-client-macos
+
+build-all-server: build-server-linux build-server-windows build-server-macos
+
+# Сборка всех приложений для всех платформ
+build-all: build-all-client build-all-server
+
+# Очистка директории сборки
+clean-bin:
+	rm -rf $(BUILD_DIR)
+
+build-client: build-dir
+	go build -o $(BUILD_DIR_CLIENT)/$(BINARY_CLIENT) ./cmd/client/main.go
+
+build-server: build-dir
+	go build -o $(BUILD_DIR_SERVER)/$(BINARY_SERVER) ./cmd/server/main.go
 
 gen-proto:
 	protoc --go_out=internal/grpc/auth/proto --go-grpc_out=internal/grpc/auth/proto internal/grpc/auth/proto/authService.proto

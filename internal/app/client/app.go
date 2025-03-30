@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 func Run(ctx context.Context, client appClient.AppClient) error {
@@ -24,11 +25,13 @@ var nav = navigation{Token: ""}
 
 func initApp(ctx context.Context, client appClient.AppClient) *cli.Command {
 	nav.Client = client
+	clientVersion := os.Getenv("CLIENT_VERSION")
+	buildDate := time.Now().Format("02.01.2006 15:04:05")
 
 	return &cli.Command{
 		Name:    "GophKeeper",
 		Usage:   "GophKeeper client",
-		Version: "0.0.1",
+		Version: clientVersion + " / build: " + buildDate,
 		Commands: []*cli.Command{
 			{
 				Name:  "run",
@@ -54,7 +57,7 @@ func initApp(ctx context.Context, client appClient.AppClient) *cli.Command {
 							}
 						case "exit":
 							printInfo("Приложение закрыто")
-							return nil
+							return cli.Exit("", 0)
 						case "clear":
 							cmd := exec.Command("clear")
 							cmd.Stdout = os.Stdout
