@@ -19,30 +19,37 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 )
 
+// mockJWTConfigurator mock для JWTConfigurator
 type mockJWTConfigurator struct {
 	mock.Mock
 }
 
+// GetJWTSecret mock метода для получения JWT-секрета
 func (m *mockJWTConfigurator) GetJWTSecret() string {
 	return "test-secret"
 }
 
+// IsValid mock метода для проверки валидности JWTConfigurator
 func (m *mockJWTConfigurator) IsValid() bool { return true }
 
+// GetTokenLifeTime mock метода для получения времени жизни токена
 func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
+// GetRefreshTokenLifeTime mock метода для получения времени жизни токена
 func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
+// setupService инициализирует сервис и репозиторий для тестов
 func setupService() (Service, *rm.NoteRepository) {
 	mockRepo := new(rm.NoteRepository)
 	jwtCnf := new(mockJWTConfigurator)
 	return MakeService(mockRepo, jwtCnf), mockRepo
 }
 
+// setupAuthContext создает контекст с валидным токеном авторизации
 func setupAuthContext(uid string) context.Context {
 	user := &models.User{
 		UID:       uid,

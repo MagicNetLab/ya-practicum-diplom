@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/sha256"
 	"encoding/base64"
+
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 )
@@ -61,6 +62,7 @@ func EncryptPassword(password string) (string, error) {
 	return hashString, nil
 }
 
+// prepareEncryptor - создает шифровальщик для пароля
 func prepareEncryptor(secretPassword string) (cipher.AEAD, []byte, error) {
 	hash := sha256.New()
 

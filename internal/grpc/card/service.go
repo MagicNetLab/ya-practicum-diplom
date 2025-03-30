@@ -191,6 +191,7 @@ func (s *Service) List(ctx context.Context, req *pb.ListCardRequest) (*pb.ListCa
 	return &pb.ListCardResponse{Cards: cards}, nil
 }
 
+// RegisterService регистрирует сервис карт
 func RegisterService(gRPCServer *grpc.Server, s Service) {
 	pb.RegisterCardServer(gRPCServer, &s)
 }

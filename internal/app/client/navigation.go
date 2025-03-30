@@ -7,10 +7,12 @@ type navigation struct {
 	Client appClianet.AppClient
 }
 
+// IsLoggedIn - проверка авторизации пользователя
 func (n *navigation) IsLoggedIn() bool {
 	return n.Token != ""
 }
 
+// PrintAvailableCommands - вывод доступных команд в консоль
 func (n *navigation) PrintAvailableCommands() {
 	printInfo("Доступные команды:")
 

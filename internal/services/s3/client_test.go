@@ -3,14 +3,16 @@ package s3
 import (
 	"bytes"
 	"context"
+	"testing"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"testing"
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"github.com/stretchr/testify/assert"
 )
 
+// TestNew проверяет создание нового клиента S3.
 func TestNew(t *testing.T) {
 	cnf := config.S3Config{
 		Endpoint:  "localhost:9000",
@@ -42,6 +44,7 @@ func TestNew(t *testing.T) {
 	})
 }
 
+// TestClient_GetObject проверяет получение объекта из S3.
 func TestClient_GetObject(t *testing.T) {
 	testbucket := "testbucket"
 	testobjectName := "testobject.txt"
@@ -86,6 +89,7 @@ func TestClient_GetObject(t *testing.T) {
 
 }
 
+// TestClient_PutObject проверяет сохранение объекта в S3.
 func TestClient_PutObject(t *testing.T) {
 	testbucket := "testbucket"
 	testobjectName := "/files/testobject.txt"
@@ -129,6 +133,7 @@ func TestClient_PutObject(t *testing.T) {
 	})
 }
 
+// TestClient_RemoveObject проверяет удаление объекта из S3.
 func TestClient_RemoveObject(t *testing.T) {
 	testbucket := "testbucket"
 	testobjectName := "testobject.txt"

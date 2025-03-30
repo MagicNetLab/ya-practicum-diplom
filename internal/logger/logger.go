@@ -67,6 +67,7 @@ func Close() error {
 	return log.Sync()
 }
 
+// prepareZapArgs подготовка аргументов для логирования
 func prepareZapArgs(args []LogArg) []zapcore.Field {
 	var zapArgs []zapcore.Field
 	for _, arg := range args {

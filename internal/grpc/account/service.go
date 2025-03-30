@@ -145,6 +145,7 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchAccountRequest) (*pb
 	return &pb.SearchAccountResponse{Acc: accounts}, nil
 }
 
+// RegisterService регистрирует сервис в gRPC сервере
 func RegisterService(gRPCServer *grpc.Server, s Service) {
 	pb.RegisterAccountsServer(gRPCServer, &s)
 }

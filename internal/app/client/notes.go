@@ -48,7 +48,7 @@ func notesList(ctx context.Context) {
 
 }
 
-// notesAdd добавляет новую заметку
+// notesAdd добавляет новую заметку и выводит результат в консоль
 func notesAdd(ctx context.Context) {
 	data := client.NoteData{}
 
@@ -88,7 +88,7 @@ func notesAdd(ctx context.Context) {
 
 }
 
-// notesRemove удаляет заметку по ID
+// notesRemove удаляет заметку по ID и выводит результат в консоль
 func notesRemove(ctx context.Context) {
 	var id string
 	fmt.Print("Введите ID заметки для удаления:")
@@ -110,6 +110,7 @@ func notesRemove(ctx context.Context) {
 	printInfo("Заметка успешно удалена")
 }
 
+// notesDetail выводит детальную информацию о заметке по ID в консоль
 func notesDetail(ctx context.Context) {
 	var id string
 

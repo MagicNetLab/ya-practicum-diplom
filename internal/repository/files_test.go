@@ -15,6 +15,7 @@ import (
 
 const testFileDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable"
 
+// getFileTestDB возвращает подклбчение к тестовой базе данных
 func getFileTestDB(t *testing.T) *pgxpool.Pool {
 	pool, err := pgxpool.New(context.Background(), testFileDSN)
 	require.NoError(t, err)
@@ -22,6 +23,7 @@ func getFileTestDB(t *testing.T) *pgxpool.Pool {
 	return pool
 }
 
+// getFileTestRepo возвращает тестовый репозиторий файлов
 func getFileTestRepo(t *testing.T) (FileRepository, *pgxpool.Pool) {
 	pool := getFileTestDB(t)
 	return NewFileRepository(pool), pool

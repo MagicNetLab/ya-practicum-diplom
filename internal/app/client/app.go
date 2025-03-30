@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// Run Запуск клиента приложения
 func Run(ctx context.Context, client appClient.AppClient) error {
 	commands := initApp(ctx, client)
 	err := commands.Run(ctx, os.Args)
@@ -21,8 +22,10 @@ func Run(ctx context.Context, client appClient.AppClient) error {
 	return nil
 }
 
+// navigation TODO артефакт от старой идеи. Выглядит лишним но как от него избавиться?
 var nav = navigation{Token: ""}
 
+// initApp Инициализация приложения
 func initApp(ctx context.Context, client appClient.AppClient) *cli.Command {
 	nav.Client = client
 	clientVersion := os.Getenv("CLIENT_VERSION")
@@ -216,18 +219,22 @@ func initApp(ctx context.Context, client appClient.AppClient) *cli.Command {
 	}
 }
 
+// printErr Вывод ошибок в консоль
 func printErr(str string) {
 	fmt.Printf("\033[31m>>> %s\033[0m\n", str)
 }
 
+// printInfo Вывод информации в консоль
 func printInfo(str string) {
 	fmt.Printf("\033[32m>>> %s\033[0m\n", str)
 }
 
+// printSuccess Вывод успешных действий в консоль
 func printSuccess(str string) {
 	fmt.Printf("\033[32m>>> %s\033[0m\n", str)
 }
 
+// clearScreen Очистка экрана клиента
 func clearScreen() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout

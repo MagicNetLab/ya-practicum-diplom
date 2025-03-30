@@ -15,15 +15,18 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// mockHandler - mock для grpc.Handler
 type mockHandler struct {
 	mock.Mock
 }
 
+// Handle - mock метода для grpc.Handler
 func (m *mockHandler) Handle(ctx context.Context, req any) (any, error) {
 	args := m.Called(ctx, req)
 	return args.Get(0), args.Error(1)
 }
 
+// TestAuthInterceptor - тесты для AuthInterceptor
 func TestAuthInterceptor(t *testing.T) {
 	err := os.Setenv("JWT_SECRET", "secret")
 	assert.NoError(t, err)
@@ -104,6 +107,7 @@ func TestAuthInterceptor(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// TestGuestInterceptor - тесты для GuestInterceptor
 func TestGuestInterceptor(t *testing.T) {
 	err := os.Setenv("JWT_SECRET", "secret")
 	assert.NoError(t, err)

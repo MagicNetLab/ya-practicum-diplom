@@ -9,6 +9,7 @@ type S3Configurator interface {
 	IsValid() bool
 }
 
+// S3Config конфигурация S3 хранилища
 type S3Config struct {
 	Endpoint  string `env:"S3_ENDPOINT" envDefault:""`
 	SecretKey string `env:"S3_SECRET_KEY" envDefault:""`

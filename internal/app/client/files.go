@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Выводит список файлов пользователя
+// fileList Выводит список файлов пользователя
 func fileList(ctx context.Context) {
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)
@@ -33,7 +33,7 @@ func fileList(ctx context.Context) {
 	}
 }
 
-// Добавляет файл в хранилище пользователя
+// fileAdd Добавляет файл в хранилище пользователя
 func fileAdd(ctx context.Context) {
 	var data = client.FileData{}
 
@@ -91,7 +91,7 @@ func fileAdd(ctx context.Context) {
 	printInfo("Файл успешно добавлен")
 }
 
-// Удаляет файл из хранилища пользователя
+// fileRemove Удаляет файл из хранилища пользователя
 func fileRemove(ctx context.Context) {
 	var id string
 	fmt.Print("Введите ID файла: ")
@@ -111,6 +111,7 @@ func fileRemove(ctx context.Context) {
 	printInfo("Файл успешно удален")
 }
 
+// fileDownload Скачивает файл из хранилища пользователя
 func fileDownload(ctx context.Context) {
 	var id, path string
 	fmt.Print("Введите ID файла: ")
@@ -155,6 +156,7 @@ func fileDownload(ctx context.Context) {
 	printInfo("Файл успешно скачан")
 }
 
+// fileSearch Поиск файлов по названию
 func fileSearch(ctx context.Context) {
 	var name string
 

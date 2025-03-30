@@ -2,6 +2,7 @@ package client
 
 import "fmt"
 
+// PrintHelp - выводит список доступных команд
 func PrintHelp() {
 	fmt.Println("Доступные команды:")
 	fmt.Println("  auth                  - авторизация пользователя")

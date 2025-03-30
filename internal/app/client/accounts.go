@@ -32,7 +32,7 @@ func accountList(ctx context.Context) {
 	}
 }
 
-// accountAdd добавляет аккаунт на сайт.
+// accountAdd добавляет аккаунт на сайт и выводит результат в консоль.
 func accountAdd(ctx context.Context) {
 	var login, password, url, meta string
 
@@ -74,7 +74,7 @@ func accountAdd(ctx context.Context) {
 	printInfo("Аккаунт успешно добавлен!")
 }
 
-// accountDelete удаляет аккаунт.
+// accountDelete удаляет аккаунт и выводит результат в консоль.
 func accountDelete(ctx context.Context) {
 	var id string
 
@@ -96,7 +96,7 @@ func accountDelete(ctx context.Context) {
 	fmt.Println("Аккаунт успешно удален.")
 }
 
-// accountDetail получает данные аккаунта.
+// accountDetail получает данные аккаунта и выводит их в консоль.
 func accountDetail(ctx context.Context) {
 	var id string
 
@@ -122,12 +122,12 @@ func accountDetail(ctx context.Context) {
 	printInfo("Meta: " + account.Meta)
 }
 
-// accountSearch получает список аккаунтов по поисковому запросу.
+// accountSearch получает список аккаунтов по поисковому запросу и выводит их в консоль.
 func accountSearch(ctx context.Context) {
 	var url string
 
 	fmt.Print("Укажите адрес сайта: ")
-	fmt.Scanln(&url)
+	_, _ = fmt.Scanln(&url)
 
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)

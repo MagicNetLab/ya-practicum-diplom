@@ -2,7 +2,9 @@ package config
 
 import "testing"
 
+// TestSecretConfig tests the SecretConfig
 func TestSecretConfig(t *testing.T) {
+	// Test GetSecret method
 	t.Run("GetSecret", func(t *testing.T) {
 		tests := []struct {
 			name     string
@@ -38,6 +40,7 @@ func TestSecretConfig(t *testing.T) {
 		}
 	})
 
+	// Test IsValid method
 	t.Run("IsValid", func(t *testing.T) {
 		tests := []struct {
 			name     string

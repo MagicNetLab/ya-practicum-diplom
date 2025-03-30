@@ -15,12 +15,14 @@ import (
 
 const testCardDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable"
 
+// getCardTestDB возвращает подключение к тестовой базе данных
 func getCardTestDB(t *testing.T) *pgxpool.Pool {
 	pool, err := pgxpool.New(context.Background(), testCardDSN)
 	require.NoError(t, err)
 	return pool
 }
 
+// getCardTestRepo возвращает тестовый репозиторий карт
 func getCardTestRepo(t *testing.T) (CardRepository, *pgxpool.Pool) {
 	t.Setenv("ENCRYPT_KEY", "test-encryption-key-32-bytes-length!")
 	pool := getCardTestDB(t)

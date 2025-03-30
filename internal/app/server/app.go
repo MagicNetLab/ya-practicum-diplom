@@ -18,6 +18,7 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3"
 )
 
+// New инициализация приложения
 func New(cnf config.AppConfigurator) (*Application, error) {
 	repo, err := repository.NewRepository(cnf.GetDBConf())
 	if err != nil {
@@ -36,6 +37,7 @@ func New(cnf config.AppConfigurator) (*Application, error) {
 	}, nil
 }
 
+// Application структура приложения
 type Application struct {
 	cnf    config.AppConfigurator
 	server *grpc.Server
@@ -43,6 +45,7 @@ type Application struct {
 	repo   repository.Repository
 }
 
+// InitServer инициализация сервера
 func (app *Application) InitServer() error {
 	accountService, err := account.MakeService(app.repo.GetAccountRepo(), app.cnf.GetJWTConf())
 	if err != nil {
@@ -87,6 +90,7 @@ func (app *Application) InitServer() error {
 	return nil
 }
 
+// Start запуск сервера
 func (app *Application) Start() error {
 
 	serverAddress := app.cnf.GetServerConf().GetHost() + ":" + app.cnf.GetServerConf().GetPort()
@@ -107,8 +111,10 @@ func (app *Application) Start() error {
 	return nil
 }
 
+// Stop остановка сервера
 func (app *Application) Stop() {
 	app.server.GracefulStop()
 	app.repo.Close()
 	logger.Info("app stopped")
+	_ = logger.Close()
 }

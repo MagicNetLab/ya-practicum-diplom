@@ -10,14 +10,17 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// mockUserModel mock для UserModel
 type mockUserModel struct {
 	uid string
 }
 
+// GetUID возвращает UID пользователя
 func (m mockUserModel) GetUID() string {
 	return m.uid
 }
 
+// TestGenerateToken тестирование генерации токена
 func TestGenerateToken(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -53,6 +56,7 @@ func TestGenerateToken(t *testing.T) {
 	}
 }
 
+// TestParseToken тестирование парсинга токена
 func TestParseToken(t *testing.T) {
 	validUID := uuid.New().String()
 	validSecret := "test-secret"
@@ -103,6 +107,7 @@ func TestParseToken(t *testing.T) {
 	}
 }
 
+// TestVerifyToken тестирование проверки токена
 func TestVerifyToken(t *testing.T) {
 	validUID := uuid.New().String()
 	validSecret := "test-secret"
@@ -142,6 +147,7 @@ func TestVerifyToken(t *testing.T) {
 	}
 }
 
+// TestGetRandomSecret тестирование генерации случайного секрета
 func TestGetRandomSecret(t *testing.T) {
 	secret1 := GetRandomSecret()
 	secret2 := GetRandomSecret()
@@ -152,6 +158,7 @@ func TestGetRandomSecret(t *testing.T) {
 	assert.Len(t, secret1, 64) // 32 bytes in hex = 64 characters
 }
 
+// TestExtractToken тестирование извлечения токена из контекста
 func TestExtractToken(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -200,6 +207,7 @@ func TestExtractToken(t *testing.T) {
 	}
 }
 
+// TestGetUIDFromContext тестирование извлечения UID из контекста
 func TestGetUIDFromContext(t *testing.T) {
 	validUID := uuid.New().String()
 	validSecret := "test-secret"

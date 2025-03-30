@@ -16,6 +16,7 @@ import (
 
 const testAccountDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable"
 
+// getAccountTestRepo возвращает подключение к тестовой базе данных
 func getAccountTestDB(t *testing.T) *pgxpool.Pool {
 	t.Setenv("ENCRYPT_KEY", "test-encryption-key-32-bytes-length!")
 
@@ -24,6 +25,7 @@ func getAccountTestDB(t *testing.T) *pgxpool.Pool {
 	return pool
 }
 
+// getAccountTestRepo возвращает тестовый репозиторий аккаунтов
 func getAccountTestRepo(t *testing.T) (AccountRepository, *pgxpool.Pool) {
 	pool := getAccountTestDB(t)
 	return NewAccountRepo(pool), pool

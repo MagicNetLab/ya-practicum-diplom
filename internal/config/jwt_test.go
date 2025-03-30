@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
+// TestJWTConfig tests the JWTConfig
 func TestJWTConfig(t *testing.T) {
+	// Test GetJWTSecret method
 	t.Run("GetJWTSecret", func(t *testing.T) {
 		tests := []struct {
 			name     string
@@ -33,6 +35,7 @@ func TestJWTConfig(t *testing.T) {
 		}
 	})
 
+	// Test IsValid method
 	t.Run("IsValid", func(t *testing.T) {
 		tests := []struct {
 			name     string
@@ -60,6 +63,7 @@ func TestJWTConfig(t *testing.T) {
 		}
 	})
 
+	// Test GetTokenLifeTime method
 	t.Run("GetTokenLifeTime", func(t *testing.T) {
 		tests := []struct {
 			name     string
@@ -87,6 +91,7 @@ func TestJWTConfig(t *testing.T) {
 		}
 	})
 
+	// Test GetRefreshTokenLifeTime method
 	t.Run("GetRefreshTokenLifeTime", func(t *testing.T) {
 		tests := []struct {
 			name     string

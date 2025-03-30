@@ -20,10 +20,12 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3"
 )
 
+// MakeService возвращает сервис для работы с файлами
 func MakeService(repo repository.FileRepository, storage s3.S3Client, jwt config.JWTConfigurator) Service {
 	return Service{db: repo, storage: storage, jwt: jwt}
 }
 
+// Service сервис для работы с файлами
 type Service struct {
 	pb.FilesServer
 	db      repository.FileRepository
@@ -194,6 +196,7 @@ func (s *Service) Remove(ctx context.Context, req *pb.RemoveFileRequest) (*pb.Re
 	return &pb.RemoveFileResponse{}, nil
 }
 
+// RegisterService регистрирует сервис в gRPC сервере
 func RegisterService(gRPCServer *grpc.Server, s Service) {
 	pb.RegisterFilesServer(gRPCServer, &s)
 }

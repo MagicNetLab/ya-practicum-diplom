@@ -22,24 +22,30 @@ import (
 	sm "github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3/mocks"
 )
 
+// mockJWTConfigurator mock для JWTConfigurator
 type mockJWTConfigurator struct {
 	mock.Mock
 }
 
+// GetJWTSecret mock для метода получения секрета
 func (m *mockJWTConfigurator) GetJWTSecret() string {
 	return "hfjhshfjshdkfhsjhfksjdfhskfhjsdhfhaksjdh"
 }
 
+// IsValid mock для метода проверки валидности конфигуратора
 func (m *mockJWTConfigurator) IsValid() bool { return true }
 
+// GetRefreshTokenLifeTime mock для метода получения времени жизни токена
 func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
+// GetRefreshTokenLifeTime mock для метода получения времени жизни refresh токена
 func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
+// setupService инициализирует сервис для тестов
 func setupService() (*Service, *rm.FileRepository, *sm.S3Client, *mockJWTConfigurator) {
 	mockRepo := new(rm.FileRepository)
 	mockStorage := new(sm.S3Client)
@@ -47,6 +53,7 @@ func setupService() (*Service, *rm.FileRepository, *sm.S3Client, *mockJWTConfigu
 	return &Service{db: mockRepo, storage: mockStorage, jwt: mockJWTCnf}, mockRepo, mockStorage, mockJWTCnf
 }
 
+// setupAuthContext инициализирует контекст c валидным токеном авторизации для тестов
 func setupAuthContext(uid string, secret string) context.Context {
 	user := &models.User{
 		UID:       uid,

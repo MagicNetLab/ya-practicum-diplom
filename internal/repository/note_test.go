@@ -15,12 +15,14 @@ import (
 
 const testNoteDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable"
 
+// getNoteTestDB возвращает подключение к тестовой базе
 func getNoteTestDB(t *testing.T) *pgxpool.Pool {
 	pool, err := pgxpool.New(context.Background(), testNoteDSN)
 	require.NoError(t, err)
 	return pool
 }
 
+// getNoteTestRepo возвращате тестовый репозиторий заметок
 func getNoteTestRepo(t *testing.T) (NoteRepository, *pgxpool.Pool) {
 	pool := getNoteTestDB(t)
 	t.Setenv("ENCRYPT_KEY", "test-encryption-key-32-bytes-length!")

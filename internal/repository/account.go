@@ -13,6 +13,7 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 )
 
+// NewAccountRepo возвращает новый репозиторий аккаунтов
 func NewAccountRepo(pool *pgxpool.Pool) AccountRepository {
 	return &AccountRepo{pool: pool}
 }

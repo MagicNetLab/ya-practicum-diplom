@@ -12,6 +12,7 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
+// AuthInterceptor - проверка авторизации пользователя
 func AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if strings.Contains(info.FullMethod, "Auth") || strings.Contains(info.FullMethod, "Register") {
 		return handler(ctx, req)
@@ -36,6 +37,7 @@ func AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServe
 	return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
 }
 
+// GuestInterceptor - проверка гостя
 func GuestInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if !strings.Contains(info.FullMethod, "Auth") || strings.Contains(info.FullMethod, "Register") {
 		return handler(ctx, req)

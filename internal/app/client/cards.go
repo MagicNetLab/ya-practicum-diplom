@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-// cardsList выводит список карт клиента на экран
+// cardsList выводит список карт клиента в консоль
 func cardsList(ctx context.Context) {
 	md := metadata.Pairs("token", nav.Token)
 	rCtx := metadata.NewOutgoingContext(ctx, md)
@@ -31,7 +31,7 @@ func cardsList(ctx context.Context) {
 	}
 }
 
-// cardsCreate создаёт карту клиента
+// cardsCreate создаёт карту клиента и выводит результат в консоль
 func cardsCreate(ctx context.Context) {
 	data := client.CardData{}
 
@@ -95,7 +95,7 @@ func cardsCreate(ctx context.Context) {
 	printInfo("Карта добавлена")
 }
 
-// cardsDelete удаляет карту клиента
+// cardsDelete удаляет карту клиента и выводит результат в консоль
 func cardsDelete(ctx context.Context) {
 	var id string
 
@@ -118,7 +118,7 @@ func cardsDelete(ctx context.Context) {
 	printInfo("Карта удалена")
 }
 
-// cardDetail выводит подробную информацию о карте
+// cardDetail выводит подробную информацию о карте в консоль
 func cardDetail(ctx context.Context) {
 	var id string
 
@@ -147,7 +147,7 @@ func cardDetail(ctx context.Context) {
 	printInfo(fmt.Sprintf("Дополнительная информация: %s", res.Meta))
 }
 
-// cardsSearch находит карту клиента по заданным параметрам
+// cardsSearch находит список карт по имени и выводит результат в консоль
 func cardsSearch(ctx context.Context) {
 	var data client.CardSearchData
 

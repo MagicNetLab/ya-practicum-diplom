@@ -19,10 +19,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// FileReaderMock - это мок для интерфейса FileManager
 type FileReaderMock struct {
 	mock.Mock
 }
 
+// Read чтение содержание файла
 func (f *FileReaderMock) Read(filename string) ([]byte, error) {
 	ret := f.Called(filename)
 
@@ -52,6 +54,7 @@ func (f *FileReaderMock) Read(filename string) ([]byte, error) {
 	return r0, r1
 }
 
+// TestAuth - тест функции Auth
 func TestAuth(t *testing.T) {
 	mockAuth := new(mockAuthClient.AuthClient)
 	client := &AppClientImpl{authClient: mockAuth}
@@ -75,6 +78,7 @@ func TestAuth(t *testing.T) {
 	})
 }
 
+// TestRegister - тест функции Register
 func TestRegister(t *testing.T) {
 	mockAuth := new(mockAuthClient.AuthClient)
 	client := &AppClientImpl{authClient: mockAuth}
@@ -98,6 +102,7 @@ func TestRegister(t *testing.T) {
 	})
 }
 
+// TestListAccounts - тест вывода списка аккаунтов
 func TestListAccounts(t *testing.T) {
 	t.Run("Успешное получение списка аккаунтов", func(t *testing.T) {
 		mockAccounts := new(mockAccClient.AccountsClient)
@@ -129,6 +134,7 @@ func TestListAccounts(t *testing.T) {
 	})
 }
 
+// TestAddAccount - тест добавления аккаунта
 func TestAddAccount(t *testing.T) {
 	t.Run("Успешное добавление аккаунта", func(t *testing.T) {
 		mockAccounts := new(mockAccClient.AccountsClient)
@@ -151,6 +157,7 @@ func TestAddAccount(t *testing.T) {
 	})
 }
 
+// TestRemoveAccount - тест удаления аккаунта
 func TestRemoveAccount(t *testing.T) {
 	t.Run("Успешное удаление аккаунта", func(t *testing.T) {
 		mockAccounts := new(mockAccClient.AccountsClient)
@@ -173,6 +180,7 @@ func TestRemoveAccount(t *testing.T) {
 	})
 }
 
+// TestGetAccount - тест получения аккаунта
 func TestGetAccount(t *testing.T) {
 	t.Run("Успешное получение аккаунта", func(t *testing.T) {
 		mockAccounts := new(mockAccClient.AccountsClient)
@@ -200,6 +208,7 @@ func TestGetAccount(t *testing.T) {
 	})
 }
 
+// TestSearchAccount - тест поиска аккаунтов
 func TestSearchAccount(t *testing.T) {
 	t.Run("Успешный поиск аккаунтов", func(t *testing.T) {
 		mockAccounts := new(mockAccClient.AccountsClient)
@@ -230,6 +239,7 @@ func TestSearchAccount(t *testing.T) {
 	})
 }
 
+// TestAddCard - тест добавления карты
 func TestAddCard(t *testing.T) {
 	t.Run("Успешное добавление карты", func(t *testing.T) {
 		mockCards := new(mockCardClient.CardClient)
@@ -268,6 +278,7 @@ func TestAddCard(t *testing.T) {
 	})
 }
 
+// TestRemoveCard - тест удаления карты
 func TestRemoveCard(t *testing.T) {
 	t.Run("Успешное удаление карты", func(t *testing.T) {
 		mockCards := new(mockCardClient.CardClient)
@@ -290,6 +301,7 @@ func TestRemoveCard(t *testing.T) {
 	})
 }
 
+// TestcardDetail - тест получения информации о карте
 func TestCardDetail(t *testing.T) {
 	t.Run("Успешное получение информации о карте", func(t *testing.T) {
 		mockCards := new(mockCardClient.CardClient)
@@ -317,6 +329,7 @@ func TestCardDetail(t *testing.T) {
 	})
 }
 
+// TestCardSearch - тест поиска карт
 func TestCardSearch(t *testing.T) {
 	t.Run("Успешный поиск карт", func(t *testing.T) {
 		mockCards := new(mockCardClient.CardClient)
@@ -347,6 +360,7 @@ func TestCardSearch(t *testing.T) {
 	})
 }
 
+// TestNotesList - тест получения списка заметок
 func TestNotesList(t *testing.T) {
 	t.Run("Успешное получение списка заметок", func(t *testing.T) {
 		mockNotes := new(mockNoteClient.NoteClient)
@@ -378,6 +392,7 @@ func TestNotesList(t *testing.T) {
 	})
 }
 
+// TestNoteCreate - тест создания заметки
 func TestNoteCreate(t *testing.T) {
 	t.Run("Успешное создание заметки", func(t *testing.T) {
 		mockNotes := new(mockNoteClient.NoteClient)
@@ -408,6 +423,7 @@ func TestNoteCreate(t *testing.T) {
 	})
 }
 
+// TestNoteDelete - тест удаления заметки
 func TestNoteDelete(t *testing.T) {
 	t.Run("Успешное удаление заметки", func(t *testing.T) {
 		mockNotes := new(mockNoteClient.NoteClient)
@@ -430,6 +446,7 @@ func TestNoteDelete(t *testing.T) {
 	})
 }
 
+// TestNoteSearch - тест поиска заметок
 func TestNoteSearch(t *testing.T) {
 	t.Run("Успешный поиск заметок", func(t *testing.T) {
 		mockNotes := new(mockNoteClient.NoteClient)
@@ -460,6 +477,7 @@ func TestNoteSearch(t *testing.T) {
 	})
 }
 
+// TestNoteDetail - тест получения информации о заметке
 func TestNoteDetail(t *testing.T) {
 	t.Run("Успешное получение информации о заметке", func(t *testing.T) {
 		mockNotes := new(mockNoteClient.NoteClient)
@@ -487,6 +505,7 @@ func TestNoteDetail(t *testing.T) {
 	})
 }
 
+// TestFileList - тест получения списка файлов
 func TestFileList(t *testing.T) {
 	t.Run("Успешное получение списка файлов", func(t *testing.T) {
 		mockFiles := new(mockFileClient.FilesClient)
@@ -517,6 +536,7 @@ func TestFileList(t *testing.T) {
 	})
 }
 
+// TestFileAdd - тест добавления файла
 func TestFileAdd(t *testing.T) {
 	t.Run("Успешное добавление файла", func(t *testing.T) {
 		mockFiles := new(mockFileClient.FilesClient)
@@ -567,6 +587,7 @@ func TestFileAdd(t *testing.T) {
 	})
 }
 
+// TestFileRemove - тест удаления файла
 func TestFileRemove(t *testing.T) {
 	t.Run("Успешное удаление файла", func(t *testing.T) {
 		mockFiles := new(mockFileClient.FilesClient)
@@ -589,6 +610,7 @@ func TestFileRemove(t *testing.T) {
 	})
 }
 
+// TestFileDownload - тест скачивания файла
 func TestFileDownload(t *testing.T) {
 	t.Run("Успешное скачивание файла", func(t *testing.T) {
 		mockFiles := new(mockFileClient.FilesClient)
@@ -617,6 +639,7 @@ func TestFileDownload(t *testing.T) {
 	})
 }
 
+// TestFileSearch - тест поиска файлов
 func TestFileSearch(t *testing.T) {
 	t.Run("Успешный поиск файлов", func(t *testing.T) {
 		mockFiles := new(mockFileClient.FilesClient)

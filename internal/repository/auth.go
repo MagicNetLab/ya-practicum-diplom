@@ -3,8 +3,9 @@ package repository
 import (
 	"context"
 	"errors"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 	"time"
+
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -31,6 +32,8 @@ type AuthRepository interface {
 	HasToken(ctx context.Context, Token string) (bool, error)
 	HasLogin(ctx context.Context, login string) (bool, error)
 }
+
+// AuthRepo репозиторий авторизации
 type AuthRepo struct {
 	pool *pgxpool.Pool
 }

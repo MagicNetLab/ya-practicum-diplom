@@ -13,12 +13,14 @@ import (
 
 const testDSN = "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable"
 
+// getTestDB возвращает тестовое подключение к базе данных
 func getTestDB(t *testing.T) *pgxpool.Pool {
 	pool, err := pgxpool.New(context.Background(), testDSN)
 	require.NoError(t, err)
 	return pool
 }
 
+// getTestRepo возвращает тестовый репозиторий
 func getTestRepo(t *testing.T) (AuthRepository, *pgxpool.Pool) {
 	pool := getTestDB(t)
 	return NewAuthRepository(pool), pool

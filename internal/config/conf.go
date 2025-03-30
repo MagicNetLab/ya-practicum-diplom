@@ -16,6 +16,7 @@ const (
 	defaultRefreshTokenLifeTime = 24
 )
 
+// InitConfiguration инициализирует конфигурацию приложения
 func InitConfiguration() error {
 	if err := godotenv.Load(".env"); err != nil {
 		return fmt.Errorf("error loading .env file: %w", err)

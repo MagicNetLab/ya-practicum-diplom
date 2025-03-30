@@ -2,7 +2,9 @@ package config
 
 import "testing"
 
+// TestServerConfig tests the ServerConfig struct
 func TestServerConfig(t *testing.T) {
+	// Test GetHost method
 	t.Run("GetHost", func(t *testing.T) {
 		tests := []struct {
 			name     string
@@ -35,6 +37,7 @@ func TestServerConfig(t *testing.T) {
 		}
 	})
 
+	// Test GetPort method
 	t.Run("GetPort", func(t *testing.T) {
 		tests := []struct {
 			name     string
@@ -67,6 +70,7 @@ func TestServerConfig(t *testing.T) {
 		}
 	})
 
+	// Test IsValid method
 	t.Run("IsValid", func(t *testing.T) {
 		tests := []struct {
 			name     string

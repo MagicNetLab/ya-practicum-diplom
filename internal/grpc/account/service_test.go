@@ -17,24 +17,30 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// mockJWTConfigurator - mock для JWTConfigurator
 type mockJWTConfigurator struct {
 	mock.Mock
 }
 
+// GetJWTSecret - метод для получения секрета JWT
 func (m *mockJWTConfigurator) GetJWTSecret() string {
 	return "test-secret"
 }
 
+// IsValid - метод для проверки валидности JWTConfigurator
 func (m *mockJWTConfigurator) IsValid() bool { return true }
 
+// GetTokenLifeTime - метод для получения времени жизни токена
 func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
+// GetRefreshTokenLifeTime - метод для получения времени жизни токена
 func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
 	return time.Hour
 }
 
+// setupService - настройка сервиса для тестов
 func setupService() (*Service, *mocks.AccountRepository, *mockJWTConfigurator) {
 	mockRepo := new(mocks.AccountRepository)
 	mockJWTCnf := new(mockJWTConfigurator)
@@ -42,6 +48,7 @@ func setupService() (*Service, *mocks.AccountRepository, *mockJWTConfigurator) {
 	return &service, mockRepo, mockJWTCnf
 }
 
+// setupAuthContext - настройка контекста с валидным токеном авторизации для тестов
 func setupAuthContext(uid string) context.Context {
 	user := &models.User{
 		UID:       uid,
@@ -55,6 +62,7 @@ func setupAuthContext(uid string) context.Context {
 	return metadata.NewIncomingContext(context.Background(), md)
 }
 
+// TestService_GetAccount - тестирование метода GetAccount
 func TestService_GetAccount(t *testing.T) {
 	service, mockRepo, _ := setupService()
 	id := uuid.New().String()
@@ -112,6 +120,7 @@ func TestService_GetAccount(t *testing.T) {
 	})
 }
 
+// TestService_CreateAccount - тестирование метода CreateAccount
 func TestService_CreateAccount(t *testing.T) {
 	service, mockRepo, _ := setupService()
 	id := uuid.New().String()
@@ -176,6 +185,7 @@ func TestService_CreateAccount(t *testing.T) {
 	})
 }
 
+// TestService_RemoveAccount - тестирование метода RemoveAccount
 func TestService_RemoveAccount(t *testing.T) {
 	service, mockRepo, _ := setupService()
 	uid := uuid.New().String()
@@ -213,6 +223,7 @@ func TestService_RemoveAccount(t *testing.T) {
 	})
 }
 
+// TestService_SearchAccounts - тестирование метода SearchAccounts
 func TestService_SearchAccounts(t *testing.T) {
 	service, mockRepo, _ := setupService()
 	id1 := uuid.New().String()

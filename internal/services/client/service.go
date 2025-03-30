@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	accpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
 	authpb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/auth/proto"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// AccountData - структура данных аккаунта
 type AccountData struct {
 	ID       string
 	Login    string
@@ -21,6 +23,7 @@ type AccountData struct {
 	Meta     string
 }
 
+// CardData - структура данных карты
 type CardData struct {
 	ID     string
 	Name   string
@@ -33,6 +36,7 @@ type CardData struct {
 	Meta   string
 }
 
+// ShortCardData - краткая структура данных карты
 type ShortCardData struct {
 	ID     string
 	Name   string
@@ -40,10 +44,12 @@ type ShortCardData struct {
 	Meta   string
 }
 
+// CardSearchData - структура данных для поиска карт
 type CardSearchData struct {
 	Name string
 }
 
+// NoteData - структура данных заметки
 type NoteData struct {
 	ID      string
 	Title   string
@@ -51,6 +57,7 @@ type NoteData struct {
 	Meta    string
 }
 
+// FileData - структура данных файла
 type FileData struct {
 	ID      string
 	Name    string
@@ -60,10 +67,12 @@ type FileData struct {
 	Meta    string
 }
 
+// NoteSearchData - структура данных для поиска заметок
 type NoteSearchData struct {
 	Search string
 }
 
+// AppClient - интерфейс клиента приложения
 type AppClient interface {
 	Auth(ctx context.Context, username string, password string) (string, error)
 	Register(ctx context.Context, username string, password string) (string, error)

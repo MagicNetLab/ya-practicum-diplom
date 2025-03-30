@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestDatabaseConfig_GetDSN tests the GetDSN method of the DatabaseConfig
 func TestDatabaseConfig_GetDSN(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -58,6 +59,7 @@ func TestDatabaseConfig_GetDSN(t *testing.T) {
 	}
 }
 
+// TestDatabaseConfig_IsValid tests the IsValid method of the DatabaseConfig
 func TestDatabaseConfig_IsValid(t *testing.T) {
 	tests := []struct {
 		name     string

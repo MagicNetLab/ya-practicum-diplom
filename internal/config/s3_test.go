@@ -2,7 +2,9 @@ package config
 
 import "testing"
 
+// TestS3Config tests the S3Config
 func TestS3Config(t *testing.T) {
+	// Test GetEndpoint method
 	t.Run("GetEndpoint", func(t *testing.T) {
 		tests := []struct {
 			name     string

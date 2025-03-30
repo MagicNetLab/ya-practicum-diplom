@@ -1,8 +1,10 @@
 # GophKeeper - менеджер паролей
 
 
+### Первый запуск:
+  - cp .env.example .env
+  - make up
+  - make migrate
+  - make run-server
+  - make run-client
 
-
-
-!! для использования хранилища s3  необходимо создать accessKey в web  интерфейсе 
-на localhost:9010 и указать его в фвйле .env ыместе с secretKey

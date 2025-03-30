@@ -17,6 +17,7 @@ import (
 	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models/mocks"
 )
 
+// setupService - инициализирует сервис и моки
 func setupService() (*Service, *rm.AuthRepository) {
 	mockRepo := new(rm.AuthRepository)
 	cnf := config.GetJWTConfig()

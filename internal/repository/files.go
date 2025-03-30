@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
@@ -18,6 +19,7 @@ type FileRepository interface {
 	SearchFile(ctx context.Context, search models.FilesSearchModel) ([]models.FilesModel, error)
 }
 
+// NewFileRepository возвращает настроеный репозиторий для файлов
 func NewFileRepository(pool *pgxpool.Pool) FileRepository {
 	return &FileRepo{pool: pool}
 }

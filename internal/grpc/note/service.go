@@ -178,6 +178,7 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchNoteRequest) (*pb.Se
 	return &pb.SearchNoteResponse{Notes: notes}, nil
 }
 
+// RegisterService регистрация сервиса в gRPC сервере
 func RegisterService(gRPCServer *grpc.Server, s Service) {
 	pb.RegisterNoteServer(gRPCServer, &s)
 }

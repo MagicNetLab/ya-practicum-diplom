@@ -42,6 +42,7 @@ func GenerateToken(user models.UserModel, jwtSecret string) (string, error) {
 	return tokenString, nil
 }
 
+// ParseToken парсинг JWT токена
 func ParseToken(tokenString string, jwtSecret string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
@@ -62,6 +63,7 @@ func ParseToken(tokenString string, jwtSecret string) (*Claims, error) {
 	return claims, nil
 }
 
+// VerifyToken проверяет JWT
 func VerifyToken(token string, jwtSecret string) bool {
 	_, err := ParseToken(token, jwtSecret)
 	return err == nil
@@ -78,6 +80,7 @@ func GetRandomSecret() string {
 	return hex.EncodeToString(b)
 }
 
+// ExtractToken извлекает токен из контекста
 func ExtractToken(ctx context.Context) (string, error) {
 	meta, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -93,6 +96,7 @@ func ExtractToken(ctx context.Context) (string, error) {
 	return token, nil
 }
 
+// GetUIDFromContext извлекает UID из контекста
 func GetUIDFromContext(ctx context.Context, jwtSecret string) (string, error) {
 	tokenString, err := ExtractToken(ctx)
 	if err != nil {
