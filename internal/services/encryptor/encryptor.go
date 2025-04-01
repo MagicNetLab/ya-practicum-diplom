@@ -12,9 +12,13 @@ import (
 
 // EncryptData - шифрует текст с помощью ключа
 func EncryptData(data string) (string, error) {
-	cnf := config.GetSecretConfig()
-	secretKey, err := cnf.GetSecret()
+	cnf, err := config.MakeConfig()
 	if err != nil {
+		return "", err
+	}
+
+	secretKey := cnf.EncryptKey()
+	if secretKey == "" {
 		return "", err
 	}
 
@@ -29,9 +33,12 @@ func EncryptData(data string) (string, error) {
 
 // DecryptData - дешифрует текст с помощью ключа
 func DecryptData(data string) (string, error) {
-	cnf := config.GetSecretConfig()
-	secretKey, err := cnf.GetSecret()
+	cnf, err := config.MakeConfig()
 	if err != nil {
+		return "", err
+	}
+	secretKey := cnf.EncryptKey()
+	if secretKey == "" {
 		return "", err
 	}
 

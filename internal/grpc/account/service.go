@@ -17,20 +17,20 @@ import (
 )
 
 // MakeService возвращает настроенный сервис аккаунтов
-func MakeService(repo repository.AccountRepository, jwtCnf config.JWTConfigurator) (Service, error) {
-	return Service{store: repo, jwtCnf: jwtCnf}, nil
+func MakeService(repo repository.AccountRepository, cnf config.AppConfig) (Service, error) {
+	return Service{store: repo, cnf: cnf}, nil
 }
 
 // Service  сервис аккаунтов
 type Service struct {
 	pb.AccountsServer
-	store  repository.AccountRepository
-	jwtCnf config.JWTConfigurator
+	store repository.AccountRepository
+	cnf   config.AppConfig
 }
 
 // Get получение аккаунта по идентификатору
 func (s *Service) Get(ctx context.Context, req *pb.GetAccountRequest) (*pb.GetAccountResponse, error) {
-	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	userUID, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -60,7 +60,7 @@ func (s *Service) Get(ctx context.Context, req *pb.GetAccountRequest) (*pb.GetAc
 
 // Create создание аккаунта
 func (s *Service) Create(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
-	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	userUID, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -84,7 +84,7 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateAccountRequest) (*pb
 
 // Remove удаление аккаунта по идентификатору
 func (s *Service) Remove(ctx context.Context, req *pb.RemoveAccountRequest) (*pb.RemoveAccountResponse, error) {
-	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	userUID, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -100,7 +100,7 @@ func (s *Service) Remove(ctx context.Context, req *pb.RemoveAccountRequest) (*pb
 
 // Search поиск аккаунтов по критериям
 func (s *Service) Search(ctx context.Context, req *pb.SearchAccountRequest) (*pb.SearchAccountResponse, error) {
-	userUID, err := jwt.GetUIDFromContext(ctx, s.jwtCnf.GetJWTSecret())
+	userUID, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}

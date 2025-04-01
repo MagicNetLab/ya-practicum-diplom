@@ -99,8 +99,8 @@ type AppClient interface {
 }
 
 // NewAppClient - конструктор объекта реализующего интерфейс AppClient
-func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
-	connAddress := cnf.GetServerConf().GetHost() + ":" + cnf.GetServerConf().GetPort()
+func NewAppClient(cnf config.Configurator) (AppClient, error) {
+	connAddress := cnf.ServerHost() + ":" + cnf.ServerPort()
 	connect, err := grpc.NewClient(connAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
@@ -115,19 +115,19 @@ func NewAppClient(cnf config.AppConfigurator) (AppClient, error) {
 		cards:      cardpb.NewCardClient(connect),
 		notes:      notepb.NewNoteClient(connect),
 		files:      filepb.NewFilesClient(connect),
-		fileReader: &FileReader{},
+		fileReader: &Reader{},
 	}, nil
 }
 
 // AppClientImpl - реализация интерфейса AppClient
 type AppClientImpl struct {
-	cnf        config.AppConfigurator
+	cnf        config.Configurator
 	authClient authpb.AuthClient
 	accounts   accpb.AccountsClient
 	cards      cardpb.CardClient
 	notes      notepb.NoteClient
 	files      filepb.FilesClient
-	fileReader FileManager
+	fileReader FileReader
 }
 
 // Auth - метод аутентификации пользователя

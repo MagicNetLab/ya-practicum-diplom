@@ -15,12 +15,12 @@ func main() {
 		log.Fatalf("failed to start application. Logger init error: %v", err)
 	}
 
-	err = config.InitConfiguration()
+	cnf, err := config.MakeConfig()
 	if err != nil {
 		log.Fatalf("failed to start application. Configuration init error: %v", err)
 	}
 
-	client, err := appClianet.NewAppClient(config.GetAppConfig())
+	client, err := appClianet.NewAppClient(cnf)
 	if err != nil {
 		log.Fatalf("failed to start application. Application client error: %v", err)
 	}

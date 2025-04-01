@@ -19,13 +19,13 @@ import (
 )
 
 // New инициализация приложения
-func New(cnf config.AppConfigurator) (*Application, error) {
-	repo, err := repository.NewRepository(cnf.GetDBConf())
+func New(cnf config.Configurator) (*Application, error) {
+	repo, err := repository.NewRepository(cnf)
 	if err != nil {
 		return nil, err
 	}
 
-	s3Client, err := s3.New(cnf.GetS3Conf())
+	s3Client, err := s3.New(cnf)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func New(cnf config.AppConfigurator) (*Application, error) {
 
 // Application структура приложения
 type Application struct {
-	cnf    config.AppConfigurator
+	cnf    config.Configurator
 	server *grpc.Server
 	s3     s3.S3Client
 	repo   repository.Repository
@@ -47,27 +47,27 @@ type Application struct {
 
 // InitServer инициализация сервера
 func (app *Application) InitServer() error {
-	accountService, err := account.MakeService(app.repo.GetAccountRepo(), app.cnf.GetJWTConf())
+	accountService, err := account.MakeService(app.repo.GetAccountRepo(), app.cnf)
 	if err != nil {
 		logger.Error("failed to create account service", logger.StrArg("error", err.Error()))
 		return fmt.Errorf("create account service err: %v", err)
 	}
 
-	authService, err := auth.MakeService(app.cnf.GetJWTConf(), app.repo.GetAuthRepo())
+	authService, err := auth.MakeService(app.cnf, app.repo.GetAuthRepo())
 	if err != nil {
 		logger.Error("failed to create auth service", logger.StrArg("error", err.Error()))
 		return fmt.Errorf("creaye auth service err: %v", err)
 	}
 
-	cardService, err := card.MakeService(app.repo.GetCardRepo(), app.cnf.GetJWTConf())
+	cardService, err := card.MakeService(app.repo.GetCardRepo(), app.cnf)
 	if err != nil {
 		logger.Error("failed to create card service", logger.StrArg("error", err.Error()))
 		return fmt.Errorf("creaye card service err: %v", err)
 	}
 
-	filesService := files.MakeService(app.repo.GetFileRepo(), app.s3, app.cnf.GetJWTConf())
+	filesService := files.MakeService(app.repo.GetFileRepo(), app.s3, app.cnf)
 
-	noteService := note.MakeService(app.repo.GetNoteRepo(), app.cnf.GetJWTConf())
+	noteService := note.MakeService(app.repo.GetNoteRepo(), app.cnf)
 
 	opts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
@@ -93,7 +93,7 @@ func (app *Application) InitServer() error {
 // Start запуск сервера
 func (app *Application) Start() error {
 
-	serverAddress := app.cnf.GetServerConf().GetHost() + ":" + app.cnf.GetServerConf().GetPort()
+	serverAddress := app.cnf.ServerHost() + ":" + app.cnf.ServerPort()
 	listener, err := net.Listen("tcp", serverAddress)
 	if err != nil {
 		logger.Error("failed to start serv listen", logger.StrArg("error", err.Error()))

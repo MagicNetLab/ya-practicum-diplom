@@ -30,13 +30,14 @@ func (m *mockHandler) Handle(ctx context.Context, req any) (any, error) {
 func TestAuthInterceptor(t *testing.T) {
 	err := os.Setenv("JWT_SECRET", "secret")
 	assert.NoError(t, err)
-	cnf := config.GetJWTConfig()
+	cnf, err := config.MakeConfig()
+	assert.NoError(t, err)
 
 	t.Run("успешная авторизация с валидным токеном", func(t *testing.T) {
 		mockHandler := &mockHandler{}
 		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
 		user := models.User{UID: uuid.New().String()}
-		token, err := jwt.GenerateToken(&user, cnf.GetJWTSecret())
+		token, err := jwt.GenerateToken(&user, cnf.JWTSecret())
 		assert.NoError(t, err)
 
 		ctx := context.Background()
@@ -111,7 +112,8 @@ func TestAuthInterceptor(t *testing.T) {
 func TestGuestInterceptor(t *testing.T) {
 	err := os.Setenv("JWT_SECRET", "secret")
 	assert.NoError(t, err)
-	cnf := config.GetJWTConfig()
+	cnf, err := config.MakeConfig()
+	assert.NoError(t, err)
 
 	t.Run("успешный доступ для гостя", func(t *testing.T) {
 		mockHandler := &mockHandler{}
@@ -130,7 +132,7 @@ func TestGuestInterceptor(t *testing.T) {
 		mockHandler := &mockHandler{}
 		mockHandler.On("Handle", mock.Anything, mock.Anything).Return("success", nil)
 		user := models.User{UID: uuid.New().String()}
-		token, err := jwt.GenerateToken(&user, cnf.GetJWTSecret())
+		token, err := jwt.GenerateToken(&user, cnf.JWTSecret())
 		assert.NoError(t, err)
 
 		ctx := context.Background()

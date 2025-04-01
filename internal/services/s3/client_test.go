@@ -8,21 +8,21 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
+	cm "github.com/MagicNetLab/ya-practicum-diplom/internal/config/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
 // TestNew проверяет создание нового клиента S3.
 func TestNew(t *testing.T) {
-	cnf := config.S3Config{
-		Endpoint:  "localhost:9000",
-		SecretKey: "minioadmin",
-		AccessKey: "minioadmin",
-		Bucket:    "testbucket",
-	}
+	mockCnf := new(cm.AppConfig)
+	mockCnf.On("S3Endpoint").Return("localhost:9000")
+	mockCnf.On("S3AccessKey").Return("minioadmin")
+	mockCnf.On("S3SecretKey").Return("minioadmin")
+	mockCnf.On("S3Bucket").Return("testbucket")
+	mockCnf.On("IsValid").Return(true)
 
-	s3Client, err := minio.New(cnf.GetEndpoint(), &minio.Options{
-		Creds:  credentials.NewStaticV4(cnf.GetAccessKey(), cnf.GetSecretKey(), ""),
+	s3Client, err := minio.New(mockCnf.S3Endpoint(), &minio.Options{
+		Creds:  credentials.NewStaticV4(mockCnf.S3AccessKey(), mockCnf.S3SecretKey(), ""),
 		Secure: false,
 	})
 
@@ -32,13 +32,13 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("Bucket отсутствует", func(t *testing.T) {
-		client, err := New(cnf)
+		client, err := New(mockCnf)
 		assert.NoError(t, err)
 		assert.NotNil(t, client)
 	})
 
 	t.Run("Bucket уже есть", func(t *testing.T) {
-		client, err := New(cnf)
+		client, err := New(mockCnf)
 		assert.NoError(t, err)
 		assert.NotNil(t, client)
 	})
@@ -49,15 +49,15 @@ func TestClient_GetObject(t *testing.T) {
 	testbucket := "testbucket"
 	testobjectName := "testobject.txt"
 
-	cnf := config.S3Config{
-		Endpoint:  "localhost:9000",
-		SecretKey: "minioadmin",
-		AccessKey: "minioadmin",
-		Bucket:    testbucket,
-	}
+	mockCnf := new(cm.AppConfig)
+	mockCnf.On("S3Endpoint").Return("localhost:9000")
+	mockCnf.On("S3AccessKey").Return("minioadmin")
+	mockCnf.On("S3SecretKey").Return("minioadmin")
+	mockCnf.On("S3Bucket").Return(testbucket)
+	mockCnf.On("IsValid").Return(true)
 
-	s3Client, err := minio.New(cnf.GetEndpoint(), &minio.Options{
-		Creds:  credentials.NewStaticV4(cnf.GetAccessKey(), cnf.GetSecretKey(), ""),
+	s3Client, err := minio.New(mockCnf.S3Endpoint(), &minio.Options{
+		Creds:  credentials.NewStaticV4(mockCnf.S3AccessKey(), mockCnf.S3SecretKey(), ""),
 		Secure: false,
 	})
 	assert.NoError(t, err)
@@ -72,7 +72,7 @@ func TestClient_GetObject(t *testing.T) {
 		_ = s3Client.RemoveBucket(context.Background(), testbucket)
 	})
 
-	service, err := New(cnf)
+	service, err := New(mockCnf)
 	assert.NoError(t, err)
 
 	t.Run("Успешное получение объекта", func(t *testing.T) {
@@ -94,15 +94,15 @@ func TestClient_PutObject(t *testing.T) {
 	testbucket := "testbucket"
 	testobjectName := "/files/testobject.txt"
 
-	cnf := config.S3Config{
-		Endpoint:  "localhost:9000",
-		SecretKey: "minioadmin",
-		AccessKey: "minioadmin",
-		Bucket:    testbucket,
-	}
+	mockCnf := new(cm.AppConfig)
+	mockCnf.On("S3Endpoint").Return("localhost:9000")
+	mockCnf.On("S3AccessKey").Return("minioadmin")
+	mockCnf.On("S3SecretKey").Return("minioadmin")
+	mockCnf.On("S3Bucket").Return(testbucket)
+	mockCnf.On("IsValid").Return(true)
 
-	s3Client, err := minio.New(cnf.GetEndpoint(), &minio.Options{
-		Creds:  credentials.NewStaticV4(cnf.GetAccessKey(), cnf.GetSecretKey(), ""),
+	s3Client, err := minio.New(mockCnf.S3Endpoint(), &minio.Options{
+		Creds:  credentials.NewStaticV4(mockCnf.S3AccessKey(), mockCnf.S3SecretKey(), ""),
 		Secure: false,
 	})
 	assert.NoError(t, err)
@@ -115,7 +115,7 @@ func TestClient_PutObject(t *testing.T) {
 		_ = s3Client.RemoveBucket(context.Background(), testbucket)
 	})
 
-	service, err := New(cnf)
+	service, err := New(mockCnf)
 	assert.NoError(t, err)
 
 	t.Run("Успешное сохранение объекта", func(t *testing.T) {
@@ -138,15 +138,15 @@ func TestClient_RemoveObject(t *testing.T) {
 	testbucket := "testbucket"
 	testobjectName := "testobject.txt"
 
-	cnf := config.S3Config{
-		Endpoint:  "localhost:9000",
-		SecretKey: "minioadmin",
-		AccessKey: "minioadmin",
-		Bucket:    testbucket,
-	}
+	mockCnf := new(cm.AppConfig)
+	mockCnf.On("S3Endpoint").Return("localhost:9000")
+	mockCnf.On("S3AccessKey").Return("minioadmin")
+	mockCnf.On("S3SecretKey").Return("minioadmin")
+	mockCnf.On("S3Bucket").Return(testbucket)
+	mockCnf.On("IsValid").Return(true)
 
-	s3Client, err := minio.New(cnf.GetEndpoint(), &minio.Options{
-		Creds:  credentials.NewStaticV4(cnf.GetAccessKey(), cnf.GetSecretKey(), ""),
+	s3Client, err := minio.New(mockCnf.S3Endpoint(), &minio.Options{
+		Creds:  credentials.NewStaticV4(mockCnf.S3AccessKey(), mockCnf.S3SecretKey(), ""),
 		Secure: false,
 	})
 	assert.NoError(t, err)
@@ -161,7 +161,7 @@ func TestClient_RemoveObject(t *testing.T) {
 		_ = s3Client.RemoveBucket(context.Background(), testbucket)
 	})
 
-	service, err := New(cnf)
+	service, err := New(mockCnf)
 	assert.NoError(t, err)
 
 	t.Run("Успешное удаление объекта", func(t *testing.T) {

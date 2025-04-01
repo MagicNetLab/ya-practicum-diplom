@@ -21,8 +21,8 @@ import (
 )
 
 // MakeService возвращает сервис для работы с файлами
-func MakeService(repo repository.FileRepository, storage s3.S3Client, jwt config.JWTConfigurator) Service {
-	return Service{db: repo, storage: storage, jwt: jwt}
+func MakeService(repo repository.FileRepository, storage s3.S3Client, cnf config.AppConfig) Service {
+	return Service{db: repo, storage: storage, cnf: cnf}
 }
 
 // Service сервис для работы с файлами
@@ -30,12 +30,12 @@ type Service struct {
 	pb.FilesServer
 	db      repository.FileRepository
 	storage s3.S3Client
-	jwt     config.JWTConfigurator
+	cnf     config.AppConfig
 }
 
 // Put добавление файла в хранилище
 func (s *Service) Put(ctx context.Context, req *pb.PutFileRequest) (*pb.PutFileResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -77,7 +77,7 @@ func (s *Service) Put(ctx context.Context, req *pb.PutFileRequest) (*pb.PutFileR
 
 // List список файлов пользователя
 func (s *Service) List(ctx context.Context, req *pb.ListFilesRequest) (*pb.ListFilesResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -107,7 +107,7 @@ func (s *Service) List(ctx context.Context, req *pb.ListFilesRequest) (*pb.ListF
 
 // Download скачивание файла пользователем
 func (s *Service) Download(ctx context.Context, req *pb.DownloadFileRequest) (*pb.DownloadFileResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -140,7 +140,7 @@ func (s *Service) Download(ctx context.Context, req *pb.DownloadFileRequest) (*p
 
 // Search поиск по файлам пользователя
 func (s *Service) Search(ctx context.Context, req *pb.SearchFilesRequest) (*pb.SearchFilesResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -169,7 +169,7 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchFilesRequest) (*pb.S
 
 // Remove удаление файла пользователем
 func (s *Service) Remove(ctx context.Context, req *pb.RemoveFileRequest) (*pb.RemoveFileResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}

@@ -17,13 +17,13 @@ func main() {
 		log.Fatalf("Error initializing logger: %v", err)
 	}
 
-	err = config.InitConfiguration()
+	cnf, err := config.MakeConfig()
 	if err != nil {
 		logger.Fatal("failed to init configuration", logger.StrArg("error", err.Error()))
 
 	}
 
-	application, err := app.New(config.GetAppConfig())
+	application, err := app.New(cnf)
 	if err != nil {
 		log.Fatalf("appInit err: %v", err)
 	}

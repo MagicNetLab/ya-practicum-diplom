@@ -3,30 +3,30 @@ package auth
 import (
 	"context"
 	"errors"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 	"github.com/google/uuid"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	cm "github.com/MagicNetLab/ya-practicum-diplom/internal/config/mocks"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/auth/proto"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	rm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/mocks"
 	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models/mocks"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/encryptor"
 )
 
 // setupService - инициализирует сервис и моки
-func setupService() (*Service, *rm.AuthRepository) {
+func setupService() (*Service, *rm.AuthRepository, *cm.AppConfig) {
 	mockRepo := new(rm.AuthRepository)
-	cnf := config.GetJWTConfig()
-	return &Service{store: mockRepo, jwt: cnf}, mockRepo
+	cnf := new(cm.AppConfig)
+	return &Service{store: mockRepo, cnf: cnf}, mockRepo, cnf
 }
 
 // TestService_Auth тест авторизации пользователя
 func TestService_Auth(t *testing.T) {
-	service, mockRepo := setupService()
+	service, mockRepo, _ := setupService()
 	mockUser := new(mm.UserModel)
 	mockUser.On("GetUID").Return(uuid.New().String())
 	pass, err := encryptor.EncryptPassword("password")
@@ -58,7 +58,7 @@ func TestService_Auth(t *testing.T) {
 
 // TestService_Register тест регистрации пользователя
 func TestService_Register(t *testing.T) {
-	service, mockRepo := setupService()
+	service, mockRepo, _ := setupService()
 	ctx := context.Background()
 
 	t.Run("Успешная регистрация", func(t *testing.T) {
@@ -88,13 +88,14 @@ func TestService_Register(t *testing.T) {
 
 // TestService_Refresh тест обновления токена
 func TestService_Refresh(t *testing.T) {
-	service, mockRepo := setupService()
+	service, mockRepo, cnf := setupService()
 	ctx := context.Background()
 
 	t.Run("Успешное обновление токена", func(t *testing.T) {
+		cnf.On("GetJWTSecret").Return("secret")
 		mockUser := new(mm.UserModel)
 		mockUser.On("GetUID").Return(uuid.New().String())
-		token, _ := jwt.GenerateToken(mockUser, service.jwt.GetJWTSecret())
+		token, _ := jwt.GenerateToken(mockUser, service.cnf.JWTSecret())
 		mockRepo.On("HasToken", ctx, token).Return(true, nil)
 		mockRepo.On("GetUserByUID", ctx, mock.Anything).Return(mockUser, nil)
 		mockRepo.On("CreateToken", ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)

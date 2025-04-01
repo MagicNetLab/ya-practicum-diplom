@@ -17,19 +17,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = config.InitConfiguration()
-	if err != nil {
-		logger.Fatal("failed to load configuration", logger.StrArg("error", err.Error()))
+	cnf, err := config.MakeConfig()
+	if err != nil || !cnf.IsValid() {
+		log.Fatal(err)
 	}
 
-	cnf := config.GetDBConfig()
 	if !cnf.IsValid() {
 		logger.Fatal("db config is not valid")
 	}
 
 	m, err := migrate.New(
 		"file://migrations",
-		cnf.GetDSN(),
+		cnf.DBConnectionString(),
 	)
 	if err != nil {
 		logger.Fatal("failed migration: error with init migration", logger.StrArg("error", err.Error()))

@@ -29,8 +29,12 @@ func AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServe
 		token = values[0]
 	}
 
-	cnf := config.GetJWTConfig()
-	if token != "" && jwt.VerifyToken(token, cnf.GetJWTSecret()) {
+	cnf, err := config.MakeConfig()
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
+	}
+
+	if token != "" && jwt.VerifyToken(token, cnf.JWTSecret()) {
 		return handler(ctx, req)
 	}
 
@@ -55,8 +59,12 @@ func GuestInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServ
 		token = values[0]
 	}
 
-	cnf := config.GetJWTConfig()
-	if token != "" && jwt.VerifyToken(token, cnf.GetJWTSecret()) {
+	cnf, err := config.MakeConfig()
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
+	}
+
+	if token != "" && jwt.VerifyToken(token, cnf.JWTSecret()) {
 		return nil, status.Errorf(codes.PermissionDenied, "forbidden for authorized users")
 	}
 

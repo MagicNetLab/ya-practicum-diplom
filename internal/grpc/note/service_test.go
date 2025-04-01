@@ -14,39 +14,21 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	cm "github.com/MagicNetLab/ya-practicum-diplom/internal/config/mocks"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/note/proto"
 	rm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/mocks"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
 )
 
-// mockJWTConfigurator mock для JWTConfigurator
-type mockJWTConfigurator struct {
-	mock.Mock
-}
-
-// GetJWTSecret mock метода для получения JWT-секрета
-func (m *mockJWTConfigurator) GetJWTSecret() string {
-	return "test-secret"
-}
-
-// IsValid mock метода для проверки валидности JWTConfigurator
-func (m *mockJWTConfigurator) IsValid() bool { return true }
-
-// GetTokenLifeTime mock метода для получения времени жизни токена
-func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
-	return time.Hour
-}
-
-// GetRefreshTokenLifeTime mock метода для получения времени жизни токена
-func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
-	return time.Hour
-}
-
 // setupService инициализирует сервис и репозиторий для тестов
 func setupService() (Service, *rm.NoteRepository) {
 	mockRepo := new(rm.NoteRepository)
-	jwtCnf := new(mockJWTConfigurator)
-	return MakeService(mockRepo, jwtCnf), mockRepo
+	cnf := new(cm.AppConfig)
+	cnf.On("JWTSecret").Return("test-secret")
+	cnf.On("IsValid").Return(true)
+	cnf.On("JWTTokenLifeTime").Return(time.Hour)
+	cnf.On("JWTRefreshTokenLifeTime").Return(time.Hour)
+	return MakeService(mockRepo, cnf), mockRepo
 }
 
 // setupAuthContext создает контекст с валидным токеном авторизации

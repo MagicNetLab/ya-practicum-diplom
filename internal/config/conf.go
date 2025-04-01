@@ -1,101 +1,142 @@
 package config
 
 import (
-	"fmt"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
-	"os"
+	"errors"
 	"strconv"
 
-	"github.com/joho/godotenv"
-
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config/readers"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
 )
 
-const (
-	defaultTokenLifeTime        = 1
-	defaultRefreshTokenLifeTime = 24
-)
+var Config Configurator
 
-// InitConfiguration инициализирует конфигурацию приложения
-func InitConfiguration() error {
-	if err := godotenv.Load(".env"); err != nil {
-		return fmt.Errorf("error loading .env file: %w", err)
+var getReadersFunc = getReaders
+
+// MakeConfig возвращает конфигурацию приложения
+func MakeConfig() (Configurator, error) {
+	if Config.IsValid() {
+		return Config, nil
+	}
+
+	err := readConfig()
+	if err == nil && Config.IsValid() {
+		return Config, nil
+	}
+
+	return Config, errors.New("invalid config")
+}
+
+func getReaders() ([]Reader, error) {
+	return []Reader{
+		&readers.DefaultConfig{},
+		&readers.EnvReader{},
+		&readers.FlagReader{},
+	}, nil
+}
+
+func readConfig() error {
+	cnfReaders, err := getReadersFunc()
+	if err != nil {
+		logger.Error("Failed to get readers from config", logger.StrArg("error", err.Error()))
+		return err
+	}
+
+	for _, reader := range cnfReaders {
+		err := reader.Parse()
+		if err != nil {
+			logger.Error("Failed to parse config", logger.StrArg("error", err.Error()))
+			continue
+		}
+
+		servHost, err := reader.GetServerHost()
+		if err == nil {
+			Config.serverHost = servHost
+		}
+
+		servPort, err := reader.GetServerPort()
+		if err == nil {
+			Config.serverPort = servPort
+		}
+
+		s3Endpoint, err := reader.GetS3EndPoint()
+		if err == nil {
+			Config.s3Endpoint = s3Endpoint
+		}
+
+		s3SecretKey, err := reader.GetS3SecretKey()
+		if err == nil {
+			Config.s3SecretKey = s3SecretKey
+		}
+
+		s3AccessKey, err := reader.GetS3AccessKey()
+		if err == nil {
+			Config.s3AccessKey = s3AccessKey
+		}
+
+		s3Bucket, err := reader.GetS3BucketName()
+		if err == nil {
+			Config.s3Bucket = s3Bucket
+		}
+
+		dbHost, err := reader.GetDBHost()
+		if err == nil {
+			Config.dbHost = dbHost
+		}
+
+		dbPort, err := reader.GetDBPort()
+		if err == nil {
+			Config.dbPort = dbPort
+		}
+
+		dbUser, err := reader.GetDBUser()
+		if err == nil {
+			Config.dbUser = dbUser
+		}
+
+		dbPassword, err := reader.GetDBPassword()
+		if err == nil {
+			Config.dbPassword = dbPassword
+		}
+
+		dbName, err := reader.GetDBName()
+		if err == nil {
+			Config.dbName = dbName
+		}
+
+		dbSSLMode, err := reader.GetDBSSLMode()
+		if err == nil {
+			Config.dbSSLMode = dbSSLMode
+		}
+
+		jwtSecret, err := reader.GetJWTSecret()
+		if err == nil {
+			Config.jwtSecret = jwtSecret
+		} else {
+			Config.jwtSecret = jwt.GetRandomSecret()
+		}
+
+		jwtTokenLifeTime, err := reader.GetJWTTokenLifeTime()
+		if err == nil {
+			val, err := strconv.Atoi(jwtTokenLifeTime)
+			if err == nil {
+				Config.jwtTokenLifeTime = val
+			}
+		}
+
+		jwtRefreshTokenLifeTime, err := reader.GetJWTRefreshTokenLifeTime()
+		if err == nil {
+			val, err := strconv.Atoi(jwtRefreshTokenLifeTime)
+			if err == nil {
+				Config.jwtTokenLifeTime = val
+			}
+		}
+
+		encryptKey, err := reader.GetEncryptKey()
+		if err == nil {
+			Config.encryptKey = encryptKey
+		}
 	}
 
 	return nil
-}
-
-// GetAppConfig возвращает параметры приложения
-func GetAppConfig() AppConfigurator {
-	return &AppConfig{
-		serverConf: GetServerConfig(),
-		dbConf:     GetDBConfig(),
-		s3Conf:     GetS3Config(),
-		jwtConf:    GetJWTConfig(),
-		secretConf: GetSecretConfig(),
-	}
-}
-
-// GetServerConfig возвращает секреты для приложения
-func GetServerConfig() ServerConfigurator {
-	return &ServerConfig{
-		host: os.Getenv("SERVER_HOST"),
-		port: os.Getenv("SERVER_PORT"),
-	}
-}
-
-// GetDBConfig возвращает параметры для подключения к БД
-func GetDBConfig() DataBaseConfigurator {
-	return DatabaseConfig{
-		host:     os.Getenv("DB_HOST"),
-		port:     os.Getenv("DB_PORT"),
-		user:     os.Getenv("DB_USER"),
-		password: os.Getenv("DB_PASSWORD"),
-		dbname:   os.Getenv("DB_NAME"),
-		sslMode:  os.Getenv("DB_SSL_MODE"),
-	}
-}
-
-// GetS3Config возвращает параметры для работы с S3
-func GetS3Config() S3Configurator {
-	return S3Config{
-		Endpoint:  os.Getenv("S3_ENDPOINT"),
-		SecretKey: os.Getenv("S3_SECRET_KEY"),
-		AccessKey: os.Getenv("S3_ACCESS_KEY"),
-		Bucket:    os.Getenv("S3_BUCKET"),
-	}
-}
-
-// GetJWTConfig возвращает параметры для генерации JWT токенов
-func GetJWTConfig() JWTConfigurator {
-	tokenLifeTime := os.Getenv("JWT_TOKEN_LIFE_TIME")
-	tlf, err := strconv.Atoi(tokenLifeTime)
-	if err != nil {
-		logger.Error("error parsing JWT_TOKEN_LIFE_TIME", logger.StrArg("error", err.Error()))
-		tlf = defaultTokenLifeTime
-	}
-
-	refreshTokenLifeTime := os.Getenv("JWT_REFRESH_TOKEN_LIFE_TIME")
-	rtlf, err := strconv.Atoi(refreshTokenLifeTime)
-	if err != nil {
-		logger.Error("error parsing JWT_REFRESH_TOKEN_LIFE_TIME", logger.StrArg("error", err.Error()))
-		rtlf = defaultRefreshTokenLifeTime
-	}
-
-	secretKey := os.Getenv("JWT_SECRET")
-	if secretKey == "" {
-		secretKey = jwt.GetRandomSecret()
-	}
-	return &JWTConfig{
-		secret:               secretKey,
-		tokenLifeTime:        tlf,
-		refreshTokenLifeTime: rtlf,
-	}
-}
-
-// GetSecretConfig возвращает секрет для приложения
-func GetSecretConfig() SecretConfigurator {
-	return &SecretConfig{
-		secretKey: os.Getenv("ENCRYPT_KEY"),
-	}
 }

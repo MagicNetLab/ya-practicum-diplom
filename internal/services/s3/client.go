@@ -23,9 +23,9 @@ type S3Client interface {
 }
 
 // New конструктор клиента S3
-func New(cnf config.S3Configurator) (S3Client, error) {
-	client, err := minio.New(cnf.GetEndpoint(), &minio.Options{
-		Creds:  credentials.NewStaticV4(cnf.GetAccessKey(), cnf.GetSecretKey(), ""),
+func New(cnf config.AppConfig) (S3Client, error) {
+	client, err := minio.New(cnf.S3Endpoint(), &minio.Options{
+		Creds:  credentials.NewStaticV4(cnf.S3AccessKey(), cnf.S3SecretKey(), ""),
 		Secure: false,
 	})
 	if err != nil {
@@ -35,7 +35,7 @@ func New(cnf config.S3Configurator) (S3Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	exists, err := client.BucketExists(ctx, cnf.GetBucket())
+	exists, err := client.BucketExists(ctx, cnf.S3Bucket())
 	if err != nil {
 		logger.Error("Failed to check Bucket existence", logger.StrArg("err", err.Error()))
 		return nil, fmt.Errorf("failed to check Bucket existence: %w", err)
@@ -43,14 +43,14 @@ func New(cnf config.S3Configurator) (S3Client, error) {
 
 	if !exists {
 		logger.Debug("Bucket hasn't been found")
-		err = client.MakeBucket(ctx, cnf.GetBucket(), minio.MakeBucketOptions{})
+		err = client.MakeBucket(ctx, cnf.S3Bucket(), minio.MakeBucketOptions{})
 		if err != nil {
 			logger.Error("Failed to create Bucket", logger.StrArg("err", err.Error()))
 			return nil, errors.New("failed to create Bucket")
 		}
 	}
 
-	return &Client{Client: client, Bucket: cnf.GetBucket()}, nil
+	return &Client{Client: client, Bucket: cnf.S3Bucket()}, nil
 }
 
 // Client клиент хранилища S3

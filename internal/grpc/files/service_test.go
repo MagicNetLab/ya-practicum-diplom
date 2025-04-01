@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	cm "github.com/MagicNetLab/ya-practicum-diplom/internal/config/mocks"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/files/proto"
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 	rm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/mocks"
@@ -46,11 +47,15 @@ func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
 }
 
 // setupService инициализирует сервис для тестов
-func setupService() (*Service, *rm.FileRepository, *sm.S3Client, *mockJWTConfigurator) {
+func setupService() (*Service, *rm.FileRepository, *sm.S3Client, *cm.AppConfig) {
 	mockRepo := new(rm.FileRepository)
 	mockStorage := new(sm.S3Client)
-	mockJWTCnf := new(mockJWTConfigurator)
-	return &Service{db: mockRepo, storage: mockStorage, jwt: mockJWTCnf}, mockRepo, mockStorage, mockJWTCnf
+	mockCnf := new(cm.AppConfig)
+	mockCnf.On("JWTSecret").Return("jhjshdahjdakhdjaskdhajshdhadaskdhad")
+	mockCnf.On("IsValid").Return(true)
+	mockCnf.On("TokenLifeTime").Return(time.Hour)
+	mockCnf.On("RefreshTokenLifeTime").Return(time.Hour)
+	return &Service{db: mockRepo, storage: mockStorage, cnf: mockCnf}, mockRepo, mockStorage, mockCnf
 }
 
 // setupAuthContext инициализирует контекст c валидным токеном авторизации для тестов
@@ -69,13 +74,11 @@ func setupAuthContext(uid string, secret string) context.Context {
 
 // TestService_Put тесты добавления файла в хранилище
 func TestService_Put(t *testing.T) {
-	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
-	assert.NoError(t, err)
 
 	t.Run("Успешное добавление файла", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
 			Content: []byte("test content"),
@@ -116,7 +119,7 @@ func TestService_Put(t *testing.T) {
 	t.Run("Ошибка создания файла в БД", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
 			Content: []byte("test content"),
@@ -137,7 +140,7 @@ func TestService_Put(t *testing.T) {
 	t.Run("Ошибка загрузки файла в хранилище", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		req := &pb.PutFileRequest{
 			Name:    "test.txt",
 			Content: []byte("test content"),
@@ -168,7 +171,7 @@ func TestService_List(t *testing.T) {
 	t.Run("Успешное получение списка файлов", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		expectedFiles := make([]models.FilesModel, 0)
 
 		expectedFiles = append(expectedFiles, &models.File{
@@ -217,7 +220,7 @@ func TestService_List(t *testing.T) {
 	t.Run("Ошибка поиска файлов", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		mockRepo.On("SearchFile", ctx, mock.AnythingOfType("*models.FilesSearch")).Return(nil, assert.AnError)
 
 		resp, err := service.List(ctx, &pb.ListFilesRequest{})
@@ -239,7 +242,7 @@ func TestService_Download(t *testing.T) {
 	t.Run("Успешное скачивание файла", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:        fileID,
@@ -281,7 +284,7 @@ func TestService_Download(t *testing.T) {
 	t.Run("Ошибка валидации ID", func(t *testing.T) {
 		service, _, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		resp, err := service.Download(ctx, &pb.DownloadFileRequest{Id: "invalid-id"})
 
 		assert.Error(t, err)
@@ -294,7 +297,7 @@ func TestService_Download(t *testing.T) {
 	t.Run("Файл не найден", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		mockRepo.On("GetFile", ctx, fileID, uid).Return(nil, assert.AnError)
 
@@ -311,7 +314,7 @@ func TestService_Download(t *testing.T) {
 	t.Run("Ошибка получения файла из хранилища", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
@@ -333,13 +336,10 @@ func TestService_Download(t *testing.T) {
 
 // TestService_Search тесты поиска файлов
 func TestService_Search(t *testing.T) {
-	err := os.Setenv("ENCRYPT_KEY", "jhjshdahjdakhdjaskdhajshdhadaskdhad")
-	assert.NoError(t, err)
-
 	t.Run("Успешный поиск файлов", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		exportedFiles := make([]models.FilesModel, 0)
 		expectedFiles := append(exportedFiles, &models.File{
 			ID:        uuid.New().String(),
@@ -378,7 +378,7 @@ func TestService_Search(t *testing.T) {
 	t.Run("Ошибка поиска файлов", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		mockRepo.On("SearchFile", ctx, mock.AnythingOfType("*models.FilesSearch")).Return(nil, assert.AnError)
 
 		resp, err := service.Search(ctx, &pb.SearchFilesRequest{Name: "test"})
@@ -400,7 +400,7 @@ func TestService_Remove(t *testing.T) {
 	t.Run("Успешное удаление файла", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
@@ -435,7 +435,7 @@ func TestService_Remove(t *testing.T) {
 	t.Run("Ошибка валидации ID", func(t *testing.T) {
 		service, _, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		resp, err := service.Remove(ctx, &pb.RemoveFileRequest{Id: "invalid-id"})
 
 		assert.Error(t, err)
@@ -448,7 +448,7 @@ func TestService_Remove(t *testing.T) {
 	t.Run("Файл не найден", func(t *testing.T) {
 		service, mockRepo, _, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		mockRepo.On("GetFile", ctx, fileID, uid).Return(nil, assert.AnError)
 
@@ -465,7 +465,7 @@ func TestService_Remove(t *testing.T) {
 	t.Run("Ошибка удаления файла из хранилища", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,
@@ -490,7 +490,7 @@ func TestService_Remove(t *testing.T) {
 	t.Run("Ошибка удаления информации о файле из БД", func(t *testing.T) {
 		service, mockRepo, mockStorage, _ := setupService()
 		uid := uuid.New().String()
-		ctx := setupAuthContext(uid, service.jwt.GetJWTSecret())
+		ctx := setupAuthContext(uid, service.cnf.JWTSecret())
 		fileID := uuid.New().String()
 		expectedFile := &models.File{
 			ID:   fileID,

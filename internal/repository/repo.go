@@ -20,8 +20,8 @@ type Repository interface {
 }
 
 // NewRepository конструктор репозитория
-func NewRepository(cnf config.DataBaseConfigurator) (Repository, error) {
-	pool, err := pgxpool.New(context.Background(), cnf.GetDSN())
+func NewRepository(cnf config.Configurator) (Repository, error) {
+	pool, err := pgxpool.New(context.Background(), cnf.DBConnectionString())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed connect to database")
 	}

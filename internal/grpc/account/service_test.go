@@ -3,49 +3,29 @@ package account
 import (
 	"context"
 	"errors"
-	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	"testing"
 	"time"
 
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/mocks"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
-	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/metadata"
+
+	cm "github.com/MagicNetLab/ya-practicum-diplom/internal/config/mocks"
+	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/mocks"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models"
+	mm "github.com/MagicNetLab/ya-practicum-diplom/internal/repository/models/mocks"
 )
 
-// mockJWTConfigurator - mock для JWTConfigurator
-type mockJWTConfigurator struct {
-	mock.Mock
-}
-
-// GetJWTSecret - метод для получения секрета JWT
-func (m *mockJWTConfigurator) GetJWTSecret() string {
-	return "test-secret"
-}
-
-// IsValid - метод для проверки валидности JWTConfigurator
-func (m *mockJWTConfigurator) IsValid() bool { return true }
-
-// GetTokenLifeTime - метод для получения времени жизни токена
-func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
-	return time.Hour
-}
-
-// GetRefreshTokenLifeTime - метод для получения времени жизни токена
-func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
-	return time.Hour
-}
-
 // setupService - настройка сервиса для тестов
-func setupService() (*Service, *mocks.AccountRepository, *mockJWTConfigurator) {
+func setupService() (*Service, *mocks.AccountRepository, config.AppConfig) {
 	mockRepo := new(mocks.AccountRepository)
-	mockJWTCnf := new(mockJWTConfigurator)
-	service, _ := MakeService(mockRepo, mockJWTCnf)
-	return &service, mockRepo, mockJWTCnf
+	mockCnf := new(cm.AppConfig)
+	service, _ := MakeService(mockRepo, mockCnf)
+	return &service, mockRepo, mockCnf
 }
 
 // setupAuthContext - настройка контекста с валидным токеном авторизации для тестов

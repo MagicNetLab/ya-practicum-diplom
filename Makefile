@@ -110,12 +110,8 @@ mock-clients:
 	mockery --name=S3Client --dir=internal/services/s3 --output=internal/services/s3/mocks --outpkg=mocks
 
 mock-conf:
-	mockery --name=ServerConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
-	mockery --name=SecretConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
-	mockery --name=S3Configurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
-	mockery --name=JWTConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
-	mockery --name=DataBaseConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
-	mockery --name=AppConfigurator --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=AppConfig --dir=internal/config --output=internal/config/mocks --outpkg=mocks
+	mockery --name=Reader --dir=internal/config --output=internal/config/mocks --outpkg=mocks
 
 mock-service:
 	mockery --name=AppClient --dir=internal/services/client --output=internal/services/client/mocks --outpkg=mocks

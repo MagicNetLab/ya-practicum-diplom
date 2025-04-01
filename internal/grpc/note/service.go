@@ -17,20 +17,20 @@ import (
 )
 
 // MakeService создание сервиса работы с заметками
-func MakeService(store repository.NoteRepository, jwt config.JWTConfigurator) Service {
-	return Service{store: store, jwt: jwt}
+func MakeService(store repository.NoteRepository, cnf config.AppConfig) Service {
+	return Service{store: store, cnf: cnf}
 }
 
 // Service сервис работы с заметками
 type Service struct {
 	pb.NoteServer
 	store repository.NoteRepository
-	jwt   config.JWTConfigurator
+	cnf   config.AppConfig
 }
 
 // Create создание заметки
 func (s *Service) Create(ctx context.Context, req *pb.CreateNoteRequest) (*pb.CreateNoteResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -60,7 +60,7 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateNoteRequest) (*pb.Cr
 
 // Get получение заметки
 func (s *Service) Get(ctx context.Context, req *pb.GetNoteRequest) (*pb.GetNoteResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -90,7 +90,7 @@ func (s *Service) Get(ctx context.Context, req *pb.GetNoteRequest) (*pb.GetNoteR
 
 // Remove удаление заметки
 func (s *Service) Remove(ctx context.Context, req *pb.RemoveNoteRequest) (*pb.RemoveNoteResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -109,7 +109,7 @@ func (s *Service) Remove(ctx context.Context, req *pb.RemoveNoteRequest) (*pb.Re
 
 // List получение списка заметок пользователя todo deprecated
 func (s *Service) List(ctx context.Context, req *pb.ListNoteRequest) (*pb.ListNoteResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -144,7 +144,7 @@ func (s *Service) List(ctx context.Context, req *pb.ListNoteRequest) (*pb.ListNo
 
 // Search поиск заметок пользователя
 func (s *Service) Search(ctx context.Context, req *pb.SearchNoteRequest) (*pb.SearchNoteResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}

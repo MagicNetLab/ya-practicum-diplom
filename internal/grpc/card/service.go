@@ -16,20 +16,20 @@ import (
 )
 
 // MakeService возвращает настроенный сервис карт
-func MakeService(repo repository.CardRepository, jwtConfig config.JWTConfigurator) (Service, error) {
-	return Service{store: repo, jwt: jwtConfig}, nil
+func MakeService(repo repository.CardRepository, jwtConfig config.AppConfig) (Service, error) {
+	return Service{store: repo, cnf: jwtConfig}, nil
 }
 
 // Service  сервис карт
 type Service struct {
 	pb.CardServer
 	store repository.CardRepository
-	jwt   config.JWTConfigurator
+	cnf   config.AppConfig
 }
 
 // Get получение карты по идентификатору
 func (s *Service) Get(ctx context.Context, req *pb.GetCardRequest) (*pb.GetCardResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -63,7 +63,7 @@ func (s *Service) Get(ctx context.Context, req *pb.GetCardRequest) (*pb.GetCardR
 
 // Create создание карты
 func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.CreateCardResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -106,7 +106,7 @@ func (s *Service) Create(ctx context.Context, req *pb.CreateCardRequest) (*pb.Cr
 
 // Delete удаление карты по идентификатору
 func (s *Service) Delete(ctx context.Context, req *pb.DeleteCardRequest) (*pb.DeleteCardResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -129,7 +129,7 @@ func (s *Service) Delete(ctx context.Context, req *pb.DeleteCardRequest) (*pb.De
 
 // Search поиск карт по запросу
 func (s *Service) Search(ctx context.Context, req *pb.SearchCardRequest) (*pb.SearchCardResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
@@ -161,7 +161,7 @@ func (s *Service) Search(ctx context.Context, req *pb.SearchCardRequest) (*pb.Se
 
 // List получение списка карт по идентификатору владельца
 func (s *Service) List(ctx context.Context, req *pb.ListCardRequest) (*pb.ListCardResponse, error) {
-	uid, err := jwt.GetUIDFromContext(ctx, s.jwt.GetJWTSecret())
+	uid, err := jwt.GetUIDFromContext(ctx, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
 	}

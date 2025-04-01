@@ -18,14 +18,14 @@ import (
 )
 
 // MakeService возвращает настроенный сервис авторизации
-func MakeService(cnf config.JWTConfigurator, repo repository.AuthRepository) (Service, error) {
-	return Service{jwt: cnf, store: repo}, nil
+func MakeService(cnf config.AppConfig, repo repository.AuthRepository) (Service, error) {
+	return Service{cnf: cnf, store: repo}, nil
 }
 
 // Service  сервис авторизации
 type Service struct {
 	pb.AuthServer
-	jwt   config.JWTConfigurator
+	cnf   config.AppConfig
 	store repository.AuthRepository
 }
 
@@ -46,12 +46,12 @@ func (s *Service) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthRespon
 		return nil, status.Errorf(codes.PermissionDenied, "Invalid credentials")
 	}
 
-	token, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
+	token, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	err = s.store.CreateToken(ctx, user.GetUID(), token, false, time.Now().Add(s.jwt.GetTokenLifeTime()))
+	err = s.store.CreateToken(ctx, user.GetUID(), token, false, time.Now().Add(s.cnf.JWTTokenLifeTime()))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to create token")
 	}
@@ -75,12 +75,12 @@ func (s *Service) Register(ctx context.Context, req *pb.RegRequest) (*pb.RegResp
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	token, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
+	token, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	refreshToken, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
+	refreshToken, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -90,11 +90,11 @@ func (s *Service) Register(ctx context.Context, req *pb.RegRequest) (*pb.RegResp
 
 // Refresh обновление токена
 func (s *Service) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
-	if isValidToken := jwt.VerifyToken(req.Token, s.jwt.GetJWTSecret()); !isValidToken {
+	if isValidToken := jwt.VerifyToken(req.Token, s.cnf.JWTSecret()); !isValidToken {
 		return nil, status.Errorf(codes.PermissionDenied, "Invalid token1")
 	}
 
-	tokenData, err := jwt.ParseToken(req.Token, s.jwt.GetJWTSecret())
+	tokenData, err := jwt.ParseToken(req.Token, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -109,12 +109,12 @@ func (s *Service) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Refr
 		return nil, status.Errorf(codes.NotFound, "User not found")
 	}
 
-	token, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
+	token, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	refreshToken, err := jwt.GenerateToken(user, s.jwt.GetJWTSecret())
+	refreshToken, err := jwt.GenerateToken(user, s.cnf.JWTSecret())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}

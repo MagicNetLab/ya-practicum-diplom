@@ -3,15 +3,15 @@ package client
 import "os"
 
 // FileReader интерфейс сервис чтения файлов из файловой системы.
-type FileManager interface {
+type FileReader interface {
 	Read(path string) ([]byte, error)
 }
 
-// FileReader сервис чтения файлов из файловой системы.
-type FileReader struct{}
+// Reader сервис чтения файлов из файловой системы.
+type Reader struct{}
 
 // Read чтение содержимого файла
-func (r FileReader) Read(path string) ([]byte, error) {
+func (r Reader) Read(path string) ([]byte, error) {
 	fileContent, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
