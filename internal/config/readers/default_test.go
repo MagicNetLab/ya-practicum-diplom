@@ -19,10 +19,10 @@ func TestDefaultConfig_Parse(t *testing.T) {
 	assert.Equal(t, "gophkeeper", config.dbPassword)
 	assert.Equal(t, "gophkeeper", config.dbName)
 	assert.Equal(t, "disable", config.dbSSLMode)
-	assert.Equal(t, "gophkeeper", config.jwtSecret)
+	assert.Equal(t, "jhjshdahjdakhdjaskdhajshdhadaskdhad", config.jwtSecret)
 	assert.Equal(t, "60", config.jwtTokenLifeTime)
 	assert.Equal(t, "3600", config.jwtRefreshTokenLifeTime)
-	assert.Equal(t, "gophkeeper", config.encryptKey)
+	assert.Equal(t, "jhjshdahjdakhdjaskdhajshdhadaskdhad", config.encryptKey)
 }
 
 func TestDefaultConfig_GetServerHost(t *testing.T) {

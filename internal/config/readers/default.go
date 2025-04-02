@@ -33,10 +33,14 @@ func (r *DefaultConfig) Parse() error {
 	r.dbPassword = "gophkeeper"
 	r.dbName = "gophkeeper"
 	r.dbSSLMode = "disable"
-	r.jwtSecret = "gophkeeper"
+	r.jwtSecret = "jhjshdahjdakhdjaskdhajshdhadaskdhad"
+	r.s3Bucket = "gophkeeper"
+	r.s3AccessKey = "minioadmin"
+	r.s3SecretKey = "minioadmin"
+	r.s3Endpoint = "localhost:9000"
 	r.jwtTokenLifeTime = "60"
 	r.jwtRefreshTokenLifeTime = "3600"
-	r.encryptKey = "gophkeeper"
+	r.encryptKey = "jhjshdahjdakhdjaskdhajshdhadaskdhad"
 
 	return nil
 }

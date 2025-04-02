@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,6 +22,8 @@ import (
 func setupService() (*Service, *rm.AuthRepository, *cm.AppConfig) {
 	mockRepo := new(rm.AuthRepository)
 	cnf := new(cm.AppConfig)
+	cnf.On("JWTSecret").Return("test-secret")
+	cnf.On("JWTTokenLifeTime").Return(1 * time.Hour)
 	return &Service{store: mockRepo, cnf: cnf}, mockRepo, cnf
 }
 

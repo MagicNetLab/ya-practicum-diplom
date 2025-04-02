@@ -24,6 +24,7 @@ import (
 func setupService() (*Service, *mocks.AccountRepository, config.AppConfig) {
 	mockRepo := new(mocks.AccountRepository)
 	mockCnf := new(cm.AppConfig)
+	mockCnf.On("JWTSecret").Return("test-secret")
 	service, _ := MakeService(mockRepo, mockCnf)
 	return &service, mockRepo, mockCnf
 }

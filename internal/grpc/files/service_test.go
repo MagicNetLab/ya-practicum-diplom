@@ -23,29 +23,6 @@ import (
 	sm "github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3/mocks"
 )
 
-// mockJWTConfigurator mock для JWTConfigurator
-type mockJWTConfigurator struct {
-	mock.Mock
-}
-
-// GetJWTSecret mock для метода получения секрета
-func (m *mockJWTConfigurator) GetJWTSecret() string {
-	return "hfjhshfjshdkfhsjhfksjdfhskfhjsdhfhaksjdh"
-}
-
-// IsValid mock для метода проверки валидности конфигуратора
-func (m *mockJWTConfigurator) IsValid() bool { return true }
-
-// GetRefreshTokenLifeTime mock для метода получения времени жизни токена
-func (m *mockJWTConfigurator) GetTokenLifeTime() time.Duration {
-	return time.Hour
-}
-
-// GetRefreshTokenLifeTime mock для метода получения времени жизни refresh токена
-func (m *mockJWTConfigurator) GetRefreshTokenLifeTime() time.Duration {
-	return time.Hour
-}
-
 // setupService инициализирует сервис для тестов
 func setupService() (*Service, *rm.FileRepository, *sm.S3Client, *cm.AppConfig) {
 	mockRepo := new(rm.FileRepository)
@@ -55,6 +32,7 @@ func setupService() (*Service, *rm.FileRepository, *sm.S3Client, *cm.AppConfig) 
 	mockCnf.On("IsValid").Return(true)
 	mockCnf.On("TokenLifeTime").Return(time.Hour)
 	mockCnf.On("RefreshTokenLifeTime").Return(time.Hour)
+
 	return &Service{db: mockRepo, storage: mockStorage, cnf: mockCnf}, mockRepo, mockStorage, mockCnf
 }
 

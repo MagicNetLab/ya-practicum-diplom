@@ -23,6 +23,7 @@ import (
 func setupService() (*Service, *rm.CardRepository, *cm.AppConfig) {
 	mockRepo := new(rm.CardRepository)
 	mockCnf := new(cm.AppConfig)
+	mockCnf.On("JWTSecret").Return("test-secret")
 	return &Service{store: mockRepo, cnf: mockCnf}, mockRepo, mockCnf
 }
 
