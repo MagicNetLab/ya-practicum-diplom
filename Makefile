@@ -85,7 +85,6 @@ mock:
 	make mock-repo
 	make mock-repo-models
 	make mock-clients
-	make mock-service
 
 mock-repo:
 	mockery --name=AuthRepository --dir=internal/repository --output=internal/repository/mocks --outpkg=mocks
@@ -112,10 +111,6 @@ mock-clients:
 mock-conf:
 	mockery --name=AppConfig --dir=internal/config --output=internal/config/mocks --outpkg=mocks
 	mockery --name=Reader --dir=internal/config --output=internal/config/mocks --outpkg=mocks
-
-mock-service:
-	mockery --name=AppClient --dir=internal/services/client --output=internal/services/client/mocks --outpkg=mocks
-	mockery --name=FileManager --dir=internal/services/client --output=internal/services/client/mocks --outpkg=mocks
 
 mock-grpc:
 	mockery --name=AuthServer --dir=internal/grpc/auth/proto --output=internal/grpc/auth/mocks --outpkg=mocks
