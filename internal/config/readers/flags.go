@@ -21,7 +21,7 @@ const (
 	jwtSecretKey       = "jwtSecret"
 	jwtTokenKey        = "tokenTime"
 	jwtRefreshTokenKey = "refreshTokenTime"
-	encryptSecretKey   = "encryptKey"
+	encryptSecretKey   = "EncryptKey"
 )
 
 type FlagReader struct {
@@ -51,24 +51,24 @@ func (r *FlagReader) Parse() error {
 	var jwtSecret, jwtTokenLifeTime, jwtRefreshTokenLifeTime string
 	var encryptKey string
 
-	flag.StringVar(&serverHost, serverHostKey, "", "server host")
-	flag.StringVar(&serverPort, serverPortKey, "", "server port")
+	flag.StringVar(&serverHost, serverHostKey, "", "Server Host")
+	flag.StringVar(&serverPort, serverPortKey, "", "Server Port")
 
-	flag.StringVar(&s3Endpoint, s3EndpointKey, "", "s3 endpoint")
-	flag.StringVar(&s3SecretKey, s3SecretKeyKey, "", "s3 secret key")
-	flag.StringVar(&s3AccessKey, s3AccessKeyKey, "", "s3 access key")
-	flag.StringVar(&s3Bucket, s3BucketKey, "", "s3 bucket")
+	flag.StringVar(&s3Endpoint, s3EndpointKey, "", "S3 Endpoint")
+	flag.StringVar(&s3SecretKey, s3SecretKeyKey, "", "S3 secret key")
+	flag.StringVar(&s3AccessKey, s3AccessKeyKey, "", "S3 access key")
+	flag.StringVar(&s3Bucket, s3BucketKey, "", "S3 Bucket")
 
-	flag.StringVar(&dbHost, dbHostKey, "", "database host")
-	flag.StringVar(&dbPort, dbPortKey, "", "database port")
-	flag.StringVar(&dbUser, dbUserKey, "", "database user")
-	flag.StringVar(&dbPassword, dbPasswordKey, "", "database password")
-	flag.StringVar(&dbName, dbNameKey, "", "database name")
+	flag.StringVar(&dbHost, dbHostKey, "", "database Host")
+	flag.StringVar(&dbPort, dbPortKey, "", "database Port")
+	flag.StringVar(&dbUser, dbUserKey, "", "database User")
+	flag.StringVar(&dbPassword, dbPasswordKey, "", "database Password")
+	flag.StringVar(&dbName, dbNameKey, "", "database Name")
 	flag.StringVar(&dbSSLMode, dbSSLModeKey, "", "database ssl mode")
 
-	flag.StringVar(&jwtSecret, jwtSecretKey, "", "jwt secret")
-	flag.StringVar(&jwtTokenLifeTime, jwtTokenKey, "", "jwt token life time")
-	flag.StringVar(&jwtRefreshTokenLifeTime, jwtRefreshTokenKey, "", "jwt refresh token life time")
+	flag.StringVar(&jwtSecret, jwtSecretKey, "", "JWT secret")
+	flag.StringVar(&jwtTokenLifeTime, jwtTokenKey, "", "JWT token life time")
+	flag.StringVar(&jwtRefreshTokenLifeTime, jwtRefreshTokenKey, "", "JWT refresh token life time")
 
 	flag.StringVar(&encryptKey, encryptSecretKey, "", "encrypt key")
 
@@ -263,7 +263,7 @@ func (r *FlagReader) GetJWTRefreshTokenLifeTime() (string, error) {
 // GetEncryptKey возвращает ключ шифрования
 func (r *FlagReader) GetEncryptKey() (string, error) {
 	if r.encryptKey == "" {
-		return "", errors.New("encryptKey is not set")
+		return "", errors.New("EncryptKey is not set")
 	}
 	return r.encryptKey, nil
 }
