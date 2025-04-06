@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"bufio"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -8,6 +9,8 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -117,4 +120,43 @@ func GetUIDFromContext(ctx context.Context, jwtSecret string) (string, error) {
 	}
 
 	return tokenData.UID, nil
+}
+
+// ReadTokenFromFile парсинг JWT токена из файла
+func ReadTokenFromFile() (string, error) {
+	fileName := "token.txt"
+	token := ""
+	file, err := os.OpenFile(fileName, os.O_RDONLY, 0666)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		token = strings.TrimSpace(scanner.Text())
+		break
+	}
+
+	if token == "" {
+		return "", fmt.Errorf("token not found")
+	}
+
+	return token, nil
+}
+
+// SaveTokenToFile сохраняет токен в файл
+func SaveTokenToFile(token string) error {
+	fileName := "token.txt"
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(token)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
