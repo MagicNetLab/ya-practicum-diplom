@@ -11,21 +11,22 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
 // detailAction выводит подробную информацию о карте с заданным ID.
 func detailAction(ctx context.Context, cmd *cli.Command, cardClient pb.CardClient) error {
-	token, err := jwt.ReadTokenFromFile()
+	token, err := readTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")
 		return nil
 	}
 
-	id := cmd.Args().Get(0)
-	if id == "" {
-		fmt.Println("Ошибка: не указан ID карты")
-		return nil
+	var id string
+	fmt.Print("Введите Url сайта: ")
+	_, err = fmt.Scanln(&id)
+	if err != nil {
+		fmt.Println("Необходимо указать id карты")
+		return err
 	}
 
 	md := metadata.Pairs("token", token)

@@ -28,21 +28,7 @@ func GetAuthCommands(rootCtx context.Context) ([]*cli.Command, error) {
 		{
 			Name:      "auth",
 			Usage:     "Аутентификация пользователя",
-			UsageText: "auth -u <user> -p <password>",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "user",
-					Aliases:  []string{"u"},
-					Required: true,
-					Usage:    "Имя пользователя",
-				},
-				&cli.StringFlag{
-					Name:     "password",
-					Aliases:  []string{"p"},
-					Required: true,
-					Usage:    "Пароль",
-				},
-			},
+			UsageText: "auth",
 			Action: func(ctx context.Context, cmd *cli.Command) error {
 				return authAction(rootCtx, cmd, authClient)
 			},
@@ -50,21 +36,7 @@ func GetAuthCommands(rootCtx context.Context) ([]*cli.Command, error) {
 		{
 			Name:      "register",
 			Usage:     "Регистрация нового пользователя",
-			UsageText: "register -u <user> -p <password>",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "user",
-					Aliases:  []string{"u"},
-					Required: true,
-					Usage:    "Имя пользователя",
-				},
-				&cli.StringFlag{
-					Name:     "password",
-					Aliases:  []string{"p"},
-					Required: true,
-					Usage:    "Пароль",
-				},
-			},
+			UsageText: "register",
 			Action: func(ctx context.Context, cmd *cli.Command) error {
 				return registerAction(rootCtx, cmd, authClient)
 			},

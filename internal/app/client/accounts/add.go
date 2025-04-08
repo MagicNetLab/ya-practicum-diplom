@@ -13,12 +13,11 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
 // addAction добавления нового аккаунта
 func addAction(ctx context.Context, cmd *cli.Command, accountClient pb.AccountsClient) error {
-	token, err := jwt.ReadTokenFromFile()
+	token, err := readTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")
 		return err
@@ -43,7 +42,7 @@ func addAction(ctx context.Context, cmd *cli.Command, accountClient pb.AccountsC
 	fmt.Print("Введите Пароль для сайта: ")
 	_, err = fmt.Scanln(&password)
 	if err != nil {
-		fmt.Println("ОШИБКА: Логин не введен.")
+		fmt.Println("ОШИБКА: Пароль не введен.")
 		return nil
 	}
 
@@ -67,8 +66,10 @@ func addAction(ctx context.Context, cmd *cli.Command, accountClient pb.AccountsC
 		if status.Convert(err).Code() == codes.Unauthenticated {
 			_ = os.Remove("token.txt")
 			fmt.Println("Время жизни токена истекло. Пожалуйста, повторите авторизацию.")
+		} else {
+			fmt.Println("Ошибка при добавлении аккаунта:", err)
 		}
-		return nil
+		return err
 	}
 
 	fmt.Println("Аккаунт успешно добавлен!")

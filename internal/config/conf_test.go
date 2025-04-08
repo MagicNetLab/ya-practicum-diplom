@@ -106,6 +106,6 @@ func TestGetReaders(t *testing.T) {
 
 	// Проверяем типы возвращаемых ридеров
 	assert.IsType(t, &readers.DefaultConfig{}, r[0])
-	assert.IsType(t, &readers.EnvReader{}, r[1])
+	assert.IsType(t, &readers.ConfigReader{}, r[1])
 	assert.IsType(t, &readers.FlagReader{}, r[2])
 }

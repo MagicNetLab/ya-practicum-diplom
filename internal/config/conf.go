@@ -29,6 +29,7 @@ func MakeConfig() (Configurator, error) {
 
 func getReaders() ([]Reader, error) {
 	return []Reader{
+		&readers.DefaultConfig{},
 		&readers.ConfigReader{},
 		&readers.FlagReader{},
 	}, nil

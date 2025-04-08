@@ -11,12 +11,11 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
 // listAction получает список карт и выводит его в консоль.
 func listAction(ctx context.Context, cmd *cli.Command, cardClient pb.CardClient) error {
-	token, err := jwt.ReadTokenFromFile()
+	token, err := readTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")
 		return nil

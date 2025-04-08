@@ -2,6 +2,7 @@ package card
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
@@ -10,6 +11,8 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card/proto"
 )
+
+var readTokenFromFile = jwt.ReadTokenFromFile
 
 // GetCardCommands возвращает список команд для работы с картами
 func GetCardCommands(rootCtx context.Context) ([]*cli.Command, error) {

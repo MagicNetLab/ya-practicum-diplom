@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
@@ -10,6 +11,8 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account/proto"
 )
+
+var readTokenFromFile = jwt.ReadTokenFromFile
 
 // GetAccountCommands возвращает список команд для работы с аккаунтами
 func GetAccountCommands(rootCtx context.Context) ([]*cli.Command, error) {
@@ -57,7 +60,7 @@ func GetAccountCommands(rootCtx context.Context) ([]*cli.Command, error) {
 				{
 					Name:      "info",
 					Usage:     "Детальная информация об аккаунте",
-					UsageText: "account info <account_id>",
+					UsageText: "account info",
 					Action: func(ctx context.Context, cmd *cli.Command) error {
 						return detailAction(ctx, cmd, accountClient)
 					},

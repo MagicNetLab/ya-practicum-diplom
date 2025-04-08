@@ -2,6 +2,7 @@ package file
 
 import (
 	"context"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
@@ -10,6 +11,8 @@ import (
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/files/proto"
 )
+
+var readTokenFromFile = jwt.ReadTokenFromFile
 
 // GetFileCommands получение команд для работы с файлами.
 func GetFileCommands(rootCtx context.Context) ([]*cli.Command, error) {

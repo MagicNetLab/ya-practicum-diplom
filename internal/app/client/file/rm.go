@@ -11,22 +11,22 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/files/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
 // removeAction удаляет файл с указанным id.
 func removeAction(ctx context.Context, cmd *cli.Command, fileClient pb.FilesClient) error {
-	token, err := jwt.ReadTokenFromFile()
+	token, err := readTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")
 
 		return nil
 	}
 
-	id := cmd.Args().Get(0)
-	if id == "" {
-		fmt.Println("Не указан id файла")
-
+	var id string
+	fmt.Print("Введите имя карты для поиска: ")
+	_, err = fmt.Scanln(&id)
+	if err != nil {
+		fmt.Println("Ошибка: не заполнено имя карты")
 		return nil
 	}
 

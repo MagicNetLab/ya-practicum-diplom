@@ -16,11 +16,14 @@ import (
 
 // searchAction поиск аккаунтов по адресу сайта
 func searchAction(ctx context.Context, cmd *cli.Command, accountClient pb.AccountsClient) error {
-	search := cmd.Args().Get(0)
-	if search == "" {
-		fmt.Println("Необходимо указать адрес сайта.")
-		return nil
+	var search string
+	fmt.Print("Введите Url сайта: ")
+	_, err := fmt.Scanln(&search)
+	if err != nil {
+		fmt.Println("Необходимо указать id аккаунта")
+		return err
 	}
+
 	token, err := jwt.ReadTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")

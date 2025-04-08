@@ -13,12 +13,11 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
 // Add добавление новой карты
 func addAction(ctx context.Context, cmd *cli.Command, cardClient pb.CardClient) error {
-	token, err := jwt.ReadTokenFromFile()
+	token, err := readTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")
 		return nil
@@ -27,14 +26,14 @@ func addAction(ctx context.Context, cmd *cli.Command, cardClient pb.CardClient) 
 	var name, number, month, year, cvc, pin, meta string
 	fmt.Print("Введите название карты: ")
 	_, err = fmt.Scan(&name)
-	if err != nil {
+	if err != nil || name == "" {
 		fmt.Println("Ошибка: не заполнено название карты")
 		return nil
 	}
 
 	fmt.Print("Введите номер карты: ")
 	_, err = fmt.Scan(&number)
-	if err != nil {
+	if err != nil || number == "" {
 		fmt.Println("Ошибка: не заполнен номер карты")
 		return nil
 	}

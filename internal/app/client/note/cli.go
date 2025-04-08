@@ -9,7 +9,10 @@ import (
 
 	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/note/proto"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
+
+var readTokenFromFile = jwt.ReadTokenFromFile
 
 // GetNoteCommands получение команд для управления заметками
 func GetNoteCommands(rootCtx context.Context) ([]*cli.Command, error) {

@@ -16,11 +16,14 @@ import (
 
 // removeAction удаляет аккаунт по заданному id
 func removeAction(ctx context.Context, cmd *cli.Command, accountClient pb.AccountsClient) error {
-	id := cmd.Args().Get(0)
-	if id == "" {
+	var id string
+	fmt.Print("Введите Url сайта: ")
+	_, err := fmt.Scanln(&id)
+	if err != nil {
 		fmt.Println("Необходимо указать id аккаунта")
-		return nil
+		return err
 	}
+
 	token, err := jwt.ReadTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались.")

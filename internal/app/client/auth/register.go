@@ -12,12 +12,20 @@ import (
 
 // RegisterAction - регистрация пользователя
 func registerAction(ctx context.Context, cmd *cli.Command, authClient pb.AuthClient) error {
-	user := cmd.String("user")
-	password := cmd.String("password")
+	var user, password string
 
-	if user == "" || password == "" {
-		fmt.Println("не указан пользователь или пароль")
-		return fmt.Errorf("не указан пользователь или пароль")
+	fmt.Print("Введите имя пользователя: ")
+	_, err := fmt.Scan(&user)
+	if err != nil || user == "" {
+		fmt.Println("Ошибка: не указанно имя пользователя")
+		return nil
+	}
+
+	fmt.Print("Введите пароль: ")
+	_, err = fmt.Scan(&password)
+	if err != nil || password == "" {
+		fmt.Println("Ошибка: не указан пароль")
+		return nil
 	}
 
 	request := &pb.RegRequest{

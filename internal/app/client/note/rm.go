@@ -11,20 +11,21 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/note/proto"
-	"github.com/MagicNetLab/ya-practicum-diplom/internal/jwt"
 )
 
 // removeAction удаляет заметку с указанным id
 func removeAction(ctx context.Context, cmd *cli.Command, noteClient pb.NoteClient) error {
-	token, err := jwt.ReadTokenFromFile()
+	token, err := readTokenFromFile()
 	if err != nil {
 		fmt.Println("Ошибка при получении токена. Возможно, вы не авторизовались")
 		return nil
 	}
 
-	id := cmd.Args().Get(0)
-	if id == "" {
-		fmt.Println("Необходимо указать id заметки")
+	var id string
+	fmt.Print("Введите ID заметки: ")
+	_, err = fmt.Scanln(&id)
+	if err != nil {
+		fmt.Println("Ошибка чтения ID заметки")
 		return nil
 	}
 

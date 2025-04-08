@@ -123,3 +123,9 @@ mock-grpc:
 	mockery --name=FilesClient --dir=internal/grpc/files/proto --output=internal/grpc/files/mocks --outpkg=mocks
 	mockery --name=NoteServer --dir=internal/grpc/note/proto --output=internal/grpc/note/mocks --outpkg=mocks
 	mockery --name=NoteClient --dir=internal/grpc/note/proto --output=internal/grpc/note/mocks --outpkg=mocks
+
+test-coverage:
+	@echo "Running tests with coverage..."
+	@go test -coverprofile=test-report/coverage.out `go list ./internal/... | grep -v '/mocks\|/proto'`
+	@go tool cover -func=test-report/coverage.out | grep total | awk '{print "Total coverage: " $$3}'
+	@go tool cover -func=test-report/coverage.out > test-report/result-coverage.txt
