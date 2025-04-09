@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package gophkeeper_grpc;
+
+option go_package = ".";
+
+message RegRequest {
+  string Login = 1;
+  string Secret = 2;
+}
+
+message RegResponse {
+  string Token = 1;
+  string RefreshToken = 2;
+}
+
+message AuthRequest {
+  string Login = 1;
+  string Secret = 2;
+}
+
+message AuthResponse {
+  string Token = 1;
+  string RefreshToken = 2;
+}
+
+message RefreshRequest {
+  string Token = 1;
+}
+
+message RefreshResponse {
+  string Token = 1;
+  string RefreshToken = 2;
+}
+
+service Auth {
+  rpc Register (RegRequest) returns (RegResponse);
+  rpc Auth (AuthRequest) returns (AuthResponse);
+  rpc Refresh (RefreshRequest) returns (RefreshResponse);
+}

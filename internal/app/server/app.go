@@ -1,0 +1,120 @@
+package server
+
+import (
+	"fmt"
+	"net"
+
+	"google.golang.org/grpc"
+
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/config"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/account"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/auth"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/card"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/files"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/interceptors"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/grpc/note"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/logger"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/repository"
+	"github.com/MagicNetLab/ya-practicum-diplom/internal/services/s3"
+)
+
+// New инициализация приложения
+func New(cnf config.Configurator) (*Application, error) {
+	repo, err := repository.NewRepository(cnf)
+	if err != nil {
+		return nil, err
+	}
+
+	s3Client, err := s3.New(cnf)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Application{
+		repo: repo,
+		cnf:  cnf,
+		s3:   s3Client,
+	}, nil
+}
+
+// Application структура приложения
+type Application struct {
+	cnf    config.Configurator
+	server *grpc.Server
+	s3     s3.S3Client
+	repo   repository.Repository
+}
+
+// InitServer инициализация сервера
+func (app *Application) InitServer() error {
+	accountService, err := account.MakeService(app.repo.GetAccountRepo(), app.cnf)
+	if err != nil {
+		logger.Error("failed to create account service", logger.StrArg("error", err.Error()))
+		return fmt.Errorf("create account service err: %v", err)
+	}
+
+	authService, err := auth.MakeService(app.cnf, app.repo.GetAuthRepo())
+	if err != nil {
+		logger.Error("failed to create auth service", logger.StrArg("error", err.Error()))
+		return fmt.Errorf("creaye auth service err: %v", err)
+	}
+
+	cardService, err := card.MakeService(app.repo.GetCardRepo(), app.cnf)
+	if err != nil {
+		logger.Error("failed to create card service", logger.StrArg("error", err.Error()))
+		return fmt.Errorf("creaye card service err: %v", err)
+	}
+
+	filesService := files.MakeService(app.repo.GetFileRepo(), app.s3, app.cnf)
+
+	noteService := note.MakeService(app.repo.GetNoteRepo(), app.cnf)
+
+	opts := []grpc.ServerOption{
+		grpc.ChainUnaryInterceptor(
+			interceptors.LoggerInterceptor,
+			interceptors.AuthInterceptor,
+			interceptors.GuestInterceptor,
+		),
+	}
+
+	server := grpc.NewServer(opts...)
+
+	account.RegisterService(server, accountService)
+	auth.RegisterService(server, authService)
+	card.RegisterService(server, cardService)
+	files.RegisterService(server, filesService)
+	note.RegisterService(server, noteService)
+
+	app.server = server
+
+	return nil
+}
+
+// Start запуск сервера
+func (app *Application) Start() error {
+
+	serverAddress := app.cnf.ServerHost() + ":" + app.cnf.ServerPort()
+	listener, err := net.Listen("tcp", serverAddress)
+	if err != nil {
+		logger.Error("failed to start serv listen", logger.StrArg("error", err.Error()))
+		return err
+	}
+
+	logger.Info("serv listening", logger.StrArg("address", listener.Addr().String()))
+	logger.Info("Application started")
+
+	if err := app.server.Serve(listener); err != nil {
+		logger.Error("failed to serve serv", logger.StrArg("error", err.Error()))
+		return err
+	}
+
+	return nil
+}
+
+// Stop остановка сервера
+func (app *Application) Stop() {
+	app.server.GracefulStop()
+	app.repo.Close()
+	logger.Info("app stopped")
+	_ = logger.Close()
+}

@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package gophkeeper_grpc;
+
+option go_package = ".";
+
+message FileModel {
+  string Id = 1;
+  string Name = 2;
+  string Path = 3;
+  string Meta = 4;
+  int64 Size = 5;
+  string CreatedAt = 6;
+}
+
+message PutFileRequest {
+  string Name = 1;
+  string Meta = 2;
+  bytes Content = 3;
+}
+
+message PutFileResponse {
+  FileModel File = 1;
+}
+
+message ListFilesRequest {
+  int32 Limit = 1;
+  int32 Offset = 2;
+}
+
+message ListFilesResponse {
+  repeated FileModel Files = 1;
+}
+
+message DownloadFileRequest {
+  string Id = 1;
+}
+
+message DownloadFileResponse {
+  string Name = 1;
+  bytes Content = 2;
+  int64 Size = 3;
+}
+
+message SearchFilesRequest {
+  string Name = 1;
+  int32 Limit = 2;
+  int32 Offset = 3;
+}
+
+message SearchFilesResponse {
+  repeated FileModel Files = 1;
+}
+
+message RemoveFileRequest {
+  string Id = 1;
+}
+
+message RemoveFileResponse {}
+
+service Files {
+  rpc Put(PutFileRequest) returns (PutFileResponse);
+  rpc List(ListFilesRequest) returns (ListFilesResponse);
+  rpc Download(DownloadFileRequest) returns (DownloadFileResponse);
+  rpc Search(SearchFilesRequest) returns (SearchFilesResponse);
+  rpc Remove(RemoveFileRequest) returns (RemoveFileResponse);
+}

@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package gophkeeper_grpc;
+
+option go_package = ".";
+
+
+message Account {
+  string Id = 1;
+  string Uid = 2;
+  string Login = 3;
+  string Password = 4;
+  string Url = 5;
+  string Description = 6;
+}
+
+message CreateAccountRequest {
+  string Login = 1;
+  string Password = 2;
+  string Url = 3;
+  string Description = 4;
+}
+
+message CreateAccountResponse {
+  Account Acc = 1;
+}
+
+message GetAccountRequest {
+  string Id = 1;
+}
+
+message GetAccountResponse {
+  Account Account = 1;
+}
+
+message RemoveAccountRequest {
+  string Id = 1;
+}
+
+message RemoveAccountResponse {}
+
+message SearchAccountRequest {
+  string Search = 1;
+  string Limit = 2;
+  string Offset = 3;
+}
+
+message SearchAccountResponse {
+  repeated Account Acc = 1;
+}
+
+service Accounts {
+  rpc Create(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc Get(GetAccountRequest) returns (GetAccountResponse);
+  rpc Remove(RemoveAccountRequest) returns (RemoveAccountResponse);
+  rpc Search(SearchAccountRequest) returns (SearchAccountResponse);
+}

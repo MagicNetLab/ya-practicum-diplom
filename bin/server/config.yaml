@@ -1,0 +1,26 @@
+server:
+  host: "localhost"
+  port: "3200"
+
+db:
+  host: "localhost"
+  port: "5432"
+  name: "gophkeeper"
+  user: "gophkeeper"
+  password: "gophkeeper"
+  sslMode: "disable"
+
+jwt:
+  secret: "11sb6GFNBhas86BjjndHJBROcxd4adrmc"
+  tokenLifeTime: "1"
+  refreshTokenLifeTime: "24"
+
+s3:
+  endpoint: "localhost:9000"
+  accessKey: "minioadmin"
+  secretKey: "minioadmin"
+  bucket: "gophkeeper"
+
+clientVersion: "1.0.0"
+
+encryptKey: "askjHJ83JIUbjkgygJfh64ghVhbmbvt664ghbjkgygJfh64ghVhbmbvt6"
